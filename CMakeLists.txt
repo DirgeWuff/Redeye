@@ -42,6 +42,8 @@ add_executable(${PROJECT_NAME} main.cpp
         Tilemap.h
         Camera.cpp
         Camera.h
+        Error.cpp
+        Error.h
 )
 
 #set(raylib_VERBOSE 1)
