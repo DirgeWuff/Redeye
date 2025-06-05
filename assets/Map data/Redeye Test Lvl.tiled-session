@@ -1,0 +1,45 @@
+{
+    "Map/SizeTest": {
+        "height": 4300,
+        "width": 2
+    },
+    "activeFile": "Redeye Test Lvl.tmj",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "/Users/dirgeydafluffbutt/Documents/Game assets and objects/Redeye/V2/Ground and terrain/Ground block test.tsj": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "Redeye Test Lvl.tmj": {
+            "scale": 0.5324,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 758.8279489105936,
+                "y": 361.57024793388433
+            }
+        }
+    },
+    "last.exportedFilePath": "/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/assets/Map data",
+    "last.imagePath": "/Users/dirgeydafluffbutt/Documents/Game assets and objects/Redeye/V2/Ground and terrain",
+    "map.height": 12,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "json",
+    "map.tileHeight": 32,
+    "map.tileWidth": 32,
+    "map.width": 40,
+    "openFiles": [
+        "Redeye Test Lvl.tmj"
+    ],
+    "project": "Redeye Test Lvl.tiled-project",
+    "recentFiles": [
+        "/Users/dirgeydafluffbutt/Documents/Game assets and objects/Redeye/V2/Ground and terrain/Ground block test.tsj",
+        "Redeye Test Lvl.tmj"
+    ],
+    "tileset.lastUsedFormat": "json",
+    "tileset.tileSize": {
+        "height": 32,
+        "width": 32
+    }
+}

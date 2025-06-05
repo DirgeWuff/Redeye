@@ -1,0 +1,229 @@
+//
+// Created by DirgeWuff on 5/15/25.
+//
+
+// The following is a modified version of Rob Loach's raylib-tileson implementation,
+// with class encapsulation, improvements to memory safety, const correctness, error handling,
+// and the addition of calculations for parallax.
+// Link to the original: https://github.com/RobLoach/raylib-tileson.
+// Used and modified under the permissions granted by the BSD license.
+
+
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// TO DO:
+// Add error handling
+//
+
+#include "Tilemap.h"
+#include "raymath.h"
+
+TiledMap::TiledMap() {
+    mapData.mapWidth = NULL;
+    mapData.mapHeight = NULL;
+    mapData.tileWidth = NULL;
+    mapData.tileHeight = NULL;
+    mapData.data = nullptr;
+}
+
+TiledMap::TiledMap(std::string&& filepath) {
+    mapData.baseDir = fs::relative(filepath);
+    if (mapData.baseDir.has_extension()) {
+        mapData.baseDir.remove_filename();
+    }
+
+    tson::Tileson t;
+    std::unique_ptr<tson::Map> map = t.parse(fs::path(filepath));
+
+    // Should add PROPER error handling here later, std::cerr won't do shit for users
+    if (map->getStatus() != tson::ParseStatus::OK) {
+        std::cerr << "Tileson error: " << map->getStatusMessage() << std::endl;
+        return;
+    }
+
+    if (map == nullptr) {
+        std::cerr << "Error parsing map, nullptr returned." << std::endl;
+        return;
+    }
+
+    const std::shared_ptr<TilesonData> data = std::make_shared<TilesonData>();
+
+    for (const auto& layer : map->getLayers()) {
+        if (layer.getType() == tson::LayerType::ImageLayer) {
+            loadLayer(data, mapData.baseDir, layer.getImage());
+        }
+    }
+    for (const auto& image : map->getTilesets()) {
+        loadLayer(data, mapData.baseDir, image.getImage().string());
+    }
+
+    mapData.mapWidth = map->getSize().x;
+    mapData.mapHeight = map->getSize().y;
+    mapData.tileWidth = map->getTileSize().x;
+    mapData.tileHeight = map->getTileSize().y;
+    mapData.parallaxAnchor = toRayVec2(map->getParallaxOrigin());
+    data->map = std::move(map);
+    mapData.data = data;
+
+    std::cout << "Tiled map loaded successfully!" << std::endl;
+}
+
+Rectangle TiledMap::toRayRect(const tson::Rect rect) {
+    Rectangle output;
+
+    output.x = rect.x;
+    output.y = rect.y;
+    output.width = rect.width;
+    output.height = rect.height;
+
+    return output;
+}
+
+Vector2 TiledMap::toRayVec2(tson::Vector2f vec) {
+    Vector2 output;
+
+    output.x = vec.x;
+    output.y = vec.y;
+
+    return output;
+}
+
+void TiledMap::loadLayer(
+    std::shared_ptr<TilesonData> data,
+    const std::string& baseImageDir,
+    const std::string& imageName) {
+
+    const char* imagePath;
+
+    if (baseImageDir.length() > 0) {
+        imagePath = TextFormat("%s%s", baseImageDir.c_str(), imageName.c_str());
+    }
+    else {
+        imagePath = imageName.c_str();
+    }
+
+    const Texture texture = LoadTexture(imagePath);
+    data->textures[imagePath] = texture;
+}
+
+
+void TiledMap::drawTiledLayer(
+    tson::Layer& layer,
+    const SceneCamera& cam,
+    const float offsetX,
+    const float offsetY,
+    const Color color) {
+
+    for (auto& [pos, tile] : layer.getTileObjects()) {
+        const tson::Tileset* tileset = tile.getTile()->getTileset();
+
+        const Vector2 position = toRayVec2(tile.getPosition());
+        const Rectangle drawingRect = toRayRect(tile.getDrawingRect());
+
+
+        const Rectangle tileBounds = {
+            position.x + offsetX,
+            position.y + offsetY,
+            drawingRect.width,
+            drawingRect.height
+        };
+
+        // Camera cull
+        if (!CheckCollisionRecs(tileBounds, cam.getCameraRect())) {
+            continue;
+        }
+
+        std::string imagePath = mapData.baseDir.string() + tileset->getImage().string();
+
+        if (mapData.data->textures.count(imagePath) == 0) {
+            break;
+        }
+
+        DrawTextureRec(
+            mapData.data->textures[imagePath],
+            drawingRect,
+            {position.x + offsetX, position.y + offsetY},
+            color);
+    }
+}
+
+void TiledMap::drawImageLayer(
+    const tson::Layer& layer,
+    const float offsetX,
+    const float offsetY,
+    const Color color) {
+
+    const std::string imagePath = mapData.baseDir.string() + layer.getImage();
+
+    if (mapData.data->textures.count(imagePath) == 0) {
+        return;
+    }
+
+    const tson::Vector2f offset = layer.getOffset();
+
+    DrawTexture(mapData.data->textures[imagePath], offset.x - offsetX, offset.y - offsetY, color);
+}
+
+void TiledMap::drawAnyLayer(
+    tson::Layer& layer,
+    const SceneCamera& cam,
+    const float offsetX,
+    const float offsetY,
+    const Color color) {
+
+    switch (layer.getType()) {
+        case tson::LayerType::TileLayer:
+            drawTiledLayer(layer, cam, offsetX, offsetY, color);
+            break;
+
+        case tson::LayerType::ImageLayer:
+            drawImageLayer(layer, offsetX, offsetY, color);
+            break;
+
+        default:
+            std::cerr << "Layer type unsupported." << std::endl;
+    }
+}
+
+void TiledMap::drawMap(
+    SceneCamera& cam,
+    Vector2 offset,
+    const Color color) {
+
+    std::vector<tson::Layer>& layers = mapData.data->map->getLayers();
+    for (auto& layer : layers) {
+        Vector2 parallaxFactor = toRayVec2(layer.getParallax());
+        Vector2 layerOffset = toRayVec2(layer.getOffset());
+        Vector2 parallaxOrigin = toRayVec2(layer.getMap()->getParallaxOrigin());
+        Vector2 cameraOffset = GetWorldToScreen2D(parallaxOrigin, *cam.getCameraPtr());
+
+        // Unsure why division by 10 was required to get the correct value??? Never seen this in any sample code.
+        Vector2 posAdjustedOffset = offset + layerOffset - (cameraOffset * (Vector2{1.0, 1.0} - parallaxFactor) / 10);
+        Vector2 adjustedOffset = {posAdjustedOffset.x, posAdjustedOffset.y};
+
+        drawAnyLayer(layer, cam, adjustedOffset.x, adjustedOffset.y, color);
+    }
+}
+
+// Return the width of the map in tiles
+float TiledMap::getMapWidth() const {
+    const float output = static_cast<float>(mapData.mapWidth);
+    return output;
+}
+
+// Return the height of the map in tiles
+float TiledMap::getMapHeight() const {
+    const float output = static_cast<float>(mapData.mapHeight);
+    return output;
+}
+
+// Return the width of a tile in pixels
+float TiledMap::getTileWidth() const {
+    const float output = static_cast<float>(mapData.tileWidth);
+    return  output;
+}
+
+// Return the height of a tile in pixels
+float TiledMap::getTileHeight() const {
+    const float output = static_cast<float>(mapData.tileHeight);
+    return output;
+}
