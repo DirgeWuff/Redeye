@@ -12,7 +12,8 @@
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // TO DO:
 // Add error handling
-//
+// Change name of 'offset' arg to reflect the use of parallax
+
 
 #include "Tilemap.h"
 #include "raymath.h"
@@ -78,7 +79,7 @@ Rectangle TiledMap::toRayRect(const tson::Rect rect) {
     return output;
 }
 
-Vector2 TiledMap::toRayVec2(tson::Vector2f vec) {
+Vector2 TiledMap::toRayVec2(const tson::Vector2f vec) {
     Vector2 output;
 
     output.x = vec.x;
@@ -134,7 +135,7 @@ void TiledMap::drawTiledLayer(
 
         std::string imagePath = mapData.baseDir.string() + tileset->getImage().string();
 
-        if (mapData.data->textures.count(imagePath) == 0) {
+        if (!mapData.data->textures.contains(imagePath)) {
             break;
         }
 
@@ -153,12 +154,11 @@ void TiledMap::drawImageLayer(
     const Color color) {
 
     const std::string imagePath = mapData.baseDir.string() + layer.getImage();
+    const tson::Vector2f offset = layer.getOffset();
 
-    if (mapData.data->textures.count(imagePath) == 0) {
+    if (!mapData.data->textures.contains(imagePath)) {
         return;
     }
-
-    const tson::Vector2f offset = layer.getOffset();
 
     DrawTexture(mapData.data->textures[imagePath], offset.x - offsetX, offset.y - offsetY, color);
 }
@@ -188,18 +188,15 @@ void TiledMap::drawMap(
     SceneCamera& cam,
     Vector2 offset,
     const Color color) {
+    for (std::vector<tson::Layer>& layers = mapData.data->map->getLayers(); auto& layer : layers) {
 
-    std::vector<tson::Layer>& layers = mapData.data->map->getLayers();
-    for (auto& layer : layers) {
-        Vector2 parallaxFactor = toRayVec2(layer.getParallax());
-        Vector2 layerOffset = toRayVec2(layer.getOffset());
-        Vector2 parallaxOrigin = toRayVec2(layer.getMap()->getParallaxOrigin());
-        Vector2 cameraOffset = GetWorldToScreen2D(parallaxOrigin, *cam.getCameraPtr());
+        const Vector2 parallaxFactor = toRayVec2(layer.getParallax());
+        const Vector2 layerOffset = toRayVec2(layer.getOffset());
+        const Vector2 parallaxOrigin = toRayVec2(layer.getMap()->getParallaxOrigin());
+        const Vector2 cameraOffset = GetWorldToScreen2D(parallaxOrigin, *cam.getCameraPtr());
 
         // Unsure why division by 10 was required to get the correct value??? Never seen this in any sample code.
-        Vector2 posAdjustedOffset = offset + layerOffset - (cameraOffset * (Vector2{1.0, 1.0} - parallaxFactor) / 10);
-        Vector2 adjustedOffset = {posAdjustedOffset.x, posAdjustedOffset.y};
-
+        Vector2 adjustedOffset = offset + layerOffset - (cameraOffset * (Vector2{1.0, 1.0} - parallaxFactor) / 10);
         drawAnyLayer(layer, cam, adjustedOffset.x, adjustedOffset.y, color);
     }
 }
