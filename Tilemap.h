@@ -18,16 +18,11 @@ public:
     std::shared_ptr<tson::Map> map;
 };
 
-struct ParallaxData {
-    // Fill in
-};
-
 struct MapData {
     int tileWidth;
     int tileHeight;
     int mapWidth;
     int mapHeight;
-    Vector2 parallaxAnchor;
     fs::path baseDir;
     std::shared_ptr<TilesonData> data;
 };
@@ -66,6 +61,7 @@ class TiledMap {
 public:
     TiledMap();
     explicit TiledMap(std::string&& filepath);
+    ~TiledMap();
 
     void drawMap(
     SceneCamera& cam,

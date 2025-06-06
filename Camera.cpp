@@ -3,25 +3,32 @@
 //
 
 #include "Camera.h"
+#include "Error.h"
 
 SceneCamera::SceneCamera(const TiledMap& map) {
-    camera = std::make_shared<Camera2D>();
-    this->camera->offset = {1500.0f / 2.0f, 800.0f / 2}; // Hard coded value, no bueno, fix later
-    this->camera->zoom = 1.50f;
-    this->camera->rotation = 0.0f;
+    try {
+        camera = std::make_shared<Camera2D>();
+        this->camera->offset = {1500.0f / 2.0f, 800.0f / 2}; // Hard coded value, no bueno, fix later
+        this->camera->zoom = 1.50f;
+        this->camera->rotation = 0.0f;
 
-    cameraRect = {
-        (GetScreenWidth() - static_cast<float>(GetScreenWidth()) / this->camera->zoom) / 2,
-        (GetScreenHeight() - static_cast<float>(GetScreenHeight()) / this->camera->zoom) / 2,
-        GetScreenWidth() / this->camera->zoom,
-        GetScreenHeight() / this->camera->zoom};
+        cameraRect = {
+            (GetScreenWidth() - static_cast<float>(GetScreenWidth()) / this->camera->zoom) / 2,
+            (GetScreenHeight() - static_cast<float>(GetScreenHeight()) / this->camera->zoom) / 2,
+            GetScreenWidth() / this->camera->zoom,
+            GetScreenHeight() / this->camera->zoom};
 
-    cameraCenter = {cameraRect.x + cameraRect.width / 2, cameraRect.y + cameraRect.height / 2};
-    cameraVelocityY = 15;
-    targetCenter = {0.0f, 0.0f};
-    mapSize = {
-        map.getTileWidth() * map.getMapWidth(),
-        map.getTileHeight() * map.getMapHeight()};
+        cameraCenter = {cameraRect.x + cameraRect.width / 2, cameraRect.y + cameraRect.height / 2};
+        cameraVelocityY = 15;
+        targetCenter = {0.0f, 0.0f};
+        mapSize = {
+            map.getTileWidth() * map.getMapWidth(),
+            map.getTileHeight() * map.getMapHeight()};
+    }
+    catch (std::bad_alloc) {
+        logErr(
+            "Constructor init failed, SceneCamera::SceneCamera. std::bad_alloc thrown. Ln 10, SceneCamera.cpp.");
+    }
 }
 
 SceneCamera::~SceneCamera() = default;
@@ -86,12 +93,11 @@ void SceneCamera::cameraEnd() const {
 }
 
 Rectangle SceneCamera::getCameraRect() const {
-    const Rectangle output = cameraRect;
-    return output;
+    return cameraRect;
 }
 
 Vector2 SceneCamera::getCameraCenter() const {
-    Vector2 output = {
+    const Vector2 output = {
         this->camera->target.x + this->camera->offset.x,
         this->camera->target.y + this->camera->offset.y
     };

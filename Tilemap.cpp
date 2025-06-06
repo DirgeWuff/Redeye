@@ -14,8 +14,8 @@
 // Add error handling
 // Change name of 'offset' arg to reflect the use of parallax
 
-
 #include "Tilemap.h"
+#include "Error.h"
 #include "raymath.h"
 
 TiledMap::TiledMap() {
@@ -33,39 +33,47 @@ TiledMap::TiledMap(std::string&& filepath) {
     }
 
     tson::Tileson t;
-    std::unique_ptr<tson::Map> map = t.parse(fs::path(filepath));
+    try {
+        std::unique_ptr<tson::Map> map = t.parse(fs::path(filepath));
 
-    // Should add PROPER error handling here later, std::cerr won't do shit for users
-    if (map->getStatus() != tson::ParseStatus::OK) {
-        std::cerr << "Tileson error: " << map->getStatusMessage() << std::endl;
-        return;
-    }
-
-    if (map == nullptr) {
-        std::cerr << "Error parsing map, nullptr returned." << std::endl;
-        return;
-    }
-
-    const std::shared_ptr<TilesonData> data = std::make_shared<TilesonData>();
-
-    for (const auto& layer : map->getLayers()) {
-        if (layer.getType() == tson::LayerType::ImageLayer) {
-            loadLayer(data, mapData.baseDir, layer.getImage());
+        if (map->getStatus() != tson::ParseStatus::OK) {
+            logErr(
+                "Constructor init failed: TiledMap::TiledMap. Unable to parse map: " + map->getStatusMessage());
+            return;
         }
+
+        const std::shared_ptr<TilesonData> data = std::make_shared<TilesonData>();
+
+        for (const auto& layer : map->getLayers()) {
+            if (layer.getType() == tson::LayerType::ImageLayer) {
+                loadLayer(data, mapData.baseDir, layer.getImage());
+            }
+        }
+        for (const auto& image : map->getTilesets()) {
+            loadLayer(data, mapData.baseDir, image.getImage().string());
+        }
+
+        mapData.mapWidth = map->getSize().x;
+        mapData.mapHeight = map->getSize().y;
+        mapData.tileWidth = map->getTileSize().x;
+        mapData.tileHeight = map->getTileSize().y;
+        data->map = std::move(map);
+        mapData.data = data;
     }
-    for (const auto& image : map->getTilesets()) {
-        loadLayer(data, mapData.baseDir, image.getImage().string());
+    catch (std::bad_alloc) {
+        logErr("Constructor init failed: TiledMap::TiledMap. std::bad_alloc thrown.");
     }
 
-    mapData.mapWidth = map->getSize().x;
-    mapData.mapHeight = map->getSize().y;
-    mapData.tileWidth = map->getTileSize().x;
-    mapData.tileHeight = map->getTileSize().y;
-    mapData.parallaxAnchor = toRayVec2(map->getParallaxOrigin());
-    data->map = std::move(map);
-    mapData.data = data;
+    TraceLog(LOG_INFO, "Tiled map loaded successfully.");
+}
 
-    std::cout << "Tiled map loaded successfully!" << std::endl;
+// NOTE: Seems to throw OpenGL error on texture unload, possibly related to Apple Silicon chip
+TiledMap::~TiledMap() {
+    for (const auto& [name, texture] : mapData.data->textures) {
+        UnloadTexture(texture);
+    }
+
+    TraceLog(LOG_INFO, "Tiled map unloaded successfully.");
 }
 
 Rectangle TiledMap::toRayRect(const tson::Rect rect) {
@@ -106,7 +114,6 @@ void TiledMap::loadLayer(
     data->textures[imagePath] = texture;
 }
 
-
 void TiledMap::drawTiledLayer(
     tson::Layer& layer,
     const SceneCamera& cam,
@@ -119,7 +126,6 @@ void TiledMap::drawTiledLayer(
 
         const Vector2 position = toRayVec2(tile.getPosition());
         const Rectangle drawingRect = toRayRect(tile.getDrawingRect());
-
 
         const Rectangle tileBounds = {
             position.x + offsetX,
@@ -157,6 +163,7 @@ void TiledMap::drawImageLayer(
     const tson::Vector2f offset = layer.getOffset();
 
     if (!mapData.data->textures.contains(imagePath)) {
+        logErr("Unable to load texture: " + layer.getImage() + ". Ln 167, TileMap.cpp.");
         return;
     }
 
@@ -180,7 +187,7 @@ void TiledMap::drawAnyLayer(
             break;
 
         default:
-            std::cerr << "Layer type unsupported." << std::endl;
+            logErr("Map contains unsupported layer type.");
     }
 }
 
@@ -195,7 +202,7 @@ void TiledMap::drawMap(
         const Vector2 parallaxOrigin = toRayVec2(layer.getMap()->getParallaxOrigin());
         const Vector2 cameraOffset = GetWorldToScreen2D(parallaxOrigin, *cam.getCameraPtr());
 
-        // Unsure why division by 10 was required to get the correct value??? Never seen this in any sample code.
+        // Unsure why / 10 was required to get the correct value??? Never seen this in any sample code.
         Vector2 adjustedOffset = offset + layerOffset - (cameraOffset * (Vector2{1.0, 1.0} - parallaxFactor) / 10);
         drawAnyLayer(layer, cam, adjustedOffset.x, adjustedOffset.y, color);
     }
@@ -203,24 +210,20 @@ void TiledMap::drawMap(
 
 // Return the width of the map in tiles
 float TiledMap::getMapWidth() const {
-    const float output = static_cast<float>(mapData.mapWidth);
-    return output;
+    return static_cast<float>(mapData.mapWidth);
 }
 
 // Return the height of the map in tiles
 float TiledMap::getMapHeight() const {
-    const float output = static_cast<float>(mapData.mapHeight);
-    return output;
+   return static_cast<float>(mapData.mapHeight);
 }
 
 // Return the width of a tile in pixels
 float TiledMap::getTileWidth() const {
-    const float output = static_cast<float>(mapData.tileWidth);
-    return  output;
+    return static_cast<float>(mapData.tileWidth);
 }
 
 // Return the height of a tile in pixels
 float TiledMap::getTileHeight() const {
-    const float output = static_cast<float>(mapData.tileHeight);
-    return output;
+    return static_cast<float>(mapData.tileHeight);
 }

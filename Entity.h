@@ -15,7 +15,7 @@ public:
     Entity();
     ~Entity() override;
     virtual bool update(const bool& onGround);
-    virtual void draw();
+    virtual void draw() const = 0;
     virtual float getX() const;
     virtual float getY() const;
     virtual float getWidth() const = 0;

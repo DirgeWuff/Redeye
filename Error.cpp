@@ -20,13 +20,14 @@ std::string getTime() {
     return stream.str();
 }
 
-void printAndLog(const char* errorMessage) {
+void logErr(std::string&& errorMessage) {
     SetExitKey(KEY_ESCAPE);
+    std::string msg = "FATAL ERROR: " + errorMessage;
 
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(BLACK);
-        DrawText(errorMessage, 5, 5, 15, RED);
+        DrawText(msg.c_str(), 5, 5, 15, RED);
         DrawText("Press Esc to exit.", 5, 20, 15, RED);
         EndDrawing();
     }
@@ -35,7 +36,7 @@ void printAndLog(const char* errorMessage) {
         std::ofstream f("ErrorLog.txt");
 
         if (f.is_open()) {
-            f << getTime() <<  " " << errorMessage << std::endl;
+            f << getTime() <<  " " << "FATAL ERROR: " << errorMessage << std::endl;
             f.close();
         }
     }

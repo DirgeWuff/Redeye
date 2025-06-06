@@ -8,4 +8,4 @@
 #endif //ERROR_H
 
 void getTime();
-void printAndLog(const char* errorMessage);
+void logErr(std::string&& errorMessage);

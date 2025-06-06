@@ -3,16 +3,24 @@
 //
 
 #include "Scene.h"
+#include "Error.h"
+
 Scene::Scene(
     std::string&& playerSpritePath,
     std::string&& mapFilePath) :
+playerInput(InputHandler()),
+map(TiledMap(mapFilePath.data())),
+camera(SceneCamera(map)),
 gravity(3.0f),
 groundPos(510.0f)
 {
-    playerCharacter = std::make_shared<Player>(playerSpritePath);
-    playerInput = InputHandler();
-    map = TiledMap(mapFilePath.data());
-    camera = SceneCamera(map);
+    try {
+        playerCharacter = std::make_shared<Player>(playerSpritePath);
+    }
+    catch (std::bad_alloc) {
+        logErr("Constructor init failed: Scene::Scene. std::bad_alloc thrown. Ln 19, Scene.cpp");
+    }
+
     camera.setTarget(playerCharacter);
 }
 
