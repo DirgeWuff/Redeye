@@ -8,11 +8,7 @@
 // Link to the original: https://github.com/RobLoach/raylib-tileson.
 // Used and modified under the permissions granted by the BSD license.
 
-
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-// TO DO:
-// Add error handling
-// Change name of 'offset' arg to reflect the use of parallax
 
 #include "Tilemap.h"
 #include "Error.h"
@@ -26,19 +22,20 @@ TiledMap::TiledMap() {
     mapData.data = nullptr;
 }
 
-TiledMap::TiledMap(std::string&& filepath) {
+TiledMap::TiledMap(std::string&& filepath)  {
     mapData.baseDir = fs::relative(filepath);
     if (mapData.baseDir.has_extension()) {
         mapData.baseDir.remove_filename();
     }
 
-    tson::Tileson t;
+
     try {
+        tson::Tileson t;
         std::unique_ptr<tson::Map> map = t.parse(fs::path(filepath));
 
         if (map->getStatus() != tson::ParseStatus::OK) {
             logErr(
-                "Constructor init failed: TiledMap::TiledMap. Unable to parse map: " + map->getStatusMessage());
+                "Constructor init failed: Unable to parse map: " + map->getStatusMessage());
             return;
         }
 
@@ -61,7 +58,7 @@ TiledMap::TiledMap(std::string&& filepath) {
         mapData.data = data;
     }
     catch (std::bad_alloc) {
-        logErr("Constructor init failed: TiledMap::TiledMap. std::bad_alloc thrown.");
+        logErr("Constructor init failed, std::bad_alloc thrown Ln 64, .");
     }
 
     TraceLog(LOG_INFO, "Tiled map loaded successfully.");
@@ -97,7 +94,7 @@ Vector2 TiledMap::toRayVec2(const tson::Vector2f vec) {
 }
 
 void TiledMap::loadLayer(
-    std::shared_ptr<TilesonData> data,
+    const std::shared_ptr<TilesonData>& data,
     const std::string& baseImageDir,
     const std::string& imageName) {
 
@@ -157,7 +154,7 @@ void TiledMap::drawImageLayer(
     const tson::Layer& layer,
     const float offsetX,
     const float offsetY,
-    const Color color) {
+    const Color color) const {
 
     const std::string imagePath = mapData.baseDir.string() + layer.getImage();
     const tson::Vector2f offset = layer.getOffset();

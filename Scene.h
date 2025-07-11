@@ -11,21 +11,23 @@
 #include "Tilemap.h"
 
 class Scene {
-    std::shared_ptr<Player> playerCharacter;
-    InputHandler playerInput;
-    TiledMap map;
-    SceneCamera camera;
-
-    const float gravity;
-    const float groundPos; // Temporary
+    b2WorldDef m_worldDef{};
+    b2WorldId m_worldId{};
+    bodyConfig playerCfg{};
+    std::shared_ptr<Player> m_playerCharacter{}; // Maybe change to std::unique_ptr
+    InputHandler m_playerInput{};
+    std::unique_ptr<TiledMap> m_map;
+    std::unique_ptr<SceneCamera> m_camera;
 public:
     Scene(
         std::string&& playerSpritePath,
         std::string&& mapFilePath);
 
     ~Scene();
+
+    void handleSensorEvents() const;
     void updateScene();
-    void drawScene();
+    void drawScene() const;
 };
 
 #endif //SCENE_H

@@ -3,12 +3,15 @@ project(Redeye)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# Most of the following ripped from the Raylib default CMakeLists
+
 # Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Dependencies
 set(RAYLIB_VERSION 5.5)
 find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
+find_package(box2d CONFIG REQUIRED)
 if (NOT raylib_FOUND) # If there's none, fetch and build raylib
     include(FetchContent)
     FetchContent_Declare(
@@ -32,8 +35,6 @@ add_executable(${PROJECT_NAME} main.cpp
         Player.cpp
         Player.h
         CommandListener.h
-        Entity.cpp
-        Entity.h
         InputHandler.cpp
         InputHandler.h
         Scene.cpp
@@ -44,10 +45,19 @@ add_executable(${PROJECT_NAME} main.cpp
         Camera.h
         Error.cpp
         Error.h
+        Utils.cpp
+        Utils.h
+        Debug.cpp
+        Debug.h
+        Entity.cpp
+        Entity.h
+        BoxBody.cpp
+        BoxBody.h
 )
 
 #set(raylib_VERBOSE 1)
 target_link_libraries(${PROJECT_NAME} raylib)
+target_link_libraries(${PROJECT_NAME} box2d::box2d)
 find_library(tileson
 NAMES tson tileson
 HINTS ${PROJECT_SOURCE_DIR}/external_libs

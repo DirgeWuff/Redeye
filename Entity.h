@@ -1,25 +1,27 @@
 //
-// Created by DirgeWuff on 5/9/25.
+// Created by DirgeWuff on 6/27/25.
 //
 
 #ifndef ENTITY_H
 #define ENTITY_H
-#include <raylib.h>
 
-#include "CommandListener.h"
+#include "BoxBody.h"
+#include "box2d/types.h"
 
-class Entity : public CommandListener {
-    Vector2 position{};
-    Vector2 velocity{};
+// Base class from which player/enemy bodies are created from in Box2D.
+// May want to convert this to have most of the logic contained within the player class later
+
+class Entity : public BoxBody {
 public:
-    Entity();
-    ~Entity() override;
-    virtual bool update(const bool& onGround);
-    virtual void draw() const = 0;
-    virtual float getX() const;
-    virtual float getY() const;
-    virtual float getWidth() const = 0;
-    virtual float getHeight() const = 0;
+    Entity() = default;
+
+    Entity(
+        float centerX,
+        float centerY,
+        float fullWidth,
+        float fullHeight,
+        bodyConfig config,
+        b2WorldId world);
 };
 
 #endif //ENTITY_H

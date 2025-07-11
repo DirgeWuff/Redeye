@@ -52,56 +52,77 @@ build cmake_object_order_depends_target_Redeye: phony || .
 build CMakeFiles/Redeye.dir/main.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/main.cpp || cmake_object_order_depends_target_Redeye
   DEP_FILE = CMakeFiles/Redeye.dir/main.cpp.o.d
   FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
-  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
   OBJECT_DIR = CMakeFiles/Redeye.dir
   OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
 
 build CMakeFiles/Redeye.dir/Player.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/Player.cpp || cmake_object_order_depends_target_Redeye
   DEP_FILE = CMakeFiles/Redeye.dir/Player.cpp.o.d
   FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
-  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include
-  OBJECT_DIR = CMakeFiles/Redeye.dir
-  OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
-
-build CMakeFiles/Redeye.dir/Entity.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/Entity.cpp || cmake_object_order_depends_target_Redeye
-  DEP_FILE = CMakeFiles/Redeye.dir/Entity.cpp.o.d
-  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
-  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
   OBJECT_DIR = CMakeFiles/Redeye.dir
   OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
 
 build CMakeFiles/Redeye.dir/InputHandler.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/InputHandler.cpp || cmake_object_order_depends_target_Redeye
   DEP_FILE = CMakeFiles/Redeye.dir/InputHandler.cpp.o.d
   FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
-  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
   OBJECT_DIR = CMakeFiles/Redeye.dir
   OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
 
 build CMakeFiles/Redeye.dir/Scene.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/Scene.cpp || cmake_object_order_depends_target_Redeye
   DEP_FILE = CMakeFiles/Redeye.dir/Scene.cpp.o.d
   FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
-  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
   OBJECT_DIR = CMakeFiles/Redeye.dir
   OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
 
 build CMakeFiles/Redeye.dir/Tilemap.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/Tilemap.cpp || cmake_object_order_depends_target_Redeye
   DEP_FILE = CMakeFiles/Redeye.dir/Tilemap.cpp.o.d
   FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
-  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
   OBJECT_DIR = CMakeFiles/Redeye.dir
   OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
 
 build CMakeFiles/Redeye.dir/Camera.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/Camera.cpp || cmake_object_order_depends_target_Redeye
   DEP_FILE = CMakeFiles/Redeye.dir/Camera.cpp.o.d
   FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
-  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
   OBJECT_DIR = CMakeFiles/Redeye.dir
   OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
 
 build CMakeFiles/Redeye.dir/Error.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/Error.cpp || cmake_object_order_depends_target_Redeye
   DEP_FILE = CMakeFiles/Redeye.dir/Error.cpp.o.d
   FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
-  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
+  OBJECT_DIR = CMakeFiles/Redeye.dir
+  OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
+
+build CMakeFiles/Redeye.dir/Utils.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/Utils.cpp || cmake_object_order_depends_target_Redeye
+  DEP_FILE = CMakeFiles/Redeye.dir/Utils.cpp.o.d
+  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
+  OBJECT_DIR = CMakeFiles/Redeye.dir
+  OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
+
+build CMakeFiles/Redeye.dir/Debug.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/Debug.cpp || cmake_object_order_depends_target_Redeye
+  DEP_FILE = CMakeFiles/Redeye.dir/Debug.cpp.o.d
+  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
+  OBJECT_DIR = CMakeFiles/Redeye.dir
+  OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
+
+build CMakeFiles/Redeye.dir/Entity.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/Entity.cpp || cmake_object_order_depends_target_Redeye
+  DEP_FILE = CMakeFiles/Redeye.dir/Entity.cpp.o.d
+  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
+  OBJECT_DIR = CMakeFiles/Redeye.dir
+  OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
+
+build CMakeFiles/Redeye.dir/BoxBody.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/BoxBody.cpp || cmake_object_order_depends_target_Redeye
+  DEP_FILE = CMakeFiles/Redeye.dir/BoxBody.cpp.o.d
+  FLAGS = -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include
+  INCLUDES = -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include
   OBJECT_DIR = CMakeFiles/Redeye.dir
   OBJECT_FILE_DIR = CMakeFiles/Redeye.dir
 
@@ -113,9 +134,9 @@ build CMakeFiles/Redeye.dir/Error.cpp.o: CXX_COMPILER__Redeye_unscanned_Debug /U
 #############################################
 # Link the executable Redeye
 
-build Redeye: CXX_EXECUTABLE_LINKER__Redeye_Debug CMakeFiles/Redeye.dir/main.cpp.o CMakeFiles/Redeye.dir/Player.cpp.o CMakeFiles/Redeye.dir/Entity.cpp.o CMakeFiles/Redeye.dir/InputHandler.cpp.o CMakeFiles/Redeye.dir/Scene.cpp.o CMakeFiles/Redeye.dir/Tilemap.cpp.o CMakeFiles/Redeye.dir/Camera.cpp.o CMakeFiles/Redeye.dir/Error.cpp.o | /opt/homebrew/Cellar/raylib/5.5/lib/libraylib.dylib
+build Redeye: CXX_EXECUTABLE_LINKER__Redeye_Debug CMakeFiles/Redeye.dir/main.cpp.o CMakeFiles/Redeye.dir/Player.cpp.o CMakeFiles/Redeye.dir/InputHandler.cpp.o CMakeFiles/Redeye.dir/Scene.cpp.o CMakeFiles/Redeye.dir/Tilemap.cpp.o CMakeFiles/Redeye.dir/Camera.cpp.o CMakeFiles/Redeye.dir/Error.cpp.o CMakeFiles/Redeye.dir/Utils.cpp.o CMakeFiles/Redeye.dir/Debug.cpp.o CMakeFiles/Redeye.dir/Entity.cpp.o CMakeFiles/Redeye.dir/BoxBody.cpp.o | /opt/homebrew/Cellar/raylib/5.5/lib/libraylib.dylib /usr/local/lib/libbox2d.a
   FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk
-  LINK_LIBRARIES = /opt/homebrew/Cellar/raylib/5.5/lib/libraylib.dylib  -framework IOKit  -framework Cocoa  -framework OpenGL  -L/opt/homebrew/Cellar/raylib/5.5/lib -lraylib
+  LINK_LIBRARIES = /opt/homebrew/Cellar/raylib/5.5/lib/libraylib.dylib  /usr/local/lib/libbox2d.a  -framework IOKit  -framework Cocoa  -framework OpenGL  -L/opt/homebrew/Cellar/raylib/5.5/lib -lraylib
   OBJECT_DIR = CMakeFiles/Redeye.dir
   POST_BUILD = :
   PRE_LINK = :
@@ -165,14 +186,14 @@ build all: phony Redeye
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPackageHandleStandardArgs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPackageMessage.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPkgConfig.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/UnixPaths.cmake /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/CMakeLists.txt /opt/homebrew/lib/cmake/raylib/raylib-config-version.cmake /opt/homebrew/lib/cmake/raylib/raylib-config.cmake CMakeCache.txt CMakeFiles/3.30.5/CMakeCCompiler.cmake CMakeFiles/3.30.5/CMakeCXXCompiler.cmake CMakeFiles/3.30.5/CMakeSystem.cmake
+build build.ninja: RERUN_CMAKE | /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPackageHandleStandardArgs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPackageMessage.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPkgConfig.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/UnixPaths.cmake /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/CMakeLists.txt /opt/homebrew/lib/cmake/raylib/raylib-config-version.cmake /opt/homebrew/lib/cmake/raylib/raylib-config.cmake /usr/local/lib/cmake/box2d/box2dConfig-noconfig.cmake /usr/local/lib/cmake/box2d/box2dConfig.cmake /usr/local/lib/cmake/box2d/box2dConfigVersion.cmake CMakeCache.txt CMakeFiles/3.30.5/CMakeCCompiler.cmake CMakeFiles/3.30.5/CMakeCXXCompiler.cmake CMakeFiles/3.30.5/CMakeSystem.cmake
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPackageHandleStandardArgs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPackageMessage.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPkgConfig.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/UnixPaths.cmake /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/CMakeLists.txt /opt/homebrew/lib/cmake/raylib/raylib-config-version.cmake /opt/homebrew/lib/cmake/raylib/raylib-config.cmake CMakeCache.txt CMakeFiles/3.30.5/CMakeCCompiler.cmake CMakeFiles/3.30.5/CMakeCXXCompiler.cmake CMakeFiles/3.30.5/CMakeSystem.cmake: phony
+build /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCXXInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Compiler/GNU.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPackageHandleStandardArgs.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPackageMessage.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/FindPkgConfig.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-AppleClang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-AppleClang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang-C.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang-CXX.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Apple-Clang.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Darwin-Initialize.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/Darwin.cmake /Applications/CLion.app/Contents/bin/cmake/mac/aarch64/share/cmake-3.30/Modules/Platform/UnixPaths.cmake /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/CMakeLists.txt /opt/homebrew/lib/cmake/raylib/raylib-config-version.cmake /opt/homebrew/lib/cmake/raylib/raylib-config.cmake /usr/local/lib/cmake/box2d/box2dConfig-noconfig.cmake /usr/local/lib/cmake/box2d/box2dConfig.cmake /usr/local/lib/cmake/box2d/box2dConfigVersion.cmake CMakeCache.txt CMakeFiles/3.30.5/CMakeCCompiler.cmake CMakeFiles/3.30.5/CMakeCXXCompiler.cmake CMakeFiles/3.30.5/CMakeSystem.cmake: phony
 
 
 #############################################

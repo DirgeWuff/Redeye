@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "Redeye Test Lvl.tmj",
+    "activeFile": "Master Tile Sheet.tsj",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
@@ -12,12 +12,16 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "Master Tile Sheet.tsj": {
+            "scaleInDock": 0.7452,
+            "scaleInEditor": 1
+        },
         "Redeye Test Lvl.tmj": {
-            "scale": 0.5324,
-            "selectedLayer": 1,
+            "scale": 0.63,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 758.8279489105936,
-                "y": 361.57024793388433
+                "x": -7.936507936507951,
+                "y": 431.7460317460318
             }
         }
     },
@@ -30,12 +34,14 @@
     "map.tileWidth": 32,
     "map.width": 40,
     "openFiles": [
-        "Redeye Test Lvl.tmj"
+        "Redeye Test Lvl.tmj",
+        "Master Tile Sheet.tsj"
     ],
     "project": "Redeye Test Lvl.tiled-project",
     "recentFiles": [
-        "/Users/dirgeydafluffbutt/Documents/Game assets and objects/Redeye/V2/Ground and terrain/Ground block test.tsj",
-        "Redeye Test Lvl.tmj"
+        "Redeye Test Lvl.tmj",
+        "Master Tile Sheet.tsj",
+        "/Users/dirgeydafluffbutt/Documents/Game assets and objects/Redeye/V2/Ground and terrain/Ground block test.tsj"
     ],
     "tileset.lastUsedFormat": "json",
     "tileset.tileSize": {

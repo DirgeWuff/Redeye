@@ -1,13 +1,13 @@
 #include "raylib.h"
 #include "Scene.h"
 
-constexpr int windowWidth = 1500;
-constexpr int windowHeight = 800;
+constexpr int WINDOW_WIDTH = 1500;
+constexpr int WINDOW_HEIGHT = 800;
 
 int main() {
 
-    InitWindow(windowWidth, windowHeight, "Redeye");
-    SetTargetFPS(30);
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Redeye");
+    SetTargetFPS(60);
 
     Scene testScene = Scene(
         "../assets/PlayerWalk.png",

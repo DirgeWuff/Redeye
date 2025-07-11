@@ -1,42 +1,110 @@
 //
 // Created by DirgeWuff on 5/14/25.
 //
-
+#include <box2d/box2d.h>
 #include "Scene.h"
 #include "Error.h"
+#include "Debug.h"
+#include "Utils.h"
+
+constexpr float WORLD_STEP = 1.0f / 60.0f;
+constexpr int SUB_STEP = 4;
 
 Scene::Scene(
     std::string&& playerSpritePath,
     std::string&& mapFilePath) :
-playerInput(InputHandler()),
-map(TiledMap(mapFilePath.data())),
-camera(SceneCamera(map)),
-gravity(3.0f),
-groundPos(510.0f)
+m_worldDef(b2DefaultWorldDef()),
+m_playerInput(InputHandler())
 {
+    m_worldDef.gravity = {0.0f, 20.0f};
+    m_worldId = b2CreateWorld(&m_worldDef);
+
+    // Temporary stop-gap measure to test jumping and shit
+    bodyConfig cfg = {b2_staticBody, false, 0.0f, 1.0f};
+    const auto invisible_platform = BoxBody(
+        600.0f,
+        800.0f - 158.0f,
+        1200.0f,
+        2.0f,
+        cfg,
+        m_worldId);
+
     try {
-        playerCharacter = std::make_shared<Player>(playerSpritePath);
+        m_playerCharacter = std::make_shared<Player>(
+            200.0f,
+            600.0f,
+            m_worldId,
+            playerSpritePath);
+
+        m_map = std::make_unique<TiledMap>(mapFilePath.data());
+        m_camera = std::make_unique<SceneCamera>(*m_map);
     }
     catch (std::bad_alloc) {
-        logErr("Constructor init failed: Scene::Scene. std::bad_alloc thrown. Ln 19, Scene.cpp");
+        logErr(
+            "Constructor init failed, std::bad_alloc thrown. Ln 15, Scene.cpp");
+        return;
     }
-
-    camera.setTarget(playerCharacter);
+    catch (...) {
+        logErr(
+            "Constructor init failed, an unknown error has occurred. Ln 15, Scene.cpp");
+        return;
+    }
+    m_camera->setTarget(m_playerCharacter);
 }
 
 Scene::~Scene() = default;
 
-void Scene::updateScene() {
-    playerInput.handleInput(playerCharacter);
-    this->playerCharacter->update();
-    camera.update(playerCharacter);
+void Scene::handleSensorEvents() const {
+    const b2SensorEvents sensorContactEvents = b2World_GetSensorEvents(m_worldId);
+
+    for (std::size_t i = 0; i < sensorContactEvents.beginCount; i++) {
+        const b2SensorBeginTouchEvent& event = sensorContactEvents.beginEvents[i];
+        if (isShapeIdEqual(event.sensorShapeId, m_playerCharacter->getFootpawSenorId())) {
+            m_playerCharacter->setFootpawStatus(true);
+        }
+    }
+
+    for (std::size_t i = 0; i < sensorContactEvents.endCount; i++) {
+        const b2SensorEndTouchEvent& event = sensorContactEvents.endEvents[i];
+        if (isShapeIdEqual(event.sensorShapeId, m_playerCharacter->getFootpawSenorId())) {
+            m_playerCharacter->setFootpawStatus(false);
+        }
+    }
 }
 
-void Scene::drawScene() {
-    camera.cameraBegin();
+void Scene::updateScene() {
+    m_playerInput.handleInput(m_playerCharacter);
+    b2World_Step(m_worldId, WORLD_STEP, SUB_STEP);
+    this->handleSensorEvents();
+    m_playerCharacter->update();
+    m_camera->update(m_playerCharacter);
+}
+
+void Scene::drawScene() const {
+    m_camera->cameraBegin();
+
     ClearBackground(BLACK); // Might be unnecessary???
-    map.drawMap(camera, {0.0f, 0.0f}, WHITE);
-    this->playerCharacter->draw();
-    camera.drawDebugCrosshair();
-    camera.cameraEnd();
+    m_map->drawMap(*m_camera, {0.0f, 0.0f}, WHITE);
+    m_playerCharacter->draw();
+
+    // A lot of this debugging stuff is in here because it's the only place
+    // an instance of Player and SceneCamera exist together
+    #ifdef DEBUG_DRAW_CAMERA_CROSSHAIR
+        drawDebugCameraCrosshair(m_camera);
+    #endif
+
+    #ifdef DEBUG_DRAW_PLAYER_POSITION
+        drawDebugPlayerPosition(m_playerCharacter, m_camera);
+    #endif
+
+    #ifdef DEBUG_DRAW_CAMERA_RECT
+        drawDebugCameraRect(m_camera);
+    #endif
+
+    #ifdef DEBUG_DRAW_PLAYER_SENSOR
+        drawDebugFootpawSensorStatus(m_playerCharacter, m_camera);
+    #endif
+
+
+    m_camera->cameraEnd();
 }

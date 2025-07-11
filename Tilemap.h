@@ -33,7 +33,7 @@ class TiledMap {
     Vector2 toRayVec2(tson::Vector2f vec);
 
     void loadLayer(
-    std::shared_ptr<TilesonData> data,
+    const std::shared_ptr<TilesonData>& data,
     const std::string& baseImageDir,
     const std::string& imageName);
 
@@ -49,7 +49,7 @@ class TiledMap {
     float offsetX,
     float offsetY,
     Color color
-    );
+    ) const;
 
     void drawAnyLayer(
     tson::Layer& layer,

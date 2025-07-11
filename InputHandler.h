@@ -8,14 +8,11 @@
 #include <memory>
 #include "CommandListener.h"
 
-
-class InputHandler {
+class InputHandler final {
 public:
     InputHandler();
-    virtual ~InputHandler();
+    ~InputHandler();
     void handleInput(const std::shared_ptr<CommandListener>& listener);
 };
-
-
 
 #endif //INPUTHANDLER_H

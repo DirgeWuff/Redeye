@@ -228,6 +228,9 @@ Redeye_IS_TOP_LEVEL:STATIC=ON
 //Value Computed by CMake
 Redeye_SOURCE_DIR:STATIC=/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye
 
+//The directory containing a CMake configuration file for box2d.
+box2d_DIR:PATH=/usr/local/lib/cmake/box2d
+
 //Path to a library.
 pkgcfg_lib_PC_RAYLIB_raylib:FILEPATH=/opt/homebrew/Cellar/raylib/5.5/lib/libraylib.dylib
 

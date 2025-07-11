@@ -3,89 +3,98 @@
 //
 
 #include "Camera.h"
+#include <raymath.h>
 #include "Error.h"
 
 SceneCamera::SceneCamera(const TiledMap& map) {
     try {
-        camera = std::make_shared<Camera2D>();
-        this->camera->offset = {1500.0f / 2.0f, 800.0f / 2}; // Hard coded value, no bueno, fix later
-        this->camera->zoom = 1.50f;
-        this->camera->rotation = 0.0f;
+        m_camera = std::make_shared<Camera2D>();
+        m_camera->offset = {1500.0f / 2.0f, 800.0f / 2.0f}; // Hard coded value, no bueno, fix later
+        m_camera->zoom = 1.50f;
+        m_camera->rotation = 0.0f;
 
-        cameraRect = {
-            (GetScreenWidth() - static_cast<float>(GetScreenWidth()) / this->camera->zoom) / 2,
-            (GetScreenHeight() - static_cast<float>(GetScreenHeight()) / this->camera->zoom) / 2,
-            GetScreenWidth() / this->camera->zoom,
-            GetScreenHeight() / this->camera->zoom};
+        m_cameraRect = {
+            (GetScreenWidth() - static_cast<float>(GetScreenWidth()) / m_camera->zoom) / 2.0f,
+            (GetScreenHeight() - static_cast<float>(GetScreenHeight()) / m_camera->zoom) / 2.0f,
+            GetScreenWidth() / m_camera->zoom,
+            GetScreenHeight() / m_camera->zoom
+        };
 
-        cameraCenter = {cameraRect.x + cameraRect.width / 2, cameraRect.y + cameraRect.height / 2};
-        cameraVelocityY = 15;
-        targetCenter = {0.0f, 0.0f};
-        mapSize = {
+        m_cameraCenter = {m_cameraRect.x + m_cameraRect.width / 2.0f, m_cameraRect.y + m_cameraRect.height / 2.0f};
+        m_cameraVelocityY = 15;
+        m_targetCenter = {0.0f, 0.0f}; // Init to zero might be bad???
+        m_mapSize = {
             map.getTileWidth() * map.getMapWidth(),
-            map.getTileHeight() * map.getMapHeight()};
+            map.getTileHeight() * map.getMapHeight()
+        };
+        m_maxCameraPos = {
+            m_mapSize.x - m_cameraRect.width / 2.0f,
+            m_mapSize.y - m_cameraRect.height / 2.0f
+        };
     }
     catch (std::bad_alloc) {
         logErr(
-            "Constructor init failed, SceneCamera::SceneCamera. std::bad_alloc thrown. Ln 10, SceneCamera.cpp.");
+            "Constructor init failed, std::bad_alloc thrown. Ln 37, Camera.cpp.");
     }
+    catch (...) {
+        logErr(
+            "Constructor init failed, unknown error thrown. Ln 41, Camera.cpp.");
+    }
+
+    TraceLog(LOG_INFO, "SceneCamera created successfully.");
 }
 
 SceneCamera::~SceneCamera() = default;
 
-// Maybe a bad way of doing this, it locks to center of target no matter the position of target
-void SceneCamera::setTarget(const std::shared_ptr<Entity>& targetEntity){
-    this->camera->target = {
-        targetEntity->getX() + (targetEntity->getWidth() / 2),
-        targetEntity->getY() + (targetEntity->getHeight()) / 2};
+void SceneCamera::setTarget(const std::shared_ptr<Entity>& targetEntity) const {
+    Vector2 targetEntityCenter = Vector2Add(targetEntity->getPositionCornerPx(), targetEntity->getSizePx() / 2);
 
-    targetCenter = {this->camera->target.x, this->camera->target.y};
+    if (m_camera == nullptr) {
+        logErr("m_camera == nullptr. Ln 55, Camera.cpp");
+        return;
+    }
+
+    m_camera->target.y = targetEntityCenter.y;
+    m_camera->target.x = targetEntityCenter.x;
+
+    m_camera->target = Vector2Clamp(
+        m_camera->target,
+        {m_cameraRect.width / 2.0f, m_cameraRect.height / 2.0f},
+        m_maxCameraPos);
 }
 
 void SceneCamera::update(const std::shared_ptr<Entity>& targetEntity) {
-    targetCenter = {
-        targetEntity->getX() + targetEntity->getWidth() / 2,
-        targetEntity->getY() + targetEntity->getHeight() / 2
+    if (targetEntity == nullptr) {
+        logErr("targetEntity == nullptr. Ln 70, Camera.cpp.");
+        return;
+    }
+
+    m_targetCenter = {
+        targetEntity->getPositionCornerPx().x + targetEntity->getSizePx().x / 2.0f,
+        targetEntity->getPositionCornerPx().y + targetEntity->getSizePx().y / 2.0f
     };
 
-    // Clamp camera within map bounds on X axis
-    if (targetCenter.x <= cameraRect.width / 2) {
-        this->camera->target = this->camera->target;
-    }
-    else if (
-        targetCenter.x >= mapSize.x - cameraRect.width / 2 - targetEntity->getWidth()) {
+    m_camera->target = m_targetCenter;
+    m_camera->target = Vector2Clamp(
+        m_camera->target,
+        {m_cameraRect.width / 2.0f, m_cameraRect.height / 2.0f},
+        m_maxCameraPos);
 
-        this->camera->target = this->camera->target;
-    }
-    else {
-        this->camera->target.x = targetCenter.x;
-    }
+    m_cameraRect.x = m_camera->target.x - m_cameraRect.width / 2.0f;
+    m_cameraRect.y = m_camera->target.y - m_cameraRect.height / 2.0f;
 
-    // Clamp camera within map bounds on Y axis
-    if (targetCenter.y > cameraCenter.y) {
-        if (cameraRect.y + cameraRect.height < mapSize.y) {
-            this->camera->target.y += cameraVelocityY;
-        }
-    }
-    else if (targetCenter.y < cameraCenter.y) {
-        if (cameraRect.y >= 0) {
-            this->camera->target.y -= cameraVelocityY;
-        }
-    }
-    else {
-        this->camera->target = this->camera->target;
-    }
-
-    cameraRect.x = this->camera->target.x - cameraRect.width / 2;
-    cameraRect.y = this->camera->target.y - cameraRect.height / 2;
-
-    cameraCenter.x = cameraRect.x + cameraRect.width / 2;
-    cameraCenter.y = cameraRect.y + cameraRect.height / 2;
+    m_cameraCenter.x = m_cameraRect.x + m_cameraRect.width / 2.0f;
+    m_cameraCenter.y = m_cameraRect.y + m_cameraRect.height / 2.0f;
 }
 
 // Unfortunate I have to use these stupid interface functions, but it is what it is
 void SceneCamera::cameraBegin() const {
-    BeginMode2D(*camera);
+    if (m_camera == nullptr) {
+        logErr("m_camera == nullptr. Ln 95, Camera.cpp.");
+        return;
+    }
+
+    BeginMode2D(*m_camera);
 }
 
 void SceneCamera::cameraEnd() const {
@@ -93,47 +102,31 @@ void SceneCamera::cameraEnd() const {
 }
 
 Rectangle SceneCamera::getCameraRect() const {
-    return cameraRect;
+    return m_cameraRect;
 }
 
-Vector2 SceneCamera::getCameraCenter() const {
-    const Vector2 output = {
-        this->camera->target.x + this->camera->offset.x,
-        this->camera->target.y + this->camera->offset.y
-    };
+float SceneCamera::getCameraRectWidth() const {
+    return m_cameraRect.width;
+}
 
-    return output;
+float SceneCamera::getCameraRectHeight() const {
+    return m_cameraRect.height;
+}
+
+// NOTE: Changed this recently, if shit starts breaking, look here!
+Vector2 SceneCamera::getCameraCenter() const {
+    return m_cameraCenter;
 }
 
 Vector2 SceneCamera::getCameraTarget() const {
-    return this->camera->target;
-}
+    if (m_camera == nullptr) {
+        logErr("m_camera == nullptr. Ln 125, Camera.cpp");
+        return Vector2{NULL, NULL};
+    }
 
-void SceneCamera::drawCameraDebugRect() const {
-    DrawRectangleLines(
-        cameraRect.x + 2,
-        cameraRect.y + 2,
-        cameraRect.width - 4,
-        cameraRect.height - 4,
-        RED);
-}
-
-void SceneCamera::drawDebugCrosshair() const {
-    DrawLine(
-        cameraCenter.x,
-        cameraRect.y,
-        cameraCenter.x,
-        cameraCenter.y + cameraRect.height,
-        RED);
-
-    DrawLine(
-        cameraRect.x,
-        cameraCenter.y,
-        cameraCenter.x + cameraRect.width,
-        cameraCenter.y,
-        RED);
+    return m_camera->target;
 }
 
 std::shared_ptr<Camera2D> SceneCamera::getCameraPtr() const {
-    return camera;
+    return m_camera;
 }
