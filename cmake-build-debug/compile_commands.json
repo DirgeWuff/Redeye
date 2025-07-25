@@ -64,5 +64,11 @@
   "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include -o CMakeFiles/Redeye.dir/BoxBody.cpp.o -c /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/BoxBody.cpp",
   "file": "/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/BoxBody.cpp",
   "output": "CMakeFiles/Redeye.dir/BoxBody.cpp.o"
+},
+{
+  "directory": "/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/cmake-build-debug",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/external_libs -isystem /opt/homebrew/Cellar/raylib/5.5/include -isystem /usr/local/include -g -std=gnu++20 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX13.3.sdk -fcolor-diagnostics -I/opt/homebrew/Cellar/raylib/5.5/include -o CMakeFiles/Redeye.dir/CollisionObject.cpp.o -c /Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/CollisionObject.cpp",
+  "file": "/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/CollisionObject.cpp",
+  "output": "CMakeFiles/Redeye.dir/CollisionObject.cpp.o"
 }
 ]

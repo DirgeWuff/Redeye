@@ -2,19 +2,19 @@
 // Created by DirgeWuff on 6/27/25.
 //
 
-// Note: A bunch of these functions have a bit of jitter to them due to the
-// loss of precision in doing a static_cast to int.
+// Note: A bunch of these functions have a bit of visual 'jitter' to them due to the
+// loss of precision from doing a static_cast from float to int.
 
 #include "Debug.h"
 #include "Utils.h"
+#include "Error.h"
 #include "box2d/box2d.h"
 #include "raylib.h"
 #include <cassert>
 #include <iostream>
 
-#include "Error.h"
-
-constexpr Color DEBUG_COLOR{0, 0, 255, 255};
+constexpr Color DEBUG_BODY_COLOR{0, 0, 255, 255};
+constexpr Color DEBUG_COLLISION_COLOR{255, 0, 0, 255};
 
 void drawDebugBodyShapes(const Entity* targetEntity) {
     assert(b2Body_GetShapeCount(targetEntity->getBodyID()) != 0 && "Assertion failed. Body contains no shapes.");
@@ -34,7 +34,7 @@ void drawDebugBodyShapes(const Entity* targetEntity) {
         switch (st) {
             case b2_polygonShape: {
                 const b2Polygon polygon = b2Shape_GetPolygon(shape);
-                const int numVerts = polygon.count;
+                const std::size_t numVerts = polygon.count;
 
                 b2Vec2 tfdVerts[numVerts];
                 for (std::size_t i = 0; i < numVerts; i++) {
@@ -47,14 +47,14 @@ void drawDebugBodyShapes(const Entity* targetEntity) {
                      metersToPixelsVec(tfdVerts[i]),
                       metersToPixelsVec(tfdVerts[0]),
                      1.0f,
-                     DEBUG_COLOR);
+                     DEBUG_BODY_COLOR);
                     }
                     else {
                         DrawLineEx(
                          metersToPixelsVec(tfdVerts[i]),
                           metersToPixelsVec(tfdVerts[i + 1]),
                           1.0f,
-                          DEBUG_COLOR);
+                          DEBUG_BODY_COLOR);
                     }
                 }
                 break;
@@ -77,10 +77,10 @@ void drawDebugBodyShapes(const Entity* targetEntity) {
                     tfedP1 - rad * normals
                 };
 
-                DrawLineEx(metersToPixelsVec(quads[0]), metersToPixelsVec(quads[1]), 0.5f, DEBUG_COLOR);
-                DrawLineEx(metersToPixelsVec(quads[1]), metersToPixelsVec(quads[2]), 0.5f, DEBUG_COLOR);
-                DrawLineEx(metersToPixelsVec(quads[2]), metersToPixelsVec(quads[3]), 0.5f, DEBUG_COLOR);
-                DrawLineEx(metersToPixelsVec(quads[3]), metersToPixelsVec(quads[0]), 0.5f, DEBUG_COLOR);
+                DrawLineEx(metersToPixelsVec(quads[0]), metersToPixelsVec(quads[1]), 0.5f, DEBUG_BODY_COLOR);
+                DrawLineEx(metersToPixelsVec(quads[1]), metersToPixelsVec(quads[2]), 0.5f, DEBUG_BODY_COLOR);
+                DrawLineEx(metersToPixelsVec(quads[2]), metersToPixelsVec(quads[3]), 0.5f, DEBUG_BODY_COLOR);
+                DrawLineEx(metersToPixelsVec(quads[3]), metersToPixelsVec(quads[0]), 0.5f, DEBUG_BODY_COLOR);
 
                 const float capRadius = atan2f(y, x) * RAD2DEG;
 
@@ -89,14 +89,14 @@ void drawDebugBodyShapes(const Entity* targetEntity) {
                      metersToPixels(rad),
                     capRadius - 90.0f,
                     capRadius + 90.0f,
-                    20, DEBUG_COLOR);
+                    20, DEBUG_BODY_COLOR);
                 DrawCircleSectorLines(
                     metersToPixelsVec(tfedP1),
                     metersToPixels(rad),
                     capRadius + 90.0f,
                     capRadius - 90.0f + 360.0f,
                     20,
-                    DEBUG_COLOR);
+                    DEBUG_BODY_COLOR);
                 break;
             }
             default: {
@@ -114,7 +114,7 @@ void drawDebugBodyCenter(const Entity* targetEntity) {
         static_cast<int>(metersToPixels(x)),
         static_cast<int>(metersToPixels(y)),
         5.0f,
-        DEBUG_COLOR
+        DEBUG_BODY_COLOR
     );
 }
 
@@ -207,5 +207,29 @@ void drawDebugFootpawSensorStatus(
             static_cast<int>(transPos.y),
             20,
             RED);
+    }
+}
+
+// Also probably very slow, but again, fuck it lol
+void drawDebugCollisionShapes(const std::unique_ptr<TiledMap> &map) {
+    collisionWorld_t shapes = map->getCollisionShapes();
+
+    for (const auto& shape : shapes) {
+        const b2Vec2* points = shape.getObjectVerts();
+        const std::size_t numVerts = shape.getVertCount();
+
+        std::vector<Vector2> tfedVerts;
+
+        for (std::size_t i = 0; i < numVerts; i++) {
+            tfedVerts.push_back(metersToPixelsVec(points[i]));
+        }
+
+        for (std::size_t i = 0; i < numVerts - 1; i++) {
+            DrawLineEx(
+                tfedVerts[i],
+                tfedVerts[i + 1],
+                1.0f,
+                DEBUG_COLLISION_COLOR);
+        }
     }
 }

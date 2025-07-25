@@ -3,7 +3,7 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "Master Tile Sheet.tsj",
+    "activeFile": "Redeye Test Lvl.tmj",
     "expandedProjectPaths": [
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
@@ -13,27 +13,29 @@
             "scaleInEditor": 1
         },
         "Master Tile Sheet.tsj": {
-            "scaleInDock": 0.7452,
-            "scaleInEditor": 1
+            "scaleInDock": 0.6434,
+            "scaleInEditor": 0.73
         },
         "Redeye Test Lvl.tmj": {
-            "scale": 0.63,
-            "selectedLayer": 0,
+            "scale": 0.84,
+            "selectedLayer": -1,
             "viewCenter": {
-                "x": -7.936507936507951,
-                "y": 431.7460317460318
+                "x": 1279.7619047619048,
+                "y": 382.14285714285717
             }
         }
     },
     "last.exportedFilePath": "/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/assets/Map data",
-    "last.imagePath": "/Users/dirgeydafluffbutt/Documents/Game assets and objects/Redeye/V2/Ground and terrain",
+    "last.imagePath": "/Users/dirgeydafluffbutt/Documents/Code/CPP/Redeye/assets/Map data",
     "map.height": 12,
     "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
     "map.lastUsedFormat": "json",
-    "map.tileHeight": 32,
-    "map.tileWidth": 32,
+    "map.tileHeight": 64,
+    "map.tileWidth": 64,
     "map.width": 40,
     "openFiles": [
+        "Redeye Test Lvl.tmj",
+        "Master Tile Sheet.tsj",
         "Redeye Test Lvl.tmj",
         "Master Tile Sheet.tsj"
     ],
@@ -45,7 +47,7 @@
     ],
     "tileset.lastUsedFormat": "json",
     "tileset.tileSize": {
-        "height": 32,
-        "width": 32
+        "height": 64,
+        "width": 64
     }
 }

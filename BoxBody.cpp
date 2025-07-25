@@ -6,6 +6,9 @@
 #include "Utils.h"
 #include "box2d/box2d.h"
 
+// Entirely possible this should be made into a pure virtual class or removed all together.
+// Don't really see a need for this object in the final game.
+
 BoxBody::BoxBody(
     const float centerX,
     const float centerY,

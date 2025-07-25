@@ -47,4 +47,6 @@ void logErr(std::string&& errorMessage) {
         f << getTime() << " " << errorMessage << std::endl;
         f.close();
     }
+
+    CloseWindow();
 }

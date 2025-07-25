@@ -53,6 +53,8 @@ add_executable(${PROJECT_NAME} main.cpp
         Entity.h
         BoxBody.cpp
         BoxBody.h
+        CollisionObject.cpp
+        CollisionObject.h
 )
 
 #set(raylib_VERBOSE 1)

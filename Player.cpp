@@ -142,7 +142,7 @@ void Player::jump() {
 
         b2Body_ApplyLinearImpulse(
         m_body,
-        {0.0f, -(mass * 10.0f)},
+        {0.0f, -(mass * 20.0f)},
         b2Body_GetWorldCenterOfMass(m_body),
         true);
     }

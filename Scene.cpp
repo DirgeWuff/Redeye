@@ -1,6 +1,7 @@
 //
 // Created by DirgeWuff on 5/14/25.
 //
+
 #include <box2d/box2d.h>
 #include "Scene.h"
 #include "Error.h"
@@ -16,18 +17,8 @@ Scene::Scene(
 m_worldDef(b2DefaultWorldDef()),
 m_playerInput(InputHandler())
 {
-    m_worldDef.gravity = {0.0f, 20.0f};
+    m_worldDef.gravity = {0.0f, 50.0f};
     m_worldId = b2CreateWorld(&m_worldDef);
-
-    // Temporary stop-gap measure to test jumping and shit
-    bodyConfig cfg = {b2_staticBody, false, 0.0f, 1.0f};
-    const auto invisible_platform = BoxBody(
-        600.0f,
-        800.0f - 158.0f,
-        1200.0f,
-        2.0f,
-        cfg,
-        m_worldId);
 
     try {
         m_playerCharacter = std::make_shared<Player>(
@@ -36,17 +27,17 @@ m_playerInput(InputHandler())
             m_worldId,
             playerSpritePath);
 
-        m_map = std::make_unique<TiledMap>(mapFilePath.data());
+        m_map = std::make_unique<TiledMap>(mapFilePath.data(), m_worldId);
         m_camera = std::make_unique<SceneCamera>(*m_map);
     }
     catch (std::bad_alloc) {
         logErr(
-            "Constructor init failed, std::bad_alloc thrown. Ln 15, Scene.cpp");
+            "Constructor init failed, std::bad_alloc thrown. Ln 44, Scene.cpp");
         return;
     }
     catch (...) {
         logErr(
-            "Constructor init failed, an unknown error has occurred. Ln 15, Scene.cpp");
+            "Constructor init failed, an unknown error has occurred. Ln 49, Scene.cpp");
         return;
     }
     m_camera->setTarget(m_playerCharacter);
@@ -101,10 +92,13 @@ void Scene::drawScene() const {
         drawDebugCameraRect(m_camera);
     #endif
 
-    #ifdef DEBUG_DRAW_PLAYER_SENSOR
+    #ifdef DEBUG_DRAW_PLAYER_SENSOR_STATUS
         drawDebugFootpawSensorStatus(m_playerCharacter, m_camera);
     #endif
 
+    #ifdef DEBUG_DRAW_TERRAIN_SHAPES
+        drawDebugCollisionShapes(m_map);
+    #endif
 
     m_camera->cameraEnd();
 }
