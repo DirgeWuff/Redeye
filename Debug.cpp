@@ -19,7 +19,7 @@ constexpr Color DEBUG_COLLISION_COLOR{255, 0, 0, 255};
 void drawDebugBodyShapes(const Entity* targetEntity) {
     assert(b2Body_GetShapeCount(targetEntity->getBodyID()) != 0 && "Assertion failed. Body contains no shapes.");
 
-    const int maxShapes = b2Body_GetShapeCount(targetEntity->getBodyID());
+    const u_int8_t maxShapes = b2Body_GetShapeCount(targetEntity->getBodyID());
 
     b2ShapeId shapes[maxShapes];
     b2Body_GetShapes(targetEntity->getBodyID(), shapes, maxShapes);

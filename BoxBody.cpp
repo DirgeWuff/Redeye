@@ -19,7 +19,7 @@ BoxBody::BoxBody(
         m_sizeMeters{pixelsToMeters(fullWidth), pixelsToMeters(fullHeight)},
         m_sizePx{fullWidth, fullHeight},
         m_centerPosition{pixelsToMeters(centerX), pixelsToMeters(centerY)},
-        m_cornerPosition{centerX - m_sizePx.x / 2, centerY - m_sizePx.y / 2},
+        m_cornerPosition{centerX - m_sizePx.x / 2.0f, centerY - m_sizePx.y / 2.0f},
         m_bodyDef(b2DefaultBodyDef())
 {
     m_bodyDef.position = m_centerPosition;

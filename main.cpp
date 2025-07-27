@@ -1,8 +1,8 @@
 #include "raylib.h"
 #include "Scene.h"
 
-constexpr int WINDOW_WIDTH = 1500;
-constexpr int WINDOW_HEIGHT = 800;
+constexpr uint16_t WINDOW_WIDTH = 1500;
+constexpr uint16_t WINDOW_HEIGHT = 800;
 
 int main() {
 

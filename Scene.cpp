@@ -9,7 +9,8 @@
 #include "Utils.h"
 
 constexpr float WORLD_STEP = 1.0f / 60.0f;
-constexpr int SUB_STEP = 4;
+constexpr uint8_t SUB_STEP = 4;
+CodeClock timer = CodeClock();
 
 Scene::Scene(
     std::string&& playerSpritePath,
@@ -75,7 +76,9 @@ void Scene::drawScene() const {
     m_camera->cameraBegin();
 
     ClearBackground(BLACK); // Might be unnecessary???
-    m_map->drawMap(*m_camera, {0.0f, 0.0f}, WHITE);
+    timer.begin();
+    m_map->draw(*m_camera, {0.0f, 0.0f}, WHITE);
+    timer.end();
     m_playerCharacter->draw();
 
     // A lot of this debugging stuff is in here because it's the only place

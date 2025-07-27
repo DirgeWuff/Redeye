@@ -2,14 +2,6 @@
 // Created by DirgeWuff on 5/15/25.
 //
 
-// The following is a heavily modified version of Rob Loach's raylib-tileson implementation,
-// with classes, improvements to memory safety, const correctness, error handling,
-// and the addition of calculations for parallax.
-
-// Link to the original: https://github.com/RobLoach/raylib-tileson.
-// Used and modified under the permissions granted by the BSD license.
-
-// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #include "Tilemap.h"
 #include "Error.h"
@@ -38,11 +30,29 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
 
         if (map->getStatus() != tson::ParseStatus::OK) {
             logErr(
-                "Constructor init failed: Unable to parse map: " + map->getStatusMessage() + "Ln 43, Tilemap.cpp");
+                "Constructor init failed: Unable to parse map: " + map->getStatusMessage() + "Ln 32, Tilemap.cpp");
             return;
         }
 
         const std::shared_ptr<TilesonData> data = std::make_shared<TilesonData>();
+
+        for (const auto& tileset : map->getTilesets()) {
+            std::string imagePath;
+
+            if (!mapData.baseDir.empty()) {
+                imagePath = mapData.baseDir.string() + tileset.getImage().string();
+            }
+            else {
+                imagePath = tileset.getImage();
+            }
+
+            if (!data->textures.contains(imagePath)) {
+                const Texture texture = LoadTexture(imagePath.c_str());
+                data->textures[imagePath] = texture;
+            }
+
+            data->texturePtrs[&tileset] = &data->textures[imagePath];
+        }
 
         for (auto& layer : map->getLayers()) {
             if (layer.getType() == tson::LayerType::ImageLayer) {
@@ -62,7 +72,6 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
                 for (auto& object : layer.getObjects()) {
                     tson::ObjectType objType = object.getObjectType();
 
-                    // MAY cause problems treating Polyline and Polygon the same (it does!)
                     if (objType == tson::ObjectType::Polyline) {
                         tson::Vector2i pos = object.getPosition();
                         std::vector<tson::Vector2i> tsonPoints = object.getPolylines();
@@ -76,25 +85,34 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
                         mapData.collisionObjects.emplace_back(world, points);
                     }
                     else {
-                        logErr("Object layer contains incompatible type. Ln 81, Tilemap.cpp");
+                        logErr("Object layer contains incompatible type. Ln 88, Tilemap.cpp");
                         return;
                     }
                 }
             }
-        }
+            else if (layer.getType() == tson::LayerType::TileLayer) {
+                std::vector<TileData> renderData;
 
-        for (const auto& image : map->getTilesets()) {
-            std::string imagePath;
+                for (auto& [pos, tile] : layer.getTileObjects()) {
+                    const tson::Tile* tilePtr = tile.getTile();
+                    const tson::Tileset* tileset = tilePtr->getTileset();
 
-            if (!mapData.baseDir.empty()) {
-                imagePath = mapData.baseDir.string() + image.getImage().string();
+                    auto iterator = data->texturePtrs.find(tileset);
+                    if (iterator == data->texturePtrs.end()) {
+                        logErr("Texture missing. Ln 102, Tilemap.cpp");
+                        continue;
+                    }
+
+                    TileData tileData;
+                    tileData.position = toRayVec2(tile.getPosition());
+                    tileData.sourceRect = toRayRect(tile.getDrawingRect());
+                    tileData.texture = iterator->second;
+
+                    renderData.push_back(tileData);
+                }
+
+                data->layerRenderData[&layer] = std::move(renderData);
             }
-            else {
-                imagePath = image.getImage();
-            }
-
-            const Texture texture = LoadTexture(imagePath.c_str());
-            data->textures[imagePath] = texture;
         }
 
         mapData.mapWidth = map->getSize().x;
@@ -105,7 +123,7 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
         mapData.data = data;
     }
     catch (std::bad_alloc) {
-        logErr("Constructor init failed, std::bad_alloc thrown Ln 110, Tilemap.cpp");
+        logErr("Constructor init failed, std::bad_alloc thrown Ln 126, Tilemap.cpp");
     }
 
     TraceLog(LOG_INFO, "Tiled map loaded successfully.");
@@ -120,35 +138,35 @@ TiledMap::~TiledMap() {
     TraceLog(LOG_INFO, "Tiled map unloaded successfully.");
 }
 
-
-void TiledMap::drawMap(
+void TiledMap::draw(
     const SceneCamera& cam,
     const Vector2 offset,
     const Color color) const
 {
-    for (std::vector<tson::Layer>& layers = mapData.data->map->getLayers(); auto& layer : layers) {
+    for (const std::vector<tson::Layer>& layers = mapData.data->map->getLayers(); auto& layer : layers) {
 
         const Vector2 parallaxFactor = toRayVec2(layer.getParallax());
         const Vector2 layerOffset = toRayVec2(layer.getOffset());
-        const Vector2 parallaxOrigin = toRayVec2(layer.getMap()->getParallaxOrigin());
-        const Vector2 cameraOffset = GetWorldToScreen2D(parallaxOrigin, *cam.getCameraPtr());
+        const Vector2 cameraTarget = cam.getCameraPtr()->target;
+        const Vector2 parallaxOffset = cameraTarget * (Vector2{1.0f, 1.0f} - parallaxFactor);
 
-        // Unsure why / 10 was required to get the correct value??? Never seen this in any sample code.
-        const Vector2 adjustedOffset = offset + layerOffset - cameraOffset * (Vector2{1.0, 1.0} - parallaxFactor) / 10;
+        const Vector2 adjustedOffset = offset + layerOffset + parallaxOffset;
 
         switch (layer.getType()) {
             case tson::LayerType::TileLayer: {
-                for (auto& [pos, tile] : layer.getTileObjects()) {
-                    const tson::Tileset* tileset = tile.getTile()->getTileset();
+                const std::vector<TileData> renderDataVec = mapData.data->layerRenderData[&layer];
 
-                    const Vector2 position = toRayVec2(tile.getPosition());
-                    const Rectangle drawingRect = toRayRect(tile.getDrawingRect());
+                for (const auto& data : renderDataVec) {
+                    const Vector2 drawingPos = {
+                        data.position.x + adjustedOffset.x,
+                        data.position.y + adjustedOffset.y
+                    };
 
                     const Rectangle tileBounds = {
-                        position.x + adjustedOffset.x,
-                        position.y + adjustedOffset.y,
-                        drawingRect.width,
-                        drawingRect.height
+                        drawingPos.x,
+                        drawingPos.y,
+                        data.sourceRect.width,
+                        data.sourceRect.height
                     };
 
                     // Camera cull
@@ -156,16 +174,10 @@ void TiledMap::drawMap(
                         continue;
                     }
 
-                    std::string tilesetPath = mapData.baseDir.string() + tileset->getImage().string();
-
-                    if (!mapData.data->textures.contains(tilesetPath)) {
-                        break;
-                    }
-
                     DrawTextureRec(
-                        mapData.data->textures[tilesetPath],
-                        drawingRect,
-                        {position.x + adjustedOffset.x, position.y + adjustedOffset.y},
+                        *data.texture,
+                        data.sourceRect,
+                        drawingPos,
                         color);
                 }
                 break;
@@ -173,17 +185,16 @@ void TiledMap::drawMap(
 
             case tson::LayerType::ImageLayer: {
                 const std::string imagePath = mapData.baseDir.string() + layer.getImage();
-                const tson::Vector2f imageLayerOffset = layer.getOffset();
 
                 if (!mapData.data->textures.contains(imagePath)) {
-                    logErr("Unable to load texture: " + layer.getImage() + ". Ln 181, TileMap.cpp.");
+                    logErr("Unable to load texture: " + layer.getImage() + ". Ln 190, TileMap.cpp.");
                     return;
                 }
 
                 DrawTexture(
                     mapData.data->textures[imagePath],
-                    imageLayerOffset.x - adjustedOffset.x,
-                    imageLayerOffset.y - adjustedOffset.y,
+                    adjustedOffset.x,
+                    adjustedOffset.y,
                     color);
 
                 break;
@@ -195,7 +206,7 @@ void TiledMap::drawMap(
             }
 
             default: {
-                logErr("Map contains unsupported layer type. Ln 200, Tilemap.cpp");
+                logErr("Map contains unsupported layer type. Ln 209, Tilemap.cpp");
                 break;
             }
         }

@@ -18,8 +18,16 @@ class SceneCamera;
 // Just for extra clarity
 typedef std::vector<CollisionObject> collisionWorld_t;
 
+struct TileData {
+    Vector2 position;
+    Rectangle sourceRect;
+    const Texture2D* texture;
+};
+
 struct TilesonData {
     std::map<std::string, Texture> textures;
+    std::unordered_map<const tson::Tileset*, Texture2D*> texturePtrs;
+    std::unordered_map<const tson::Layer*, std::vector<TileData>> layerRenderData;
     std::shared_ptr<tson::Map> map;
 };
 
@@ -41,7 +49,7 @@ public:
     TiledMap(std::string&& filepath, b2WorldId world);
     ~TiledMap();
 
-    void drawMap(
+    void draw(
     const SceneCamera& cam,
     Vector2 offset,
     Color color

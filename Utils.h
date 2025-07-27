@@ -8,6 +8,7 @@
 #include "tileson.hpp"
 #include <box2d/types.h>
 #include <raylib.h>
+#include <chrono>
 
 bool isShapeIdEqual(const b2ShapeId& idOne, const b2ShapeId& idTwo);    // Check if 2 b2ShapeId's are equal
 
@@ -25,4 +26,15 @@ tson::Vector2i v2iAdd(
     const tson::Vector2i& vecOne,
     const tson::Vector2i& vecTwo);                                      // Perform addition with tson::Vector2i
 
+class CodeClock {
+    std::chrono::time_point<std::chrono::steady_clock> startingTime{};
+    std::chrono::time_point<std::chrono::steady_clock> endingTime{};
+    std::vector<std::chrono::duration<float>> durations{};
+
+public:
+    CodeClock() = default;
+    ~CodeClock();
+    void begin();
+    void end();
+};
 #endif //B2UTILS_H
