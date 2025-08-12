@@ -2,11 +2,13 @@
 // Created by DirgeWuff on 4/29/25.
 //
 
-#include <box2d/box2d.h>
+
 #include <iostream>
+#include "external_libs/Box2D/include/box2d.h"
 #include "Player.h"
 #include "Utils.h"
 #include "Debug.h"
+#include "EventCollider.h"
 
 enum directions {RIGHT, LEFT};
 
@@ -21,7 +23,8 @@ m_frameDelayAmount(10),
 m_frameDelayClock(0),
 m_moving(false),
 m_onGround(true),
-m_lastDirection(RIGHT)
+m_lastDirection(RIGHT),
+m_dead(false)
 {
     // Raylib/general stuff
     m_walkSprites = LoadTexture(spritePath.c_str());
@@ -59,14 +62,21 @@ m_lastDirection(RIGHT)
 
     // Footpaw sensor :3
     m_footpawSensorBox = b2MakeOffsetBox(
+        pixelsToMeters(20.0f),
         pixelsToMeters(12.0f),
-        pixelsToMeters(12.0f),
-        {0.0f, m_sizeMeters.y / 2.5f},
+        {0.0f, m_sizeMeters.y / 2.3f},
         b2MakeRot(0.0f)
     );
     m_footpawSensorShape = b2DefaultShapeDef();
     m_footpawSensorShape.isSensor = true;
     m_footpawSensorShape.enableSensorEvents = true;
+
+    auto* ud = new sensorInfo{"pawbs"};
+    m_footpawSensorShape.userData = static_cast<void*>(ud);
+    ud = nullptr;
+    delete ud;
+
+
     m_footpawSensorId = b2CreatePolygonShape(
         m_body,
         &m_footpawSensorShape,
@@ -88,10 +98,6 @@ void Player::update() {
 
 void Player::draw() const {
     DrawTextureRec(m_walkSprites, m_spriteRect, m_cornerPosition, WHITE);
-
-    #ifdef DEBUG_DRAW_PLAYER_SHAPES
-        drawDebugBodyShapes(this);
-    #endif
 }
 
 void Player::moveRight() {
@@ -157,6 +163,11 @@ void Player::moveNowhere() {
     else {
         m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
     }
+}
+
+void Player::murder() {
+    // For testing, put real code here later
+    std::cout << "Player dead AF" << std::endl;
 }
 
 b2ShapeId Player::getFootpawSenorId() const {

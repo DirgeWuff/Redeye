@@ -4,16 +4,18 @@
 
 
 #include "Tilemap.h"
+#include "Camera.h"
 #include "Error.h"
 #include "Utils.h"
-#include "raymath.h"
+#include "external_libs/Raylib/include/raylib.h"
+#include "external_libs/Raylib/include/raymath.h"
 
 TiledMap::TiledMap() {
-    mapData.mapWidth = NULL;
-    mapData.mapHeight = NULL;
-    mapData.tileWidth = NULL;
-    mapData.tileHeight = NULL;
-    mapData.data = nullptr;
+    mapData.mapWidth = 0;
+    mapData.mapHeight = 0;
+    mapData.tileWidth = 0;
+    mapData.tileHeight = 0;
+    mapData.renderDataPtr = nullptr;
     mapData.collisionObjects = {};
 }
 
@@ -34,7 +36,7 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
             return;
         }
 
-        const std::shared_ptr<TilesonData> data = std::make_shared<TilesonData>();
+        const std::shared_ptr<RenderData> data = std::make_shared<RenderData>();
 
         for (const auto& tileset : map->getTilesets()) {
             std::string imagePath;
@@ -43,7 +45,7 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
                 imagePath = mapData.baseDir.string() + tileset.getImage().string();
             }
             else {
-                imagePath = tileset.getImage();
+                imagePath = tileset.getImage().string();
             }
 
             if (!data->textures.contains(imagePath)) {
@@ -68,7 +70,7 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
                 const Texture texture = LoadTexture(imagePath.c_str());
                 data->textures[imagePath] = texture;
             }
-            else if (layer.getType() == tson::LayerType::ObjectGroup) {
+            else if (layer.getType() == tson::LayerType::ObjectGroup && layer.getName() == "Collision mesh") {
                 for (auto& object : layer.getObjects()) {
                     tson::ObjectType objType = object.getObjectType();
 
@@ -88,6 +90,23 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
                         logErr("Object layer contains incompatible type. Ln 88, Tilemap.cpp");
                         return;
                     }
+                }
+            }
+            else if (layer.getType() == tson::LayerType::ObjectGroup && layer.getName() == "Event colliders") {
+                for (auto& object : layer.getObjects()) {
+                    if (object.getName() == "Murder box") {
+                        const tson::Vector2i pos = object.getPosition();
+                        const tson::Vector2i size = object.getSize();
+
+                        mapData.eventColliders.emplace_back(
+                            pos.x,
+                            pos.y,
+                            size.x,
+                            size.y,
+                            "MurderBox",
+                            world);
+                    }
+                    // Add any other collider types here later on
                 }
             }
             else if (layer.getType() == tson::LayerType::TileLayer) {
@@ -119,8 +138,8 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
         mapData.mapHeight = map->getSize().y;
         mapData.tileWidth = map->getTileSize().x;
         mapData.tileHeight = map->getTileSize().y;
-        data->map = std::move(map);
-        mapData.data = data;
+        data->tsonMapPtr = std::move(map);
+        mapData.renderDataPtr = data;
     }
     catch (std::bad_alloc) {
         logErr("Constructor init failed, std::bad_alloc thrown Ln 126, Tilemap.cpp");
@@ -131,7 +150,7 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
 
 // NOTE: Seems to throw OpenGL error on texture unload, likely related to Apple Silicon chip
 TiledMap::~TiledMap() {
-    for (const auto& [name, texture] : mapData.data->textures) {
+    for (const auto& [name, texture] : mapData.renderDataPtr->textures) {
         UnloadTexture(texture);
     }
 
@@ -143,7 +162,7 @@ void TiledMap::draw(
     const Vector2 offset,
     const Color color) const
 {
-    for (const std::vector<tson::Layer>& layers = mapData.data->map->getLayers(); auto& layer : layers) {
+    for (const std::vector<tson::Layer>& layers = mapData.renderDataPtr->tsonMapPtr->getLayers(); auto& layer : layers) {
 
         const Vector2 parallaxFactor = toRayVec2(layer.getParallax());
         const Vector2 layerOffset = toRayVec2(layer.getOffset());
@@ -154,7 +173,7 @@ void TiledMap::draw(
 
         switch (layer.getType()) {
             case tson::LayerType::TileLayer: {
-                const std::vector<TileData> renderDataVec = mapData.data->layerRenderData[&layer];
+                const std::vector<TileData> renderDataVec = mapData.renderDataPtr->layerRenderData[&layer];
 
                 for (const auto& data : renderDataVec) {
                     const Vector2 drawingPos = {
@@ -186,13 +205,13 @@ void TiledMap::draw(
             case tson::LayerType::ImageLayer: {
                 const std::string imagePath = mapData.baseDir.string() + layer.getImage();
 
-                if (!mapData.data->textures.contains(imagePath)) {
+                if (!mapData.renderDataPtr->textures.contains(imagePath)) {
                     logErr("Unable to load texture: " + layer.getImage() + ". Ln 190, TileMap.cpp.");
                     return;
                 }
 
                 DrawTexture(
-                    mapData.data->textures[imagePath],
+                    mapData.renderDataPtr->textures[imagePath],
                     adjustedOffset.x,
                     adjustedOffset.y,
                     color);
@@ -213,27 +232,22 @@ void TiledMap::draw(
     }
 }
 
-// Return the width of the map in tiles
 float TiledMap::getMapWidth() const {
     return static_cast<float>(mapData.mapWidth);
 }
 
-// Return the height of the map in tiles
 float TiledMap::getMapHeight() const {
    return static_cast<float>(mapData.mapHeight);
 }
 
-// Return the width of a tile in pixels
 float TiledMap::getTileWidth() const {
     return static_cast<float>(mapData.tileWidth);
 }
 
-// Return the height of a tile in pixels
 float TiledMap::getTileHeight() const {
     return static_cast<float>(mapData.tileHeight);
 }
 
-// Return collision shapes in this->mapData
-collisionWorld_t TiledMap::getCollisionShapes() const {
+const std::vector<CollisionObject>& TiledMap::getCollisionShapes() const {
     return mapData.collisionObjects;
 }

@@ -20,7 +20,7 @@ class SceneCamera final : public Camera2D {
    Vector2 m_maxCameraPos; // Used for clamping
 public:
    SceneCamera() = default;
-   explicit SceneCamera(const TiledMap& map);
+   SceneCamera(const TiledMap& map, float zoomLevel);
    ~SceneCamera();
    void setTarget(const std::shared_ptr<Entity>& targetEntity) const;
    void update(const std::shared_ptr<Entity>& targetEntity);

@@ -7,12 +7,14 @@
 #ifndef BOXBODY_H
 #define BOXBODY_H
 
-#include "raylib.h"
-#include "box2d/types.h"
+#include "external_libs/Raylib/include/raylib.h"
+#include "external_libs/Box2D/include/types.h"
 
 struct bodyConfig {
     b2BodyType bodyType;
     const bool rotationEnabled;
+    const bool isSensor;
+    const bool sensorEventsEnabled;
     const float damping;
     const float friction;
 };
@@ -47,5 +49,6 @@ public:
     Vector2 getPositionCornerPx() const;
     b2BodyId getBodyID() const;
 };
+
 
 #endif //BOXBODY_H

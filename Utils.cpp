@@ -2,6 +2,8 @@
 // Created by DirgeWuff on 6/27/25.
 //
 
+#include <cstdint>
+#include "external_libs/Box2D/include/types.h"
 #include "Utils.h"
 
 constexpr uint8_t PPM = 100; // 100 px/meter
@@ -68,9 +70,20 @@ CodeClock::~CodeClock() {
     }
 
     const std::chrono::duration<float> averageTime = totalTime / durations.size();
-    std::cout << "Average time: " << averageTime.count() << "s." << std::endl;
-}
+    double seconds = averageTime.count();
 
+    // Format to be more readable in case the time is REALLY fast.
+    // Using scientific notation here
+    if (seconds < 1e-3) {
+        std::cout << "Average time: " << seconds * 1e6 << " micro seconds." << std::endl;
+    }
+    else if (seconds < 1) {
+        std::cout << "Average time: " << seconds * 1e3 << "milliseconds" << std::endl;
+    }
+    else {
+        std::cout << "Average time: " << seconds << "s." << std::endl;
+    }
+}
 
 void CodeClock::begin() {
     startingTime = std::chrono::high_resolution_clock::now();
@@ -78,8 +91,6 @@ void CodeClock::begin() {
 
 void CodeClock::end() {
     endingTime = std::chrono::high_resolution_clock::now();
-    const std::chrono::duration<float> duration = startingTime - endingTime;
+    const std::chrono::duration<float> duration = endingTime - startingTime;
     durations.push_back(duration);
 }
-
-

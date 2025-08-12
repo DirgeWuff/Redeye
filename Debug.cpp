@@ -5,21 +5,39 @@
 // Note: A bunch of these functions have a bit of visual 'jitter' to them due to the
 // loss of precision from doing a static_cast from float to int.
 
+#define RAYGUI_IMPLEMENTATION
+
+#include <cassert>
+#include <iostream>
+#include <cstdint>
+#include "external_libs/Box2D/include/box2d.h"
+#include "external_libs/Raylib/include/raylib.h"
+#include "external_libs/Raylib/include/raygui.h"
 #include "Debug.h"
 #include "Utils.h"
 #include "Error.h"
-#include "box2d/box2d.h"
-#include "raylib.h"
-#include <cassert>
-#include <iostream>
+#include "Scene.h"
 
-constexpr Color DEBUG_BODY_COLOR{0, 0, 255, 255};
-constexpr Color DEBUG_COLLISION_COLOR{255, 0, 0, 255};
+bool g_debugWindowBoxActive = false;
+bool g_drawPlayerShapes = false;
+bool g_drawPlayerSensorStatus = false;
+bool g_drawPlayerPos = false;
+bool g_drawPlayerCenter = false;
+bool g_drawTerrainShapes = false;
+bool g_drawTerrainVerts = false;
+bool g_drawCameraCrosshair = false;
+bool g_drawCameraRect = false;
 
-void drawDebugBodyShapes(const Entity* targetEntity) {
+constexpr Color g_debugBodyColor{0, 0, 255, 255};
+constexpr Color g_debugCollisionColor{255, 0, 0, 255};
+constexpr Color g_debugVertColor{181, 2, 157, 255};
+
+void drawDebugBodyShapes(const std::shared_ptr<Entity>& targetEntity) {
+    if (!g_drawPlayerShapes) return;
+
     assert(b2Body_GetShapeCount(targetEntity->getBodyID()) != 0 && "Assertion failed. Body contains no shapes.");
 
-    const u_int8_t maxShapes = b2Body_GetShapeCount(targetEntity->getBodyID());
+    const uint8_t maxShapes = b2Body_GetShapeCount(targetEntity->getBodyID());
 
     b2ShapeId shapes[maxShapes];
     b2Body_GetShapes(targetEntity->getBodyID(), shapes, maxShapes);
@@ -47,14 +65,14 @@ void drawDebugBodyShapes(const Entity* targetEntity) {
                      metersToPixelsVec(tfdVerts[i]),
                       metersToPixelsVec(tfdVerts[0]),
                      1.0f,
-                     DEBUG_BODY_COLOR);
+                     g_debugBodyColor);
                     }
                     else {
                         DrawLineEx(
                          metersToPixelsVec(tfdVerts[i]),
                           metersToPixelsVec(tfdVerts[i + 1]),
                           1.0f,
-                          DEBUG_BODY_COLOR);
+                          g_debugBodyColor);
                     }
                 }
                 break;
@@ -77,10 +95,10 @@ void drawDebugBodyShapes(const Entity* targetEntity) {
                     tfedP1 - rad * normals
                 };
 
-                DrawLineEx(metersToPixelsVec(quads[0]), metersToPixelsVec(quads[1]), 0.5f, DEBUG_BODY_COLOR);
-                DrawLineEx(metersToPixelsVec(quads[1]), metersToPixelsVec(quads[2]), 0.5f, DEBUG_BODY_COLOR);
-                DrawLineEx(metersToPixelsVec(quads[2]), metersToPixelsVec(quads[3]), 0.5f, DEBUG_BODY_COLOR);
-                DrawLineEx(metersToPixelsVec(quads[3]), metersToPixelsVec(quads[0]), 0.5f, DEBUG_BODY_COLOR);
+                DrawLineEx(metersToPixelsVec(quads[0]), metersToPixelsVec(quads[1]), 0.5f, g_debugBodyColor);
+                DrawLineEx(metersToPixelsVec(quads[1]), metersToPixelsVec(quads[2]), 0.5f, g_debugBodyColor);
+                DrawLineEx(metersToPixelsVec(quads[2]), metersToPixelsVec(quads[3]), 0.5f, g_debugBodyColor);
+                DrawLineEx(metersToPixelsVec(quads[3]), metersToPixelsVec(quads[0]), 0.5f, g_debugBodyColor);
 
                 const float capRadius = atan2f(y, x) * RAD2DEG;
 
@@ -89,14 +107,14 @@ void drawDebugBodyShapes(const Entity* targetEntity) {
                      metersToPixels(rad),
                     capRadius - 90.0f,
                     capRadius + 90.0f,
-                    20, DEBUG_BODY_COLOR);
+                    20, g_debugBodyColor);
                 DrawCircleSectorLines(
                     metersToPixelsVec(tfedP1),
                     metersToPixels(rad),
                     capRadius + 90.0f,
                     capRadius - 90.0f + 360.0f,
                     20,
-                    DEBUG_BODY_COLOR);
+                    g_debugBodyColor);
                 break;
             }
             default: {
@@ -107,18 +125,22 @@ void drawDebugBodyShapes(const Entity* targetEntity) {
     }
 }
 
-void drawDebugBodyCenter(const Entity* targetEntity) {
+void drawDebugBodyCenter(const std::shared_ptr<Entity>& targetEntity) {
+    if (!g_drawPlayerCenter) return;
+
     const auto [x, y] = b2Body_GetPosition(targetEntity->getBodyID());
 
     DrawCircleLines(
         static_cast<int>(metersToPixels(x)),
         static_cast<int>(metersToPixels(y)),
         5.0f,
-        DEBUG_BODY_COLOR
+        g_debugBodyColor
     );
 }
 
 void drawDebugCameraCrosshair(const std::unique_ptr<SceneCamera>& camera) {
+    if (!g_drawCameraCrosshair) return;
+
     if (camera == nullptr) {
         logErr("camera == nullptr. Ln 123, Debug.cpp");
         return;
@@ -142,6 +164,8 @@ void drawDebugCameraCrosshair(const std::unique_ptr<SceneCamera>& camera) {
 }
 
 void drawDebugCameraRect(const std::unique_ptr<SceneCamera>& camera) {
+    if (!g_drawCameraRect) return;
+
     if (camera == nullptr) {
         logErr("camera == nullptr. Ln 146, Debug.cpp");
         return;
@@ -157,54 +181,39 @@ void drawDebugCameraRect(const std::unique_ptr<SceneCamera>& camera) {
             RED);
 }
 
-void drawDebugPlayerPosition(
-    const std::shared_ptr<Player>& player,
-    const std::unique_ptr<SceneCamera>& camera) {
-    if (player == nullptr || camera == nullptr) {
-        logErr("camera || player == nullptr. Ln 164, Debug.cpp");
-        return;
-    }
-
-    Vector2 transPosOne = GetScreenToWorld2D({10.0f, 10.0f}, *camera->getCameraPtr());
-    Vector2 transPosTwo = GetScreenToWorld2D({10.0f, 40.0f}, *camera->getCameraPtr());
+void drawDebugPlayerPosition(const std::shared_ptr<Player>& player) {
+    if (!g_drawPlayerPos) return;
 
     DrawText(
         TextFormat("Position X: %f", player->getPositionCornerPx().x),
-        static_cast<int>(transPosOne.x),
-        static_cast<int>(transPosOne.y),
+        10,
+        10,
         20,
         RED);
     DrawText(
         TextFormat("Position Y: %f", player->getPositionCornerPx().y),
-        static_cast<int>(transPosTwo.x),
-        static_cast<int>(transPosTwo.y),
+        10,
+        30,
         20,
         RED);
 }
 
-void drawDebugFootpawSensorStatus(
-    const std::shared_ptr<Player> &player,
-    const std::unique_ptr<SceneCamera> &camera) {
-    if (player == nullptr || camera == nullptr) {
-        logErr("camera || player == nullptr. Ln 189, Debug.cpp");
-        return;
-    }
-
-    Vector2 transPos = GetScreenToWorld2D({10.0f, 70.0f}, *camera->getCameraPtr());
+void drawDebugFootpawSensorStatus(const std::shared_ptr<Player>& player) {
+    if (!g_drawPlayerSensorStatus) return;
 
     if (player->getFootpawSensorStatus() == true) {
         DrawText(
             "Footpaw sensor in contact with object",
-            static_cast<int>(transPos.x),
-            static_cast<int>(transPos.y),
+            10,
+            g_drawPlayerPos ? 50 : 10,
             20,
             RED);
     }
     else {
         DrawText(
             "Footpaw sensor not in contact with object",
-            static_cast<int>(transPos.x),
-            static_cast<int>(transPos.y),
+            10,
+            g_drawPlayerPos ? 50 : 10,
             20,
             RED);
     }
@@ -212,7 +221,9 @@ void drawDebugFootpawSensorStatus(
 
 // Also probably very slow, but again, fuck it lol
 void drawDebugCollisionShapes(const std::unique_ptr<TiledMap> &map) {
-    collisionWorld_t shapes = map->getCollisionShapes();
+    if (!g_drawTerrainShapes) return;
+
+    const std::vector<CollisionObject> shapes = map->getCollisionShapes();
 
     for (const auto& shape : shapes) {
         const b2Vec2* points = shape.getObjectVerts();
@@ -229,7 +240,45 @@ void drawDebugCollisionShapes(const std::unique_ptr<TiledMap> &map) {
                 tfedVerts[i],
                 tfedVerts[i + 1],
                 1.0f,
-                DEBUG_COLLISION_COLOR);
+                g_debugCollisionColor);
         }
+    }
+}
+
+void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map) {
+    if (!g_drawTerrainVerts) return;
+
+    const std::vector<CollisionObject> shapes = map->getCollisionShapes();
+
+    for (const auto& shape : shapes) {
+        const b2Vec2* points = shape.getObjectVerts();
+
+        for (std::size_t i = 0; i < shape.getVertCount(); i++) {
+            Vector2 v = metersToPixelsVec(points[i]);
+
+            DrawCircleV(
+                v,
+                1.0f,
+                g_debugVertColor);
+        }
+    }
+}
+
+// This might be the most disgusting code in this entire thing, but it fucking works
+void drawControlsWindow() {
+        g_debugWindowBoxActive = IsKeyDown(KEY_M);
+
+    if (g_debugWindowBoxActive) {
+
+        g_debugWindowBoxActive = !GuiWindowBox(Rectangle{ 8, 496, 240, 280 }, "Debug drawing controls");
+
+        GuiCheckBox((Rectangle){ 16, 528, 12, 12 }, "Draw player shapes", &g_drawPlayerShapes);
+        GuiCheckBox(Rectangle{ 16, 552, 12, 12 }, "Draw player sensor status", &g_drawPlayerSensorStatus);
+        GuiCheckBox((Rectangle){ 16, 576, 12, 12 }, "Draw player position", &g_drawPlayerPos);
+        GuiCheckBox(Rectangle{16, 600, 12, 12}, "Draw player body center", &g_drawPlayerCenter);
+        GuiCheckBox((Rectangle){ 16, 624, 12, 12 }, "Draw terrain shapes", &g_drawTerrainShapes);
+        GuiCheckBox((Rectangle){ 16, 648, 12, 12 }, "Draw terrain vertices", &g_drawTerrainVerts);
+        GuiCheckBox((Rectangle){ 16, 672, 12, 12 }, "Draw camera center crosshair", &g_drawCameraCrosshair);
+        GuiCheckBox((Rectangle){ 16, 696, 12, 12}, "Draw camera edge rectangle", &g_drawCameraRect);
     }
 }

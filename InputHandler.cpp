@@ -2,8 +2,8 @@
 // Created by DirgeWuff on 5/13/25.
 //
 
+#include "external_libs/Raylib/include/raylib.h"
 #include "InputHandler.h"
-#include "raylib.h"
 
 InputHandler::InputHandler() = default;
 

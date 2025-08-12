@@ -4,8 +4,9 @@
 
 #ifndef ERROR_H
 #define ERROR_H
-
-#endif //ERROR_H
+#include <string>
 
 void getTime();
 void logErr(std::string&& errorMessage);
+
+#endif //ERROR_H

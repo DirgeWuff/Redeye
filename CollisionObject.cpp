@@ -2,7 +2,8 @@
 // Created by DirgeWuff on 7/15/25.
 //
 
-#include <box2d/box2d.h>
+#include "external_libs/Box2D/include/types.h"
+#include "external_libs/Box2d/include/box2d.h"
 #include "CollisionObject.h"
 
 #include <iostream>

@@ -5,7 +5,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <raylib.h>
+#include "external_libs/Raylib/include/raylib.h"
 #include "CommandListener.h"
 #include "Entity.h"
 
@@ -15,10 +15,11 @@ class Player final : public Entity, public CommandListener {
     const uint8_t m_numFrames;          // Number of sprites in sheet width-wise
     uint8_t m_frameIndex;               // Currently selected sprite
     const uint8_t m_frameDelayAmount;   // Duration to delay next frame
-    uint8_t m_frameDelayClock;              // Clock counting up to amount
+    uint8_t m_frameDelayClock;          // Clock counting up to amount
     bool m_moving;                      // Whether or not the player is moving
     bool m_onGround;                    // Whether the player is on the ground or not
-    uint8_t m_lastDirection;                // Last direction the player was moving for animation purposes
+    bool m_dead;                        // Whether the player is dead or not
+    uint8_t m_lastDirection;            // Last direction the player was moving for animation purposes
     b2Polygon m_footpawSensorBox{};     // Footpaw sensor box polygon
     b2ShapeDef m_footpawSensorShape{};  // Footpaw sensor box shape
     b2ShapeId m_footpawSensorId{};      // Footpaw sensor box shape ID
@@ -37,8 +38,9 @@ public:
     void moveLeft() override;
     void jump() override;
     void moveNowhere() override;
-    b2ShapeId getFootpawSenorId() const;
-    bool getFootpawSensorStatus() const;
+    void murder();
+    [[nodiscard]] b2ShapeId getFootpawSenorId() const;
+    [[nodiscard]] bool getFootpawSensorStatus() const;
     void setFootpawStatus(bool status);
 };
 

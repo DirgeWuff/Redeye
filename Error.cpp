@@ -5,6 +5,7 @@
 // Some basic error handling/logging utils
 
 #include <fstream>
+#include <filesystem>
 #include <chrono>
 #include <sstream>
 #include "raylib.h"

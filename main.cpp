@@ -1,17 +1,17 @@
 #include "raylib.h"
 #include "Scene.h"
 
-constexpr uint16_t WINDOW_WIDTH = 1500;
-constexpr uint16_t WINDOW_HEIGHT = 800;
+constexpr uint16_t g_windowWidth = 1500;
+constexpr uint16_t g_windowHeight = 800;
 
 int main() {
 
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Redeye");
+    InitWindow(g_windowWidth, g_windowHeight, "Redeye");
     SetTargetFPS(60);
 
     Scene testScene = Scene(
         "../assets/PlayerWalk.png",
-        "../assets/Map data/Redeye Test Lvl.tmj");
+        "../assets/Map data/Version 2/TestLvl1.tmj");
 
     while (!WindowShouldClose()) {
         // Update

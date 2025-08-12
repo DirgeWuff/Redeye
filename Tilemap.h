@@ -5,18 +5,16 @@
 #ifndef TILEMAP_H
 #define TILEMAP_H
 
-#include "tileson.hpp"
-#include "raylib.h"
-#include "box2d/types.h"
-#include "Camera.h"
 #include <vector>
 #include <map>
+#include "external_libs/Tson/tileson.hpp"
+#include "external_libs/Raylib/include/raylib.h"
 #include "CollisionObject.h"
+#include "EventCollider.h"
 
 class SceneCamera;
 
 // Just for extra clarity
-typedef std::vector<CollisionObject> collisionWorld_t;
 
 struct TileData {
     Vector2 position;
@@ -24,11 +22,11 @@ struct TileData {
     const Texture2D* texture;
 };
 
-struct TilesonData {
+struct RenderData {
     std::map<std::string, Texture> textures;
     std::unordered_map<const tson::Tileset*, Texture2D*> texturePtrs;
     std::unordered_map<const tson::Layer*, std::vector<TileData>> layerRenderData;
-    std::shared_ptr<tson::Map> map;
+    std::shared_ptr<tson::Map> tsonMapPtr;
 };
 
 struct MapData {
@@ -38,8 +36,9 @@ struct MapData {
     int mapHeight;
 
     fs::path baseDir;
-    std::shared_ptr<TilesonData> data;
-    collisionWorld_t collisionObjects;
+    std::shared_ptr<RenderData> renderDataPtr;
+    std::vector<CollisionObject> collisionObjects;
+    std::vector<EventCollider> eventColliders;
 };
 
 class TiledMap {
@@ -59,7 +58,7 @@ public:
     float getMapHeight() const;
     float getTileWidth() const;
     float getTileHeight() const;
-    collisionWorld_t getCollisionShapes() const;
+    const std::vector<CollisionObject>& getCollisionShapes() const;
 };
 
 #endif //TILEMAP_H

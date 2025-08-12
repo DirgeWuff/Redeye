@@ -2,9 +2,9 @@
 // Created by DirgeWuff on 7/8/25.
 //
 
+#include "external_libs/Box2D/include/box2d.h"
 #include "BoxBody.h"
 #include "Utils.h"
-#include "box2d/box2d.h"
 
 // Entirely possible this should be made into a pure virtual class or removed all together.
 // Don't really see a need for this object in the final game.

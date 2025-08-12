@@ -2,15 +2,17 @@
 // Created by DirgeWuff on 5/26/25.
 //
 
+#include <memory>
+#include "external_libs/Raylib/include/raylib.h"
+#include "external_libs/Raylib/include/raymath.h"
 #include "Camera.h"
-#include <raymath.h>
 #include "Error.h"
 
-SceneCamera::SceneCamera(const TiledMap& map) {
+SceneCamera::SceneCamera(const TiledMap& map, const float zoomLevel) {
     try {
         m_camera = std::make_shared<Camera2D>();
         m_camera->offset = {1500.0f / 2.0f, 800.0f / 2.0f}; // Hard coded value, no bueno, fix later
-        m_camera->zoom = 1.50f;
+        m_camera->zoom = zoomLevel;
         m_camera->rotation = 0.0f;
 
         m_cameraRect = {
@@ -118,10 +120,11 @@ Vector2 SceneCamera::getCameraCenter() const {
     return m_cameraCenter;
 }
 
+// Might wanna change this to use pointers later TBH, since then there can be error handling...
 Vector2 SceneCamera::getCameraTarget() const {
     if (m_camera == nullptr) {
         logErr("m_camera == nullptr. Ln 125, Camera.cpp");
-        return Vector2{NULL, NULL};
+        return Vector2{0.0f, 0.0f};
     }
 
     return m_camera->target;

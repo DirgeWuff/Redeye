@@ -5,10 +5,10 @@
 #ifndef B2UTILS_H
 #define B2UTILS_H
 
-#include "tileson.hpp"
-#include <box2d/types.h>
-#include <raylib.h>
 #include <chrono>
+#include "external_libs/Tson/tileson.hpp"
+#include "external_libs/Box2D/include/box2d.h"
+#include "external_libs/Raylib/include/raylib.h"
 
 bool isShapeIdEqual(const b2ShapeId& idOne, const b2ShapeId& idTwo);    // Check if 2 b2ShapeId's are equal
 
@@ -21,14 +21,13 @@ Vector2 toRayVec2(const tson::Vector2f& vec);                           // Conve
 b2Vec2 toB2Vec2(const tson::Vector2i& vec);                             // Convert tson::Vector2i to b2Vec2
 Rectangle toRayRect(const tson::Rect& rect);                            // Convert tson::Rect to Rectangle
 
-
 tson::Vector2i v2iAdd(
     const tson::Vector2i& vecOne,
     const tson::Vector2i& vecTwo);                                      // Perform addition with tson::Vector2i
 
 class CodeClock {
-    std::chrono::time_point<std::chrono::steady_clock> startingTime{};
-    std::chrono::time_point<std::chrono::steady_clock> endingTime{};
+    std::chrono::time_point<std::chrono::high_resolution_clock> startingTime{};
+    std::chrono::time_point<std::chrono::high_resolution_clock> endingTime{};
     std::vector<std::chrono::duration<float>> durations{};
 
 public:
@@ -37,4 +36,5 @@ public:
     void begin();
     void end();
 };
+
 #endif //B2UTILS_H

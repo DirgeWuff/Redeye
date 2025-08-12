@@ -6,7 +6,6 @@
 #define ENTITY_H
 
 #include "BoxBody.h"
-#include "box2d/types.h"
 
 // Base class from which player/enemy bodies are created from in Box2D.
 // May want to convert this to have most of the logic contained within the player class later
@@ -20,7 +19,7 @@ public:
         float centerY,
         float fullWidth,
         float fullHeight,
-        bodyConfig config,
+        const bodyConfig& config,
         b2WorldId world);
 };
 

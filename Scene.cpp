@@ -2,10 +2,12 @@
 // Created by DirgeWuff on 5/14/25.
 //
 
-#include <box2d/box2d.h>
+#include <cstdint>
+#include "external_libs/Raylib/include/raylib.h"
 #include "Scene.h"
 #include "Error.h"
 #include "Debug.h"
+#include "EventCollider.h"
 #include "Utils.h"
 
 constexpr float WORLD_STEP = 1.0f / 60.0f;
@@ -23,15 +25,16 @@ m_playerInput(InputHandler())
 
     try {
         m_playerCharacter = std::make_shared<Player>(
-            200.0f,
-            600.0f,
+            400.0f,
+            300.0f,
             m_worldId,
             playerSpritePath);
 
         m_map = std::make_unique<TiledMap>(mapFilePath.data(), m_worldId);
-        m_camera = std::make_unique<SceneCamera>(*m_map);
+        m_camera = std::make_unique<SceneCamera>(*m_map, 2.0f);
+        m_collisionEventDispatcher = std::make_unique<EventDispatcher<playerContactEvent>>();
     }
-    catch (std::bad_alloc) {
+    catch (std::bad_alloc) { // NEVER EVER had this throw but worth having here
         logErr(
             "Constructor init failed, std::bad_alloc thrown. Ln 44, Scene.cpp");
         return;
@@ -42,6 +45,28 @@ m_playerInput(InputHandler())
         return;
     }
     m_camera->setTarget(m_playerCharacter);
+
+    m_collisionEventDispatcher->subscribe(
+        "pawbs",
+        std::move([this](const playerContactEvent e) {
+            m_playerCharacter->setFootpawStatus(e.contactBegan);
+        }) );
+
+    m_collisionEventDispatcher->subscribe(
+        "MurderBox",
+        std::move([this](const playerContactEvent& e) {
+            if (e.contactBegan) {
+                m_playerCharacter->murder();
+            }
+        }));
+
+    m_collisionEventDispatcher->subscribe(
+        "GenericCollider",
+        std::move([](const playerContactEvent& e) {
+            if (e.contactBegan) {
+                std::cout << "Generic collider struck" << std::endl;
+            }
+        }));
 }
 
 Scene::~Scene() = default;
@@ -50,16 +75,30 @@ void Scene::handleSensorEvents() const {
     const b2SensorEvents sensorContactEvents = b2World_GetSensorEvents(m_worldId);
 
     for (std::size_t i = 0; i < sensorContactEvents.beginCount; i++) {
-        const b2SensorBeginTouchEvent& event = sensorContactEvents.beginEvents[i];
-        if (isShapeIdEqual(event.sensorShapeId, m_playerCharacter->getFootpawSenorId())) {
-            m_playerCharacter->setFootpawStatus(true);
+        const auto&[sensorShapeId, visitorShapeId] = sensorContactEvents.beginEvents[i];
+        auto* userData = static_cast<sensorInfo*>(b2Shape_GetUserData(sensorShapeId));
+        if (userData) {
+            m_collisionEventDispatcher->dispatch(
+                userData->typeId,
+                playerContactEvent{true, sensorShapeId});
+        }
+        else {
+            std::cerr << "User data blank!" << std::endl;
+            break;
         }
     }
 
     for (std::size_t i = 0; i < sensorContactEvents.endCount; i++) {
-        const b2SensorEndTouchEvent& event = sensorContactEvents.endEvents[i];
-        if (isShapeIdEqual(event.sensorShapeId, m_playerCharacter->getFootpawSenorId())) {
-            m_playerCharacter->setFootpawStatus(false);
+        const auto&[sensorShapeId, visitorShapeId] = sensorContactEvents.endEvents[i];
+        auto* userData = static_cast<sensorInfo*>(b2Shape_GetUserData(sensorShapeId));
+        if (userData) {
+            m_collisionEventDispatcher->dispatch(
+                userData->typeId,
+                playerContactEvent{false, sensorShapeId});
+        }
+        else {
+            std::cerr << "User data blank!" << std::endl;
+            break;
         }
     }
 }
@@ -83,25 +122,21 @@ void Scene::drawScene() const {
 
     // A lot of this debugging stuff is in here because it's the only place
     // an instance of Player and SceneCamera exist together
-    #ifdef DEBUG_DRAW_CAMERA_CROSSHAIR
+    #ifdef DEBUG
+        drawDebugBodyShapes(m_playerCharacter);
+        drawDebugCollisionShapes(m_map);
+        drawDebugBodyCenter(m_playerCharacter);
+        drawDebugCollisionVerts(m_map);
         drawDebugCameraCrosshair(m_camera);
-    #endif
-
-    #ifdef DEBUG_DRAW_PLAYER_POSITION
-        drawDebugPlayerPosition(m_playerCharacter, m_camera);
-    #endif
-
-    #ifdef DEBUG_DRAW_CAMERA_RECT
         drawDebugCameraRect(m_camera);
     #endif
 
-    #ifdef DEBUG_DRAW_PLAYER_SENSOR_STATUS
-        drawDebugFootpawSensorStatus(m_playerCharacter, m_camera);
-    #endif
-
-    #ifdef DEBUG_DRAW_TERRAIN_SHAPES
-        drawDebugCollisionShapes(m_map);
-    #endif
-
     m_camera->cameraEnd();
+
+    #ifdef DEBUG
+        drawControlsWindow();
+        drawDebugFootpawSensorStatus(m_playerCharacter);
+        drawDebugPlayerPosition(m_playerCharacter);
+    #endif
+
 }

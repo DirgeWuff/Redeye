@@ -6,7 +6,7 @@
 #define COLLISIONOBJECT_H
 
 #include <vector>
-#include "box2d/types.h"
+#include "external_libs/Box2D/include/types.h"
 
 class CollisionObject {
     b2Vec2* m_verts; // This makes everything entirely too complex...

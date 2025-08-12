@@ -1,37 +1,12 @@
-cmake_minimum_required(VERSION 3.11) # FetchContent is available in 3.11+
+cmake_minimum_required(VERSION 3.30)
 project(Redeye)
 
-set(CMAKE_CXX_STANDARD 20)
+include_directories(external_libs/Box2D/include)
+include_directories(external_libs/Raylib/include)
 
-# Most of the following ripped from the Raylib default CMakeLists
+set(CMAKE_CXX_STANDARD 23)
 
-# Generate compile_commands.json
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# Dependencies
-set(RAYLIB_VERSION 5.5)
-find_package(raylib ${RAYLIB_VERSION} QUIET) # QUIET or REQUIRED
-find_package(box2d CONFIG REQUIRED)
-if (NOT raylib_FOUND) # If there's none, fetch and build raylib
-    include(FetchContent)
-    FetchContent_Declare(
-            raylib
-            DOWNLOAD_EXTRACT_TIMESTAMP OFF
-            URL https://github.com/raysan5/raylib/archive/refs/tags/${RAYLIB_VERSION}.tar.gz
-    )
-    FetchContent_GetProperties(raylib)
-    if (NOT raylib_POPULATED) # Have we downloaded raylib yet?
-        set(FETCHCONTENT_QUIET NO)
-        FetchContent_MakeAvailable(raylib)
-        set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE) # don't build the supplied examples
-    endif()
-endif()
-
-# Our Project
-
-include_directories(${PROJECT_SOURCE_DIR}/external_libs)
-
-add_executable(${PROJECT_NAME} main.cpp
+add_executable(Redeye main.cpp
         Player.cpp
         Player.h
         CommandListener.h
@@ -55,19 +30,20 @@ add_executable(${PROJECT_NAME} main.cpp
         BoxBody.h
         CollisionObject.cpp
         CollisionObject.h
+        EventDispatcher.h
+        EventCollider.cpp
+        EventCollider.h
 )
 
-#set(raylib_VERBOSE 1)
-target_link_libraries(${PROJECT_NAME} raylib)
-target_link_libraries(${PROJECT_NAME} box2d::box2d)
-find_library(tileson
-NAMES tson tileson
-HINTS ${PROJECT_SOURCE_DIR}/external_libs
-NO_DEFAULT_PATH)
+target_link_libraries(Redeye PRIVATE ${CMAKE_SOURCE_DIR}/external_libs/Box2D/lib/libbox2d.a)
+target_link_libraries(Redeye PRIVATE
+        ${CMAKE_SOURCE_DIR}/external_libs/Raylib/lib/libraylib.a
+        -lopengl32
+        -lgdi32
+        -lwinmm
+)
 
-# Checks if OSX and links appropriate frameworks (Only required on MacOS)
-if (APPLE)
-    target_link_libraries(${PROJECT_NAME} "-framework IOKit")
-    target_link_libraries(${PROJECT_NAME} "-framework Cocoa")
-    target_link_libraries(${PROJECT_NAME} "-framework OpenGL")
-endif()
+find_library(tileson
+        NAMES tson tileson
+        HINTS ${PROJECT_SOURCE_DIR}/external_libs
+        NO_DEFAULT_PATH)
