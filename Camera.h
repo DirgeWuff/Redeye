@@ -26,12 +26,12 @@ public:
    void update(const std::shared_ptr<Entity>& targetEntity);
    void cameraBegin() const;
    void cameraEnd() const;
-   Rectangle getCameraRect() const;
-   float getCameraRectWidth() const;
-   float getCameraRectHeight() const;
-   Vector2 getCameraCenter() const;
-   Vector2 getCameraTarget() const;
-   std::shared_ptr<Camera2D> getCameraPtr() const;
+   [[nodiscard]] Rectangle getCameraRect() const noexcept;
+   [[nodiscard]] float getCameraRectWidth() const noexcept;
+   [[nodiscard]] float getCameraRectHeight() const noexcept;
+   [[nodiscard]] Vector2 getCameraCenter() const noexcept;
+   [[nodiscard]] Vector2 getCameraTarget() const noexcept;
+   [[nodiscard]] std::shared_ptr<Camera2D> getCameraPtr() const noexcept;
 };
 
 #endif //CAMERA_H

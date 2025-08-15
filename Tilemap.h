@@ -13,8 +13,7 @@
 #include "EventCollider.h"
 
 class SceneCamera;
-
-// Just for extra clarity
+class EventCollider;
 
 struct TileData {
     Vector2 position;
@@ -45,7 +44,7 @@ class TiledMap {
     MapData mapData;
 public:
     TiledMap();
-    TiledMap(std::string&& filepath, b2WorldId world);
+    TiledMap(std::string&& filepath, b2WorldId world); // Consider passing filepath by value and using std::move
     ~TiledMap();
 
     void draw(
@@ -54,11 +53,11 @@ public:
     Color color
     ) const;
 
-    float getMapWidth() const;
-    float getMapHeight() const;
-    float getTileWidth() const;
-    float getTileHeight() const;
-    const std::vector<CollisionObject>& getCollisionShapes() const;
+    [[nodiscard]] float getMapWidth() const noexcept;
+    [[nodiscard]] float getMapHeight() const noexcept;
+    [[nodiscard]] float getTileWidth() const noexcept;
+    [[nodiscard]] float getTileHeight() const noexcept;
+    [[nodiscard]] const std::vector<CollisionObject>& getCollisionShapes() const noexcept;
 };
 
 #endif //TILEMAP_H

@@ -103,25 +103,25 @@ void SceneCamera::cameraEnd() const {
     EndMode2D();
 }
 
-Rectangle SceneCamera::getCameraRect() const {
+[[nodiscard]] Rectangle SceneCamera::getCameraRect() const noexcept {
     return m_cameraRect;
 }
 
-float SceneCamera::getCameraRectWidth() const {
+[[nodiscard]] float SceneCamera::getCameraRectWidth() const noexcept {
     return m_cameraRect.width;
 }
 
-float SceneCamera::getCameraRectHeight() const {
+[[nodiscard]] float SceneCamera::getCameraRectHeight() const noexcept {
     return m_cameraRect.height;
 }
 
 // NOTE: Changed this recently, if shit starts breaking, look here!
-Vector2 SceneCamera::getCameraCenter() const {
+[[nodiscard]] Vector2 SceneCamera::getCameraCenter() const noexcept {
     return m_cameraCenter;
 }
 
 // Might wanna change this to use pointers later TBH, since then there can be error handling...
-Vector2 SceneCamera::getCameraTarget() const {
+[[nodiscard]] Vector2 SceneCamera::getCameraTarget() const noexcept {
     if (m_camera == nullptr) {
         logErr("m_camera == nullptr. Ln 125, Camera.cpp");
         return Vector2{0.0f, 0.0f};
@@ -130,6 +130,6 @@ Vector2 SceneCamera::getCameraTarget() const {
     return m_camera->target;
 }
 
-std::shared_ptr<Camera2D> SceneCamera::getCameraPtr() const {
+[[nodiscard]] std::shared_ptr<Camera2D> SceneCamera::getCameraPtr() const noexcept {
     return m_camera;
 }

@@ -25,8 +25,8 @@ m_playerInput(InputHandler())
 
     try {
         m_playerCharacter = std::make_shared<Player>(
-            400.0f,
-            300.0f,
+            200.0f,
+            390.0f,
             m_worldId,
             playerSpritePath);
 
@@ -48,17 +48,22 @@ m_playerInput(InputHandler())
 
     m_collisionEventDispatcher->subscribe(
         "pawbs",
-        std::move([this](const playerContactEvent e) {
-            m_playerCharacter->setFootpawStatus(e.contactBegan);
-        }) );
+        [this](const playerContactEvent e) {
+            if (e.contactBegan) {
+                m_playerCharacter->addContactEvent();
+            }
+            else {
+                m_playerCharacter->removeContactEvent();
+            }
+        });
 
     m_collisionEventDispatcher->subscribe(
         "MurderBox",
-        std::move([this](const playerContactEvent& e) {
+        [this](const playerContactEvent& e) {
             if (e.contactBegan) {
-                m_playerCharacter->murder();
+                m_playerCharacter->murder(m_camera);
             }
-        }));
+        });
 
     m_collisionEventDispatcher->subscribe(
         "GenericCollider",
@@ -83,7 +88,7 @@ void Scene::handleSensorEvents() const {
                 playerContactEvent{true, sensorShapeId});
         }
         else {
-            std::cerr << "User data blank!" << std::endl;
+            logErr("Unhandled b2BeginContactEvent. sensorShapeId.userData bank.");
             break;
         }
     }
@@ -97,7 +102,7 @@ void Scene::handleSensorEvents() const {
                 playerContactEvent{false, sensorShapeId});
         }
         else {
-            std::cerr << "User data blank!" << std::endl;
+            logErr("Unhandled b2EndContactEvent. senorShapeId.userData blank.");
             break;
         }
     }

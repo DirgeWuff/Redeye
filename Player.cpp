@@ -9,6 +9,7 @@
 #include "Utils.h"
 #include "Debug.h"
 #include "EventCollider.h"
+#include "UI.h"
 
 enum directions {RIGHT, LEFT};
 
@@ -23,8 +24,9 @@ m_frameDelayAmount(10),
 m_frameDelayClock(0),
 m_moving(false),
 m_onGround(true),
-m_lastDirection(RIGHT),
-m_dead(false)
+m_activeGroundContacts(0),
+m_dead(false),
+m_lastDirection(RIGHT)
 {
     // Raylib/general stuff
     m_walkSprites = LoadTexture(spritePath.c_str());
@@ -47,6 +49,8 @@ m_dead(false)
     m_bodyDef.fixedRotation = true;
     m_bodyDef.linearDamping = 8.0f;
     m_body = b2CreateBody(world, &m_bodyDef);
+
+    m_currentCheckpoint.centerPosition = m_centerPosition;
 
     const b2Capsule boundingCapsule = {
         pixelsToMetersVec({Vector2{0.0f, -20.0f}}),
@@ -76,7 +80,6 @@ m_dead(false)
     ud = nullptr;
     delete ud;
 
-
     m_footpawSensorId = b2CreatePolygonShape(
         m_body,
         &m_footpawSensorShape,
@@ -94,6 +97,12 @@ void Player::update() {
         metersToPixels(m_centerPosition.x) - m_sizePx.x / 2,
         metersToPixels(m_centerPosition.y) - m_sizePx.y / 2
     };
+    if (m_activeGroundContacts > 0) {
+        m_onGround = true;
+    }
+    else {
+        m_onGround = false;
+    }
 }
 
 void Player::draw() const {
@@ -165,21 +174,87 @@ void Player::moveNowhere() {
     }
 }
 
-void Player::murder() {
-    // For testing, put real code here later
-    std::cout << "Player dead AF" << std::endl;
+void Player::murder(const std::unique_ptr<SceneCamera>& camera) {
+    assert(camera != nullptr && "Camera == nullptr. Ln 170, Player.cpp");
+
+    unsigned char alpha = 0;
+    m_dead = true;
+    const Rectangle rect = camera->getCameraRect();
+    Texture2D deathText = LoadTexture("../assets/UI and graphics/Death screen text.png");
+    Vector2 deathTextPos = GetScreenToWorld2D(
+        {
+            static_cast<float>(1000 / 2 - deathText.width / 2),
+            static_cast<float>(400 / 2 - deathText.height / 2)},
+            *camera->getCameraPtr());
+
+    auto loadCheckpointBtn = RectButton(
+        625.0f,
+        500.0f,
+        150.0f,
+        30.0f,
+        "Continue from last checkpoint",
+        camera);
+    loadCheckpointBtn.setClickEvent([this, &alpha, &rect, &camera] {
+        alpha = 0;
+        m_dead = false;
+
+        while (alpha < 255) {
+            ClearBackground({105, 7, 0, alpha});
+            BeginDrawing();
+
+            camera->cameraBegin();
+            DrawRectangleRec(rect, {10, 1, 0, alpha});
+            camera->cameraEnd();
+
+            EndDrawing();
+
+            alpha += 3;
+        }
+
+        reform();
+    });
+    loadCheckpointBtn.setColor(
+        {9, 59,36, 255},
+        {10,92,54, 255});
+
+    // NOTE: Static code analyzers will say m_dead is always true, this is incorrect.
+    while (m_dead == true && !WindowShouldClose()) {
+        BeginDrawing();
+
+        ClearBackground(BLACK);
+
+        camera->cameraBegin();
+
+        DrawRectangleRec(rect, {105, 7, 0, alpha});
+        loadCheckpointBtn.draw(camera);
+        DrawTextureEx(deathText, deathTextPos, 0.0f, 2.0f, BLACK);
+
+        camera->cameraEnd();
+
+        EndDrawing();
+        if (alpha < 255) alpha += 3;
+    }
 }
 
-b2ShapeId Player::getFootpawSenorId() const {
+void Player::reform() const noexcept {
+    b2Body_SetTransform(
+       m_body,
+       m_currentCheckpoint.centerPosition,
+       b2MakeRot(0.0f));
+}
+
+[[nodiscard]] b2ShapeId Player::getFootpawSenorId() const noexcept {
     return m_footpawSensorId;
 }
 
-bool Player::getFootpawSensorStatus() const {
+[[nodiscard]] bool Player::getFootpawSensorStatus() const noexcept { // May be able to depreccate
     return m_onGround;
 }
 
-void Player::setFootpawStatus(const bool status) {
-    if (m_onGround != status) {
-        m_onGround = status;
-    }
+void Player::addContactEvent() noexcept {
+    m_activeGroundContacts++;
+}
+
+void Player::removeContactEvent() noexcept {
+    m_activeGroundContacts--;
 }

@@ -33,6 +33,8 @@ add_executable(Redeye main.cpp
         EventDispatcher.h
         EventCollider.cpp
         EventCollider.h
+        UI.cpp
+        UI.h
 )
 
 target_link_libraries(Redeye PRIVATE ${CMAKE_SOURCE_DIR}/external_libs/Box2D/lib/libbox2d.a)

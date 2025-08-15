@@ -232,22 +232,22 @@ void TiledMap::draw(
     }
 }
 
-float TiledMap::getMapWidth() const {
+[[nodiscard]] float TiledMap::getMapWidth() const noexcept {
     return static_cast<float>(mapData.mapWidth);
 }
 
-float TiledMap::getMapHeight() const {
+[[nodiscard]] float TiledMap::getMapHeight() const noexcept {
    return static_cast<float>(mapData.mapHeight);
 }
 
-float TiledMap::getTileWidth() const {
+[[nodiscard]] float TiledMap::getTileWidth() const noexcept {
     return static_cast<float>(mapData.tileWidth);
 }
 
-float TiledMap::getTileHeight() const {
+[[nodiscard]] float TiledMap::getTileHeight() const noexcept {
     return static_cast<float>(mapData.tileHeight);
 }
 
-const std::vector<CollisionObject>& TiledMap::getCollisionShapes() const {
+[[nodiscard]] const std::vector<CollisionObject>& TiledMap::getCollisionShapes() const noexcept {
     return mapData.collisionObjects;
 }

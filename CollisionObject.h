@@ -26,8 +26,8 @@ public:
 
     // Doing this the old-fashioned way because clang 14.x doesn't support std::span
     // Consider changing that later if compiler changes
-    b2Vec2* getObjectVerts() const;
-    std::size_t getVertCount() const;
+    [[nodiscard]] b2Vec2* getObjectVerts() const noexcept;
+    [[nodiscard]] std::size_t getVertCount() const noexcept;
 };
 
 #endif //COLLISIONOBJECT_H

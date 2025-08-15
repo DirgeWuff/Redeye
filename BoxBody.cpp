@@ -50,22 +50,22 @@ void BoxBody::draw() const {
             RED);
 }
 
-b2Vec2 BoxBody::getSizeMeters() const {
+[[nodiscard]] b2Vec2 BoxBody::getSizeMeters() const noexcept {
     return m_sizeMeters;
 }
 
-Vector2 BoxBody::getSizePx() const {
+[[nodiscard]] Vector2 BoxBody::getSizePx() const noexcept {
     return m_sizePx;
 }
 
-b2Vec2 BoxBody::getPositionCenterMeters() const {
+[[nodiscard]] b2Vec2 BoxBody::getPositionCenterMeters() const noexcept {
     return m_centerPosition;
 }
 
-Vector2 BoxBody::getPositionCornerPx() const {
+[[nodiscard]] Vector2 BoxBody::getPositionCornerPx() const noexcept {
     return m_cornerPosition;
 }
 
-b2BodyId BoxBody::getBodyID() const {
+[[nodiscard]] b2BodyId BoxBody::getBodyID() const noexcept {
     return m_body;
 }

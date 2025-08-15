@@ -43,11 +43,11 @@ public:
 
     virtual void update();
     virtual void draw() const;
-    b2Vec2 getSizeMeters() const;
-    Vector2 getSizePx() const;
-    b2Vec2 getPositionCenterMeters() const;
-    Vector2 getPositionCornerPx() const;
-    b2BodyId getBodyID() const;
+    [[nodiscard]] b2Vec2 getSizeMeters() const noexcept;
+    [[nodiscard]] Vector2 getSizePx() const noexcept;
+    [[nodiscard]] b2Vec2 getPositionCenterMeters() const noexcept;
+    [[nodiscard]] Vector2 getPositionCornerPx() const noexcept;
+    [[nodiscard]] b2BodyId getBodyID() const noexcept;
 };
 
 

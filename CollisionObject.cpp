@@ -80,8 +80,8 @@ CollisionObject& CollisionObject::operator=(const CollisionObject& other) {
         m_chainDef.materialCount = 1;
         m_chainDef.isLoop = false;
         m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
-
     }
+
     return *this;
 }
 
@@ -89,11 +89,11 @@ CollisionObject::~CollisionObject() {
     delete[] m_verts;
 }
 
-b2Vec2* CollisionObject::getObjectVerts() const {
+[[nodiscard]] b2Vec2* CollisionObject::getObjectVerts() const noexcept {
     return m_verts;
 }
 
-std::size_t CollisionObject::getVertCount() const {
+[[nodiscard]] std::size_t CollisionObject::getVertCount() const noexcept {
     return m_numVerts;
 }
 
