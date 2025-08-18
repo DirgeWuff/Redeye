@@ -6,9 +6,9 @@
 #define B2UTILS_H
 
 #include <chrono>
+#include "box2d/box2d.h"
+#include "raylib.h"
 #include "../external_libs/Tson/tileson.hpp"
-#include "../external_libs/Box2D/include/box2d.h"
-#include "../external_libs/Raylib/include/raylib.h"
 
 bool isShapeIdEqual(const b2ShapeId& idOne, const b2ShapeId& idTwo);    // Check if 2 b2ShapeId's are equal
 
@@ -25,6 +25,7 @@ tson::Vector2i v2iAdd(
     const tson::Vector2i& vecOne,
     const tson::Vector2i& vecTwo);                                      // Perform addition with tson::Vector2i
 
+// Code timer class. Can be used to track and display the time taken by a function call or other operation.
 class CodeClock {
     std::chrono::time_point<std::chrono::high_resolution_clock> startingTime{};
     std::chrono::time_point<std::chrono::high_resolution_clock> endingTime{};
@@ -33,8 +34,8 @@ class CodeClock {
 public:
     CodeClock() = default;
     ~CodeClock();
-    void begin();
-    void end();
+    void begin(); // Start the CodeClock.
+    void end();   // Stop the CodeClock and print the average time for the operation.
 };
 
 #endif //B2UTILS_H

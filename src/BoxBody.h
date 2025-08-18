@@ -7,9 +7,10 @@
 #ifndef BOXBODY_H
 #define BOXBODY_H
 
-#include "external_libs/Raylib/include/raylib.h"
-#include "external_libs/Box2D/include/types.h"
+#include "raylib.h"
+#include "box2d/types.h"
 
+// For use in configuring custom bodies of this type...
 struct bodyConfig {
     b2BodyType bodyType;
     const bool rotationEnabled;
@@ -21,13 +22,13 @@ struct bodyConfig {
 
 class BoxBody {
 protected:
-    b2Vec2 m_sizeMeters{};
-    Vector2 m_sizePx{};
-    b2Vec2 m_centerPosition{};
-    Vector2 m_cornerPosition{};
-    b2BodyDef m_bodyDef{};
-    b2BodyId m_body{};
-    b2ShapeDef m_shapeDef{};
+    b2Vec2 m_sizeMeters{};          // Body size in meters
+    Vector2 m_sizePx{};             // Body size in pixels
+    b2Vec2 m_centerPosition{};      // Center position of the body
+    Vector2 m_cornerPosition{};     // Top left corner position of the body
+    b2BodyDef m_bodyDef{};          // Box2D Body Def
+    b2BodyId m_body{};              // Box2D Body ID
+    b2ShapeDef m_shapeDef{};        // Box2D Shape Def
 public:
     BoxBody() = default;
 
@@ -41,13 +42,13 @@ public:
 
     virtual ~BoxBody() = default;
 
-    virtual void update();
-    virtual void draw() const;
-    [[nodiscard]] b2Vec2 getSizeMeters() const noexcept;
-    [[nodiscard]] Vector2 getSizePx() const noexcept;
-    [[nodiscard]] b2Vec2 getPositionCenterMeters() const noexcept;
-    [[nodiscard]] Vector2 getPositionCornerPx() const noexcept;
-    [[nodiscard]] b2BodyId getBodyID() const noexcept;
+    virtual void update();                                              // Update the BoxBody
+    virtual void draw() const;                                          // Draw the BoxBody
+    [[nodiscard]] b2Vec2 getSizeMeters() const noexcept;                // Get BoxBody size in meters
+    [[nodiscard]] Vector2 getSizePx() const noexcept;                   // Get BoxBody size in Pixels
+    [[nodiscard]] b2Vec2 getPositionCenterMeters() const noexcept;      // Get the center position of the BoxBody
+    [[nodiscard]] Vector2 getPositionCornerPx() const noexcept;         // Get the corner position of the BoxBody
+    [[nodiscard]] b2BodyId getBodyID() const noexcept;                  // Get the b2BodyId of the BoxBody
 };
 
 

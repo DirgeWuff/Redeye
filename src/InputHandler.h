@@ -8,6 +8,8 @@
 #include <memory>
 #include "CommandListener.h"
 
+// Input handler class, used to handle scene-wide input events.
+// Also not a huge fan of this architecture, may change this down the line...
 class InputHandler final {
 public:
     InputHandler();

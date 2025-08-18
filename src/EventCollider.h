@@ -5,8 +5,6 @@
 #ifndef EVENTCOLLIDER_H
 #define EVENTCOLLIDER_H
 
-#include "BoxBody.h"
-#include "../EventDispatcher.h"
 #include "Player.h"
 
 struct playerContactEvent {
@@ -20,19 +18,18 @@ struct sensorInfo {
     std::string typeId;
 };
 
-// Subclass for extra clarity here, should be used for any type of
-// Collider object that triggers an event when entered
+// An invisible collider for use in triggering events in game, such as a cutscene or death
 class EventCollider {
 protected:
-    b2Vec2 m_sizeMeters{};
-    Vector2 m_sizePx{};
-    b2Vec2 m_centerPosition{};
-    Vector2 m_cornerPosition{};
-    b2BodyDef m_bodyDef{};
-    b2BodyId m_body{};
-    b2ShapeDef m_shapeDef{};
-    std::string m_typeId{};
-    b2ShapeId m_shapeId{};
+    b2Vec2 m_sizeMeters{};          // EventCollider size in meters
+    Vector2 m_sizePx{};             // EventCollider size in pixels
+    b2Vec2 m_centerPosition{};      // Center position of the EventCollider in meters
+    Vector2 m_cornerPosition{};     // Corner position of the EventCollider in pixels
+    b2BodyDef m_bodyDef{};          // b2BodyDef of the EventCollider
+    b2BodyId m_body{};              // b2BodyId of the EventCollider
+    b2ShapeDef m_shapeDef{};        // b2ShapeDef of the EventCollider
+    std::string m_typeId{};         // typeId of the EventCollider, used by EventDispatcher for parsing purposes
+    b2ShapeId m_shapeId{};          // b2ShapeId of the EventCollider
 public:
     EventCollider() = default;
 
@@ -41,7 +38,7 @@ public:
         float cornerY,
         float fullWidthPx,
         float fullHeightPx,
-        const std::string& id,
+        const std::string&& id,
         b2WorldId world);
 
     ~EventCollider() = default;

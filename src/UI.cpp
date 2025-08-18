@@ -4,9 +4,9 @@
 
 
 #include <cmath>
-#include "../external_libs/Raylib/include/raylib.h"
-#include "../external_libs/Raylib/include/raymath.h"
-#include "../UI.h"
+#include "raylib.h"
+#include "raymath.h"
+#include "UI.h"
 
 
 RectButton::RectButton(

@@ -6,7 +6,7 @@
 #define PLAYER_H
 
 #include <memory>
-#include "../external_libs/Raylib/include/raylib.h"
+#include "raylib.h"
 #include "CommandListener.h"
 #include "Entity.h"
 #include "Camera.h"
@@ -46,18 +46,18 @@ public:
 
     ~Player() override;
 
-    void update() override;
-    void draw() const override;
-    void moveRight() override;
-    void moveLeft() override;
-    void jump() override;
-    void moveNowhere() override;
-    void murder(const std::unique_ptr<SceneCamera>& camera);
-    void reform() const noexcept;
-    [[nodiscard]] b2ShapeId getFootpawSenorId() const noexcept;
-    [[nodiscard]] bool getFootpawSensorStatus() const noexcept;
-    void addContactEvent() noexcept;
-    void removeContactEvent() noexcept;
+    void update() override;                                         // Update player
+    void draw() const override;                                     // Draw player
+    void moveRight() override;                                      // Move the player right
+    void moveLeft() override;                                       // Move the player left
+    void jump() override;                                           // Make the player jump
+    void moveNowhere() override;                                    // Used to control the player's idle sprite
+    void murder(const std::unique_ptr<SceneCamera>& camera);        // Kill the player
+    void reform() const noexcept;                                   // Respawn the player
+    [[nodiscard]] b2ShapeId getFootpawSenorId() const noexcept;     // Get the footpaw sensor id
+    [[nodiscard]] bool getFootpawSensorStatus() const noexcept;     // Get the footpaw sensor status
+    void addContactEvent() noexcept;                                // Add a player contact event to counter
+    void removeContactEvent() noexcept;                             // Remove a player contact event from counter
 };
 
 #endif //PLAYER_H

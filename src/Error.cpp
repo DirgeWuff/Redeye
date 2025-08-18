@@ -8,7 +8,7 @@
 #include <filesystem>
 #include <chrono>
 #include <sstream>
-#include "../external_libs/Raylib/include/raylib.h"
+#include "raylib.h"
 
 std::string getTime() {
     const auto currentTime = std::chrono::system_clock::now();

@@ -5,11 +5,9 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
-#define DEBUG
-
 #include <memory>
 #include "Camera.h"
-#include "../Entity.h"
+#include "Entity.h"
 #include "Player.h"
 
 // Draw all the shapes bound to an Entity for debugging
@@ -41,6 +39,5 @@ void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map);
 // Draw controls window for debugging features
 // Must be called AFTER SceneCamera->cameraEnd()
 void drawControlsWindow();
-
 
 #endif //DEBUG_H

@@ -2,13 +2,12 @@
 // Created by DirgeWuff on 5/15/25.
 //
 
-
-#include "../Tilemap.h"
+#include "raylib.h"
+#include "raymath.h"
+#include "Tilemap.h"
 #include "Camera.h"
 #include "Error.h"
 #include "Utils.h"
-#include "../external_libs/Raylib/include/raylib.h"
-#include "../external_libs/Raylib/include/raymath.h"
 
 TiledMap::TiledMap() {
     mapData.mapWidth = 0;

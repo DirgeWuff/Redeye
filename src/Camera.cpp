@@ -3,8 +3,8 @@
 //
 
 #include <memory>
-#include "external_libs/Raylib/include/raylib.h"
-#include "external_libs/Raylib/include/raymath.h"
+#include "raylib.h"
+#include "raymath.h"
 #include "Camera.h"
 #include "Error.h"
 
@@ -23,7 +23,6 @@ SceneCamera::SceneCamera(const TiledMap& map, const float zoomLevel) {
         };
 
         m_cameraCenter = {m_cameraRect.x + m_cameraRect.width / 2.0f, m_cameraRect.y + m_cameraRect.height / 2.0f};
-        m_cameraVelocityY = 15;
         m_targetCenter = {0.0f, 0.0f}; // Init to zero might be bad???
         m_mapSize = {
             map.getTileWidth() * map.getMapWidth(),
@@ -36,11 +35,11 @@ SceneCamera::SceneCamera(const TiledMap& map, const float zoomLevel) {
     }
     catch (std::bad_alloc) {
         logErr(
-            "Constructor init failed, std::bad_alloc thrown. Ln 37, Camera.cpp.");
+            "Constructor init failed, std::bad_alloc thrown. Ln 39, Camera.cpp.");
     }
     catch (...) {
         logErr(
-            "Constructor init failed, unknown error thrown. Ln 41, Camera.cpp.");
+            "Constructor init failed, unknown error thrown. Ln 43, Camera.cpp.");
     }
 
     TraceLog(LOG_INFO, "SceneCamera created successfully.");
@@ -91,11 +90,6 @@ void SceneCamera::update(const std::shared_ptr<Entity>& targetEntity) {
 
 // Unfortunate I have to use these stupid interface functions, but it is what it is
 void SceneCamera::cameraBegin() const {
-    if (m_camera == nullptr) {
-        logErr("m_camera == nullptr. Ln 95, Camera.cpp.");
-        return;
-    }
-
     BeginMode2D(*m_camera);
 }
 
@@ -120,13 +114,7 @@ void SceneCamera::cameraEnd() const {
     return m_cameraCenter;
 }
 
-// Might wanna change this to use pointers later TBH, since then there can be error handling...
 [[nodiscard]] Vector2 SceneCamera::getCameraTarget() const noexcept {
-    if (m_camera == nullptr) {
-        logErr("m_camera == nullptr. Ln 125, Camera.cpp");
-        return Vector2{0.0f, 0.0f};
-    }
-
     return m_camera->target;
 }
 

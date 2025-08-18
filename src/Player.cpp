@@ -2,14 +2,14 @@
 // Created by DirgeWuff on 4/29/25.
 //
 
-
 #include <iostream>
-#include "../external_libs/Box2D/include/box2d.h"
-#include "../Player.h"
-#include "../Utils.h"
+#include "box2d/box2d.h"
+
+#include "Player.h"
+#include "Utils.h"
 #include "Debug.h"
 #include "EventCollider.h"
-#include "../UI.h"
+#include "UI.h"
 
 enum directions {RIGHT, LEFT};
 
@@ -75,6 +75,7 @@ m_lastDirection(RIGHT)
     m_footpawSensorShape.isSensor = true;
     m_footpawSensorShape.enableSensorEvents = true;
 
+    // Set our userData for the EventDispatcher to use later
     auto* ud = new sensorInfo{"pawbs"};
     m_footpawSensorShape.userData = static_cast<void*>(ud);
     ud = nullptr;
@@ -180,8 +181,8 @@ void Player::murder(const std::unique_ptr<SceneCamera>& camera) {
     unsigned char alpha = 0;
     m_dead = true;
     const Rectangle rect = camera->getCameraRect();
-    Texture2D deathText = LoadTexture("../assets/UI and graphics/Death screen text.png");
-    Vector2 deathTextPos = GetScreenToWorld2D(
+    const Texture2D deathText = LoadTexture("../assets/UI and graphics/Death screen text.png");
+    const Vector2 deathTextPos = GetScreenToWorld2D(
         {
             static_cast<float>(1000 / 2 - deathText.width / 2),
             static_cast<float>(400 / 2 - deathText.height / 2)},

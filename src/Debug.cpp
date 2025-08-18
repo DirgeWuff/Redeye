@@ -10,10 +10,11 @@
 #include <cassert>
 #include <iostream>
 #include <cstdint>
-#include "../external_libs/Box2D/include/box2d.h"
-#include "../external_libs/Raylib/include/raylib.h"
-#include "../external_libs/Raylib/include/raygui.h"
-#include "../Debug.h"
+
+#include "box2d/box2d.h"
+#include "raylib.h"
+#include "../external_libs/Raygui/raygui.h"
+#include "Debug.h"
 #include "Utils.h"
 #include "Error.h"
 #include "Scene.h"
@@ -128,6 +129,8 @@ void drawDebugBodyShapes(const std::shared_ptr<Entity>& targetEntity) {
 void drawDebugBodyCenter(const std::shared_ptr<Entity>& targetEntity) {
     if (!g_drawPlayerCenter) return;
 
+    assert(targetEntity != nullptr && "targetEntity == nullptr. Ln 132, Debug.cpp");
+
     const auto [x, y] = b2Body_GetPosition(targetEntity->getBodyID());
 
     DrawCircleLines(
@@ -166,10 +169,8 @@ void drawDebugCameraCrosshair(const std::unique_ptr<SceneCamera>& camera) {
 void drawDebugCameraRect(const std::unique_ptr<SceneCamera>& camera) {
     if (!g_drawCameraRect) return;
 
-    if (camera == nullptr) {
-        logErr("camera == nullptr. Ln 146, Debug.cpp");
-        return;
-    }
+    assert(camera != nullptr && "camera == nullptr. Ln 172, Debug.cpp");
+
     const Rectangle rect = camera->getCameraRect();
 
     // Add offset of 2px/edge so we can see the rectangle around the edges of camera
@@ -183,6 +184,8 @@ void drawDebugCameraRect(const std::unique_ptr<SceneCamera>& camera) {
 
 void drawDebugPlayerPosition(const std::shared_ptr<Player>& player) {
     if (!g_drawPlayerPos) return;
+
+    assert(player != nullptr && "player == nullptr. Ln 188, Debug.cpp");
 
     DrawText(
         TextFormat("Position X: %f", player->getPositionCornerPx().x),
@@ -200,6 +203,8 @@ void drawDebugPlayerPosition(const std::shared_ptr<Player>& player) {
 
 void drawDebugFootpawSensorStatus(const std::shared_ptr<Player>& player) {
     if (!g_drawPlayerSensorStatus) return;
+
+    assert(player != nullptr && "player == nullptr. Ln 207, Debug.cpp");
 
     if (player->getFootpawSensorStatus() == true) {
         DrawText(
@@ -219,9 +224,10 @@ void drawDebugFootpawSensorStatus(const std::shared_ptr<Player>& player) {
     }
 }
 
-// Also probably very slow, but again, fuck it lol
-void drawDebugCollisionShapes(const std::unique_ptr<TiledMap> &map) {
+void drawDebugCollisionShapes(const std::unique_ptr<TiledMap>& map) {
     if (!g_drawTerrainShapes) return;
+
+    assert(map != nullptr && "map == nullptr. Ln 231, Debug.cpp");
 
     const std::vector<CollisionObject> shapes = map->getCollisionShapes();
 
@@ -245,8 +251,11 @@ void drawDebugCollisionShapes(const std::unique_ptr<TiledMap> &map) {
     }
 }
 
+// TODO: Improve speed on this, will tank framerate when used
 void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map) {
     if (!g_drawTerrainVerts) return;
+
+    assert(map !=nullptr && "map == nullptr. Ln 259, Debug.cpp");
 
     const std::vector<CollisionObject> shapes = map->getCollisionShapes();
 
@@ -264,7 +273,6 @@ void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map) {
     }
 }
 
-// This might be the most disgusting code in this entire thing, but it fucking works
 void drawControlsWindow() {
         g_debugWindowBoxActive = IsKeyDown(KEY_M);
 

@@ -2,7 +2,7 @@
 // Created by DirgeWuff on 6/27/25.
 //
 
-#include "../Entity.h"
+#include "Entity.h"
 
 Entity::Entity (
     const float centerX,

@@ -2,7 +2,8 @@
 // Created by DirgeWuff on 8/8/2025.
 //
 
-#include "../EventCollider.h"
+#include "box2d/box2d.h"
+#include "EventCollider.h"
 #include "Utils.h"
 
 EventCollider::EventCollider (
@@ -10,7 +11,7 @@ EventCollider::EventCollider (
     const float cornerY,
     const float fullWidthPx,
     const float fullHeightPx,
-    const std::string& id,
+    const std::string&& id,
     const b2WorldId world) :
         m_sizeMeters{pixelsToMeters(fullWidthPx), pixelsToMeters(fullHeightPx)},
         m_sizePx{fullWidthPx, fullHeightPx},

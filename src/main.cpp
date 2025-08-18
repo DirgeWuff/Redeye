@@ -1,4 +1,4 @@
-#include "../external_libs/Raylib/include/raylib.h"
+#include "raylib.h"
 #include "Scene.h"
 
 constexpr uint16_t g_windowWidth = 1500;

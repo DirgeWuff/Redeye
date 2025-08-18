@@ -3,16 +3,17 @@
 //
 
 #include <cstdint>
-#include "../external_libs/Raylib/include/raylib.h"
-#include "../Scene.h"
+#include "raylib.h"
+#include "box2d/box2d.h"
+#include "Scene.h"
 #include "Error.h"
 #include "Debug.h"
 #include "EventCollider.h"
 #include "Utils.h"
 
-constexpr float WORLD_STEP = 1.0f / 60.0f;
-constexpr uint8_t SUB_STEP = 4;
-CodeClock timer = CodeClock();
+constexpr float g_worldStep = 1.0f / 60.0f;
+constexpr uint8_t g_subStep = 4;
+auto g_timer = CodeClock();
 
 Scene::Scene(
     std::string&& playerSpritePath,
@@ -88,7 +89,7 @@ void Scene::handleSensorEvents() const {
                 playerContactEvent{true, sensorShapeId});
         }
         else {
-            logErr("Unhandled b2BeginContactEvent. sensorShapeId.userData bank.");
+            logErr("Unhandled b2BeginContactEvent. sensorShapeId.userData blank.");
             break;
         }
     }
@@ -110,7 +111,7 @@ void Scene::handleSensorEvents() const {
 
 void Scene::updateScene() {
     m_playerInput.handleInput(m_playerCharacter);
-    b2World_Step(m_worldId, WORLD_STEP, SUB_STEP);
+    b2World_Step(m_worldId, g_worldStep, g_subStep);
     this->handleSensorEvents();
     m_playerCharacter->update();
     m_camera->update(m_playerCharacter);
@@ -120,13 +121,12 @@ void Scene::drawScene() const {
     m_camera->cameraBegin();
 
     ClearBackground(BLACK); // Might be unnecessary???
-    timer.begin();
+    g_timer.begin();
     m_map->draw(*m_camera, {0.0f, 0.0f}, WHITE);
-    timer.end();
+    g_timer.end();
     m_playerCharacter->draw();
 
-    // A lot of this debugging stuff is in here because it's the only place
-    // an instance of Player and SceneCamera exist together
+    // TODO: Move these calls to their relevant classes and use generic raw pointers
     #ifdef DEBUG
         drawDebugBodyShapes(m_playerCharacter);
         drawDebugCollisionShapes(m_map);
@@ -138,6 +138,7 @@ void Scene::drawScene() const {
 
     m_camera->cameraEnd();
 
+    // Draw these outside of camera context!!!
     #ifdef DEBUG
         drawControlsWindow();
         drawDebugFootpawSensorStatus(m_playerCharacter);

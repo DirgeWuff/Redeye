@@ -7,20 +7,22 @@
 
 #include <vector>
 #include <map>
+#include "raylib.h"
 #include "../external_libs/Tson/tileson.hpp"
-#include "../external_libs/Raylib/include/raylib.h"
 #include "CollisionObject.h"
 #include "EventCollider.h"
 
 class SceneCamera;
 class EventCollider;
 
+// Struct containing relevant data about a given tile. Used for fast drawing.
 struct TileData {
     Vector2 position;
     Rectangle sourceRect;
     const Texture2D* texture;
 };
 
+// Structured data used to render a map.
 struct RenderData {
     std::map<std::string, Texture> textures;
     std::unordered_map<const tson::Tileset*, Texture2D*> texturePtrs;
@@ -28,6 +30,7 @@ struct RenderData {
     std::shared_ptr<tson::Map> tsonMapPtr;
 };
 
+// Structured data used to load a map. Used on a per-map basis.
 struct MapData {
     int tileWidth;
     int tileHeight;
@@ -41,23 +44,24 @@ struct MapData {
 };
 
 class TiledMap {
-    MapData mapData;
+    MapData mapData;                                    // MapData for this instance TiledMap
 public:
     TiledMap();
-    TiledMap(std::string&& filepath, b2WorldId world); // Consider passing filepath by value and using std::move
+    TiledMap(std::string&& filepath, b2WorldId world);
     ~TiledMap();
 
+    // Draw an already loaded TiledMap
     void draw(
     const SceneCamera& cam,
     Vector2 offset,
     Color color
     ) const;
 
-    [[nodiscard]] float getMapWidth() const noexcept;
-    [[nodiscard]] float getMapHeight() const noexcept;
-    [[nodiscard]] float getTileWidth() const noexcept;
-    [[nodiscard]] float getTileHeight() const noexcept;
-    [[nodiscard]] const std::vector<CollisionObject>& getCollisionShapes() const noexcept;
+    [[nodiscard]] float getMapWidth() const noexcept;                                           // Get the TiledMap's width in number of tiles
+    [[nodiscard]] float getMapHeight() const noexcept;                                          // Get the TieldMap's height in number of tiles
+    [[nodiscard]] float getTileWidth() const noexcept;                                          // Get the width of TiledMap's tiles in pixels
+    [[nodiscard]] float getTileHeight() const noexcept;                                         // Get the height of the TiledMap's tiles in pixels
+    [[nodiscard]] const std::vector<CollisionObject>& getCollisionShapes() const noexcept;      // Return a reference to the TiledMap's CollisionObjects
 };
 
 #endif //TILEMAP_H

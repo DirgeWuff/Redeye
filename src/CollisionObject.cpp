@@ -2,12 +2,15 @@
 // Created by DirgeWuff on 7/15/25.
 //
 
-#include "../external_libs/Box2D/include/types.h"
-#include "../external_libs/Box2d/include/box2d.h"
-#include "../CollisionObject.h"
 
 #include <iostream>
+#include "box2d/types.h"
+#include "box2d/box2d.h"
+#include "CollisionObject.h"
 
+
+// Base class for a CollisionObject, generated from vertices in a tiled map's object layer.
+// These are used to generate collisions with the terrain in a world.
 CollisionObject::CollisionObject(
     const b2WorldId world,
     const std::vector<b2Vec2>& points) :
@@ -58,6 +61,7 @@ m_chainDef(other.m_chainDef)
     m_chainDef.isLoop = false;
     m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
 }
+
 
 CollisionObject& CollisionObject::operator=(const CollisionObject& other) {
     if (this != &other) {

@@ -3,8 +3,8 @@
 //
 
 #include <cstdint>
-#include "../external_libs/Box2D/include/types.h"
-#include "../Utils.h"
+#include "box2d/types.h"
+#include "Utils.h"
 
 constexpr uint8_t PPM = 100; // 100 px/meter
 

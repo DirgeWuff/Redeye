@@ -3,3 +3,7 @@ Tools
 
 # Other shit I don't want to push
 *.o
+*.log
+cmake-build-debug
+cmake-build-release
+.idea

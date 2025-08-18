@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 
+// Underlying framework used to dispatch events within the game.
 template<typename EventType>
 using eventHandler = std::function<void(const EventType&)>;
 
