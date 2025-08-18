@@ -1,3 +1,0 @@
-C:/Users/DirgeWuff/CLionProjects/Redeye2/cmake-build-debug/CMakeFiles/Redeye.dir
-C:/Users/DirgeWuff/CLionProjects/Redeye2/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/DirgeWuff/CLionProjects/Redeye2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
