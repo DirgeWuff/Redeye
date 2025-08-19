@@ -1,20 +1,47 @@
 Redeye is a 2D Survival Horror game prototyle I developed over the past few months in C++, with only a few dependencies (Raylib, Box2D and Tileson).
 At the time of writing this (August 2025) the game is pre-alpha, and this repo is highly volatile and updated regularly to add new features, add gameplay, improve performance, and fix bugs. This is NOT a final product, and only includes basic functionality. 
 
-
 The following code is not gaurunteed to be performant, nor complete, and should not be taken as such. However, much effort and research has been put into it, and it's being published in the hopes it can help others who wish to create a similar project.
 
 Expect to see regular updates to the repo.
 
+
+
 BUILDING AND RUNNING:
-This code is intended to be compiled on Windows with g++, and requires CMake. It includes statically compiled libraries that are platform specific to Windows, and it will not compile on Linux or Mac without refactoring the build toolchian. 
-A more rubust and platform agnostic build system will be added later and will make building much easier for uses with other compilers and operating systems. 
 
-For now, the easiest way to experience the prototype is to run the precompiled binary included with the repo. This binary can be found in the cmake-build-debug directory. There is also a precompiled Binary for Apple Silicon as well. 
+Requirements:
 
-If you would like to compile on your own with MSYS2 using Cmake and gcc/g++, you can do the following :
+CMake version 3.30 or greater 
+Ninja build system version 1.13 or greater
+C++ compiler and libraries capable of compiling C++ 20 or greater
+A working version of git
 
-mkdir build && cd build
-cmake ..
+With these in place, run the following commands in your terminal of choice:
 
-Stay tuned for future updates!
+git clone github.com/DirgeWuff/Redeye.git
+cd Redeye
+mkdir build
+cd build
+
+From here, you can choose to build either the debug or release build. 
+The debug build includes a set of debugging tools that can draw invisible geometry and
+provide other additional functionality. The release build will generate optimized assembly 
+for your platform, increasing performance and removing the debugging tools.
+
+For the release build, run:
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release
+
+Or for the debug build, run:
+cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug
+
+This will generate an executable for you to run.
+
+ACKNOWLEDGEMENTS:
+
+Huge thank you to the creators of Raylib, Box2D and Tileson, the dependencies that made this game possible.
+https://github.com/raysan5/raylib
+https://github.com/erincatto/box2d
+https://github.com/SSBMTonberry/tileson/blob/master/tileson.hpp
+
+Also huge thank you to the creators of Tiled, the tiled map editor used to create the maps for this project.
+https://github.com/mapeditor/tiled
