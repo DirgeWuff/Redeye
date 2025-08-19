@@ -7,7 +7,7 @@ Expect to see regular updates to the repo.
 
 
 
-BUILDING AND RUNNING:
+### BUILDING AND RUNNING:
 
 Requirements:
 
@@ -18,13 +18,13 @@ A working version of git
 
 With these in place, run the following commands in your terminal of choice:
 
-git clone github.com/DirgeWuff/Redeye.git
+__git clone github.com/DirgeWuff/Redeye.git__
 
-cd Redeye
+__cd Redeye__
 
-mkdir build
+__mkdir build__
 
-cd build
+__cd build__
 
 From here, you can choose to build either the debug or release build. 
 The debug build includes a set of debugging tools that can draw invisible geometry and
@@ -32,14 +32,17 @@ provide other additional functionality. The release build will generate optimize
 for your platform, increasing performance and removing the debugging tools.
 
 For the release build, run:
-cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release
+__cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Release__
 
 Or for the debug build, run:
-cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug
+__cmake -G "Ninja" -DCMAKE_BUILD_TYPE=Debug__
 
 This will generate an executable for you to run.
 
-ACKNOWLEDGEMENTS:
+NOTE: This build system is new and still getting the kinks worked out of it, if you have any 
+issues compiling, please contact me and I'll assit you.
+
+### ACKNOWLEDGEMENTS:
 
 Huge thank you to the creators of Raylib, Box2D and Tileson, the dependencies that made this game possible.
 https://github.com/raysan5/raylib
