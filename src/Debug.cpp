@@ -144,10 +144,7 @@ void drawDebugBodyCenter(const std::shared_ptr<Entity>& targetEntity) {
 void drawDebugCameraCrosshair(const std::unique_ptr<SceneCamera>& camera) {
     if (!g_drawCameraCrosshair) return;
 
-    if (camera == nullptr) {
-        logErr("camera == nullptr. Ln 123, Debug.cpp");
-        return;
-    }
+    assert(camera != nullptr && "camera == nullptr. Ln 147, Debug.cpp");
 
     const Rectangle cameraRect = camera->getCameraRect();
 
@@ -169,7 +166,7 @@ void drawDebugCameraCrosshair(const std::unique_ptr<SceneCamera>& camera) {
 void drawDebugCameraRect(const std::unique_ptr<SceneCamera>& camera) {
     if (!g_drawCameraRect) return;
 
-    assert(camera != nullptr && "camera == nullptr. Ln 172, Debug.cpp");
+    assert(camera != nullptr && "camera == nullptr. Ln 169, Debug.cpp");
 
     const Rectangle rect = camera->getCameraRect();
 
@@ -185,7 +182,7 @@ void drawDebugCameraRect(const std::unique_ptr<SceneCamera>& camera) {
 void drawDebugPlayerPosition(const std::shared_ptr<Player>& player) {
     if (!g_drawPlayerPos) return;
 
-    assert(player != nullptr && "player == nullptr. Ln 188, Debug.cpp");
+    assert(player != nullptr && "player == nullptr. Ln 185, Debug.cpp");
 
     DrawText(
         TextFormat("Position X: %f", player->getPositionCornerPx().x),
@@ -204,7 +201,7 @@ void drawDebugPlayerPosition(const std::shared_ptr<Player>& player) {
 void drawDebugFootpawSensorStatus(const std::shared_ptr<Player>& player) {
     if (!g_drawPlayerSensorStatus) return;
 
-    assert(player != nullptr && "player == nullptr. Ln 207, Debug.cpp");
+    assert(player != nullptr && "player == nullptr. Ln 204, Debug.cpp");
 
     if (player->getFootpawSensorStatus() == true) {
         DrawText(
@@ -227,7 +224,7 @@ void drawDebugFootpawSensorStatus(const std::shared_ptr<Player>& player) {
 void drawDebugCollisionShapes(const std::unique_ptr<TiledMap>& map) {
     if (!g_drawTerrainShapes) return;
 
-    assert(map != nullptr && "map == nullptr. Ln 231, Debug.cpp");
+    assert(map != nullptr && "map == nullptr. Ln 227, Debug.cpp");
 
     const std::vector<CollisionObject> shapes = map->getCollisionShapes();
 
@@ -255,7 +252,7 @@ void drawDebugCollisionShapes(const std::unique_ptr<TiledMap>& map) {
 void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map) {
     if (!g_drawTerrainVerts) return;
 
-    assert(map !=nullptr && "map == nullptr. Ln 259, Debug.cpp");
+    assert(map !=nullptr && "map == nullptr. Ln 255, Debug.cpp");
 
     const std::vector<CollisionObject> shapes = map->getCollisionShapes();
 
