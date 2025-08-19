@@ -19,8 +19,11 @@ A working version of git
 With these in place, run the following commands in your terminal of choice:
 
 git clone github.com/DirgeWuff/Redeye.git
+
 cd Redeye
+
 mkdir build
+
 cd build
 
 From here, you can choose to build either the debug or release build. 
