@@ -1464,6 +1464,8 @@ namespace tson
 #include <vector>
 #include <string_view>
 #include <functional>
+#include <iterator>
+#include <algorithm>
 namespace tson
 {
     class DecompressorContainer
