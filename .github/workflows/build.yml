@@ -4,7 +4,7 @@ on:
     branches:
       - 'master'
 jobs:
-  build:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Project
@@ -25,3 +25,19 @@ jobs:
             "CMAKE_BUILD_TYPE=Release"
             "GLFW_BUILD_X11=ON"
             "GLFW_BUILD_WAYLAND=ON"
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v4
+      - name: Setup Ninja
+        uses: seanmiddleditch/gha-setup-ninja@v5
+      - name: Build Project
+        uses: threeal/cmake-action@v2.1.0
+        with:
+          source-dir: ./
+          build-dir: "build"
+          generator: Ninja
+          options: |
+            "CMAKE_BUILD_TYPE=Release"
+            "LINK_OPTIONS=/W4"
