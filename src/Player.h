@@ -58,6 +58,7 @@ public:
     [[nodiscard]] bool getFootpawSensorStatus() const noexcept;     // Get the footpaw sensor status
     void addContactEvent() noexcept;                                // Add a player contact event to counter
     void removeContactEvent() noexcept;                             // Remove a player contact event from counter
+    void setCurrentCheckpoint() noexcept;
 };
 
 #endif //PLAYER_H

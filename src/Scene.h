@@ -18,7 +18,7 @@ class Scene {
     b2WorldId m_worldId{};                                                              // b2WorldId for the scene
     bodyConfig playerCfg{};                                                             // bodyConfig for the player
     std::shared_ptr<Player> m_playerCharacter{};                                        // Ptr to the player character
-    InputHandler m_playerInput{};
+    InputHandler m_playerInput{};                                                       // Input handler for the player character
     std::unique_ptr<EventDispatcher<playerContactEvent>> m_collisionEventDispatcher;    // Ptr to the EventDispatcher
     std::unique_ptr<TiledMap> m_map;                                                    // Ptr to the TiledMap
     std::unique_ptr<SceneCamera> m_camera;                                              // Ptr to the SceneCamera

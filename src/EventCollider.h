@@ -42,6 +42,8 @@ public:
         b2WorldId world);
 
     ~EventCollider() = default;
+
+    void disableCollider() const noexcept;
 };
 
 #endif //EVENTCOLLIDER_H

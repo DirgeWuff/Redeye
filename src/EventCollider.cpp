@@ -39,3 +39,8 @@ EventCollider::EventCollider (
 
     m_shapeId = b2CreatePolygonShape(m_body, &m_shapeDef, &boundingBox);
 }
+
+void EventCollider::disableCollider() const noexcept {
+    b2Body_Disable(m_body);
+}
+

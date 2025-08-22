@@ -92,21 +92,40 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
                 }
             }
             else if (layer.getType() == tson::LayerType::ObjectGroup && layer.getName() == "Event colliders") {
-                for (auto& object : layer.getObjects()) {
-                    if (object.getName() == "Murder box") {
-                        const tson::Vector2i pos = object.getPosition();
-                        const tson::Vector2i size = object.getSize();
+                std::vector<tson::Object> objects = layer.getObjects();
 
-                        mapData.eventColliders.emplace_back(
-                            pos.x,
-                            pos.y,
-                            size.x,
-                            size.y,
-                            "MurderBox",
-                            world);
-                    }
-                    // Add any other collider types here later on
-                }
+                 for (const auto& object : layer.getObjects()) {
+                     const tson::Vector2i pos = object.getPosition();
+                     const tson::Vector2i size = object.getSize();
+
+
+                     if (object.getName() == "MurderBox") {
+                         static uint8_t murderBoxCnt{};
+
+                         mapData.eventColliders["MurderBox" + std::to_string(murderBoxCnt)] = EventCollider(
+                             static_cast<float>(pos.x),
+                             static_cast<float>(pos.y),
+                             static_cast<float>(size.x),
+                             static_cast<float>(size.y),
+                             "MurderBox" + std::to_string(murderBoxCnt),
+                             world);
+
+                         murderBoxCnt++;
+                     }
+                     else if (object.getName() == "Checkpoint") {
+                         static uint8_t checkpointCnt{};
+
+                         mapData.eventColliders["Checkpoint" + std::to_string(checkpointCnt)] = EventCollider(
+                             static_cast<float>(pos.x),
+                             static_cast<float>(pos.y),
+                             static_cast<float>(size.x),
+                             static_cast<float>(size.y),
+                             "Checkpoint" + std::to_string(checkpointCnt),
+                             world);
+
+                         checkpointCnt++;
+                     }
+                 }
             }
             else if (layer.getType() == tson::LayerType::TileLayer) {
                 std::vector<TileData> renderData;
@@ -198,6 +217,7 @@ void TiledMap::draw(
                         drawingPos,
                         color);
                 }
+
                 break;
             }
 
@@ -231,6 +251,14 @@ void TiledMap::draw(
     }
 }
 
+void TiledMap::disableEventCollider(const std::string& id) {
+    const auto it = mapData.eventColliders.find(id);
+    if (it != mapData.eventColliders.end()) {
+        it->second.disableCollider();
+    }
+}
+
+// ClangTidy doesn't like these casts, even though they're valid
 [[nodiscard]] float TiledMap::getMapWidth() const noexcept {
     return static_cast<float>(mapData.mapWidth);
 }

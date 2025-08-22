@@ -45,11 +45,15 @@ m_playerInput(InputHandler())
             "Constructor init failed, an unknown error has occurred. Ln 49, Scene.cpp");
         return;
     }
+
     m_camera->setTarget(m_playerCharacter);
 
     m_collisionEventDispatcher->subscribe(
         "pawbs",
-        [this](const playerContactEvent e) {
+        [](const std::string& id) {
+            return id.find("pawbs") != std::string::npos;
+        },
+        [this](const playerContactEvent& e) {
             if (e.contactBegan) {
                 m_playerCharacter->addContactEvent();
             }
@@ -60,19 +64,30 @@ m_playerInput(InputHandler())
 
     m_collisionEventDispatcher->subscribe(
         "MurderBox",
+        [](const std::string& id) {
+        return id.find("MurderBox") != std::string::npos;
+        },
         [this](const playerContactEvent& e) {
-            if (e.contactBegan) {
-                m_playerCharacter->murder(m_camera);
-            }
-        });
+        if (e.contactBegan) {
+            m_playerCharacter->murder(m_camera);
+        }
+    });
 
     m_collisionEventDispatcher->subscribe(
-        "GenericCollider",
-        std::move([](const playerContactEvent& e) {
+        "Checkpoint",
+        [](const std::string& id) {
+            return id.find("Checkpoint") != std::string::npos;
+        },
+        [this](const playerContactEvent& e) {
             if (e.contactBegan) {
-                std::cout << "Generic collider struck" << std::endl;
+                m_playerCharacter->setCurrentCheckpoint();
+                std::cout << "Checkpoint reached..." << std::endl;
+
+                const auto* info = static_cast<sensorInfo*>(b2Shape_GetUserData(e.visitorShape));
+                m_collisionEventDispatcher->unsubscribe(info->typeId);
+                m_map->disableEventCollider(info->typeId);
             }
-        }));
+        });
 }
 
 Scene::~Scene() = default;

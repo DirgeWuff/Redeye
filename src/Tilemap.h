@@ -32,15 +32,15 @@ struct RenderData {
 
 // Structured data used to load a map. Used on a per-map basis.
 struct MapData {
-    int tileWidth;
-    int tileHeight;
-    int mapWidth;
-    int mapHeight;
+    uint8_t tileWidth;
+    uint8_t tileHeight;
+    uint16_t mapWidth;
+    uint16_t mapHeight;
 
     fs::path baseDir;
     std::shared_ptr<RenderData> renderDataPtr;
     std::vector<CollisionObject> collisionObjects;
-    std::vector<EventCollider> eventColliders;
+    std::unordered_map<std::string, EventCollider> eventColliders;
 };
 
 class TiledMap {
@@ -56,6 +56,8 @@ public:
     Vector2 offset,
     Color color
     ) const;
+
+    void disableEventCollider(const std::string& id);
 
     [[nodiscard]] float getMapWidth() const noexcept;                                           // Get the TiledMap's width in number of tiles
     [[nodiscard]] float getMapHeight() const noexcept;                                          // Get the TieldMap's height in number of tiles

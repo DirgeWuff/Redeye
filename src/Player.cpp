@@ -259,3 +259,7 @@ void Player::addContactEvent() noexcept {
 void Player::removeContactEvent() noexcept {
     m_activeGroundContacts--;
 }
+
+void Player::setCurrentCheckpoint() noexcept {
+    m_currentCheckpoint.centerPosition = m_centerPosition;
+}
