@@ -10,7 +10,6 @@
 #include <cassert>
 #include <iostream>
 #include <cstdint>
-
 #include "box2d/box2d.h"
 #include "raylib.h"
 #include "../external_libs/Raygui/raygui.h"
@@ -18,6 +17,9 @@
 #include "Utils.h"
 #include "Error.h"
 #include "Scene.h"
+
+const Font g_debugFont = LoadFont("../assets/Fonts/JetBrainsMono-Bold.ttf");
+const bool g_fontValid = IsFontValid(g_debugFont);
 
 bool g_debugWindowBoxActive = false;
 bool g_drawPlayerShapes = false;
@@ -28,9 +30,11 @@ bool g_drawTerrainShapes = false;
 bool g_drawTerrainVerts = false;
 bool g_drawCameraCrosshair = false;
 bool g_drawCameraRect = false;
+bool g_drawEventColliders = false;
 
 constexpr Color g_debugBodyColor{0, 0, 255, 255};
 constexpr Color g_debugCollisionColor{255, 0, 0, 255};
+constexpr Color g_debugColliderColor{5, 237, 16, 255};
 constexpr Color g_debugVertColor{181, 2, 157, 255};
 
 void drawDebugBodyShapes(const std::shared_ptr<Entity>& targetEntity) {
@@ -270,6 +274,30 @@ void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map) {
     }
 }
 
+void drawDebugEventColliders(const std::unique_ptr<TiledMap>& map) {
+    if (!g_drawEventColliders) return;
+
+    std::unordered_map<std::string, EventCollider> colliders = map->getEventColliders();
+
+    for (const auto& [id, collider] : colliders) {
+        const Vector2 pos = collider.getPosPixels();
+        const Vector2 size = collider.getSizePx();
+
+        DrawRectangleLinesEx(
+            {pos.x, pos.y, size.x, size.y},
+            1.0f,
+            g_debugColliderColor);
+
+        const Vector2 idLen = MeasureTextEx(g_debugFont, id.c_str(), 6.0f, 0.50f);
+        const Vector2 textPos = {
+            pos.x + idLen.x / 2.0f,
+            pos.y - 6.0f};
+
+        // Still draws default font and I've spent way too much time trying to figure out why...
+        DrawTextEx(g_debugFont, id.c_str(), textPos, 6.0f, 0.50f, g_debugColliderColor);
+    }
+}
+
 void drawControlsWindow() {
         g_debugWindowBoxActive = IsKeyDown(KEY_M);
 
@@ -277,13 +305,14 @@ void drawControlsWindow() {
 
         g_debugWindowBoxActive = !GuiWindowBox(Rectangle{ 8, 496, 240, 280 }, "Debug drawing controls");
 
-        GuiCheckBox((Rectangle){ 16, 528, 12, 12 }, "Draw player shapes", &g_drawPlayerShapes);
+        GuiCheckBox(Rectangle{ 16, 528, 12, 12 }, "Draw player shapes", &g_drawPlayerShapes);
         GuiCheckBox(Rectangle{ 16, 552, 12, 12 }, "Draw player sensor status", &g_drawPlayerSensorStatus);
-        GuiCheckBox((Rectangle){ 16, 576, 12, 12 }, "Draw player position", &g_drawPlayerPos);
+        GuiCheckBox(Rectangle{ 16, 576, 12, 12 }, "Draw player position", &g_drawPlayerPos);
         GuiCheckBox(Rectangle{16, 600, 12, 12}, "Draw player body center", &g_drawPlayerCenter);
-        GuiCheckBox((Rectangle){ 16, 624, 12, 12 }, "Draw terrain shapes", &g_drawTerrainShapes);
-        GuiCheckBox((Rectangle){ 16, 648, 12, 12 }, "Draw terrain vertices", &g_drawTerrainVerts);
-        GuiCheckBox((Rectangle){ 16, 672, 12, 12 }, "Draw camera center crosshair", &g_drawCameraCrosshair);
-        GuiCheckBox((Rectangle){ 16, 696, 12, 12}, "Draw camera edge rectangle", &g_drawCameraRect);
+        GuiCheckBox(Rectangle{ 16, 624, 12, 12 }, "Draw terrain shapes", &g_drawTerrainShapes);
+        GuiCheckBox(Rectangle{ 16, 648, 12, 12 }, "Draw terrain vertices", &g_drawTerrainVerts);
+        GuiCheckBox(Rectangle{ 16, 672, 12, 12 }, "Draw camera center crosshair", &g_drawCameraCrosshair);
+        GuiCheckBox(Rectangle{ 16, 696, 12, 12}, "Draw camera edge rectangle", &g_drawCameraRect);
+        GuiCheckBox(Rectangle{16, 720, 12,12}, "Draw event colliders", &g_drawEventColliders);
     }
 }

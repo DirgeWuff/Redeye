@@ -7,9 +7,9 @@
 #include "box2d/box2d.h"
 #include "Scene.h"
 #include "Error.h"
-#include "Debug.h"
 #include "EventCollider.h"
 #include "Utils.h"
+#include "Debug.h"
 
 constexpr float g_worldStep = 1.0f / 60.0f;
 constexpr uint8_t g_subStep = 4;
@@ -48,6 +48,7 @@ m_playerInput(InputHandler())
 
     m_camera->setTarget(m_playerCharacter);
 
+    // Subscribe footpaw sensor.
     m_collisionEventDispatcher->subscribe(
         "pawbs",
         [](const std::string& id) {
@@ -62,6 +63,7 @@ m_playerInput(InputHandler())
             }
         });
 
+    // Subscribe death colliders.
     m_collisionEventDispatcher->subscribe(
         "MurderBox",
         [](const std::string& id) {
@@ -73,6 +75,7 @@ m_playerInput(InputHandler())
         }
     });
 
+    // Subscribe checkpoint colliders.
     m_collisionEventDispatcher->subscribe(
         "Checkpoint",
         [](const std::string& id) {
@@ -81,7 +84,6 @@ m_playerInput(InputHandler())
         [this](const playerContactEvent& e) {
             if (e.contactBegan) {
                 m_playerCharacter->setCurrentCheckpoint();
-                std::cout << "Checkpoint reached..." << std::endl;
 
                 const auto* info = static_cast<sensorInfo*>(b2Shape_GetUserData(e.visitorShape));
                 m_collisionEventDispatcher->unsubscribe(info->typeId);
@@ -95,6 +97,7 @@ Scene::~Scene() = default;
 void Scene::handleSensorEvents() const {
     const b2SensorEvents sensorContactEvents = b2World_GetSensorEvents(m_worldId);
 
+    // Process all b2SensorBeginTouch events for the step.
     for (std::size_t i = 0; i < sensorContactEvents.beginCount; i++) {
         const auto&[sensorShapeId, visitorShapeId] = sensorContactEvents.beginEvents[i];
         auto* userData = static_cast<sensorInfo*>(b2Shape_GetUserData(sensorShapeId));
@@ -109,6 +112,7 @@ void Scene::handleSensorEvents() const {
         }
     }
 
+    // Process all the b2SensorEndTouch events for the step.
     for (std::size_t i = 0; i < sensorContactEvents.endCount; i++) {
         const auto&[sensorShapeId, visitorShapeId] = sensorContactEvents.endEvents[i];
         auto* userData = static_cast<sensorInfo*>(b2Shape_GetUserData(sensorShapeId));
@@ -124,14 +128,16 @@ void Scene::handleSensorEvents() const {
     }
 }
 
+// Update our scene.
 void Scene::updateScene() {
     m_playerInput.handleInput(m_playerCharacter);
     b2World_Step(m_worldId, g_worldStep, g_subStep);
-    this->handleSensorEvents();
+    handleSensorEvents();
     m_playerCharacter->update();
     m_camera->update(m_playerCharacter);
 }
 
+// Draw our scene.
 void Scene::drawScene() const {
     m_camera->cameraBegin();
 
@@ -149,6 +155,7 @@ void Scene::drawScene() const {
         drawDebugCollisionVerts(m_map);
         drawDebugCameraCrosshair(m_camera);
         drawDebugCameraRect(m_camera);
+        drawDebugEventColliders(m_map);
     #endif
 
     m_camera->cameraEnd();

@@ -10,7 +10,6 @@
 struct playerContactEvent {
     bool contactBegan;
     b2ShapeId visitorShape;
-
 };
 
 // This shit is only in a struct for type safety reasons, since we cast to void* and back
@@ -44,6 +43,8 @@ public:
     ~EventCollider() = default;
 
     void disableCollider() const noexcept;
+    [[nodiscard]] Vector2 getSizePx() const noexcept;
+    [[nodiscard]] Vector2 getPosPixels() const noexcept;
 };
 
 #endif //EVENTCOLLIDER_H

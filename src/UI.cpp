@@ -8,7 +8,6 @@
 #include "raymath.h"
 #include "UI.h"
 
-
 RectButton::RectButton(
     const float cornerX,
     const float cornerY,

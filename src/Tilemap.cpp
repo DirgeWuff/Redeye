@@ -9,6 +9,7 @@
 #include "Error.h"
 #include "Utils.h"
 
+
 TiledMap::TiledMap() {
     mapData.mapWidth = 0;
     mapData.mapHeight = 0;
@@ -18,6 +19,7 @@ TiledMap::TiledMap() {
     mapData.collisionObjects = {};
 }
 
+// TODO: Clean up this constructor and add some comments so it's less of a clusterfuck
 TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
 
     mapData.baseDir = fs::relative(filepath);
@@ -277,4 +279,8 @@ void TiledMap::disableEventCollider(const std::string& id) {
 
 [[nodiscard]] const std::vector<CollisionObject>& TiledMap::getCollisionShapes() const noexcept {
     return mapData.collisionObjects;
+}
+
+[[nodiscard]] const std::unordered_map<std::string, EventCollider>& TiledMap::getEventColliders() const noexcept {
+    return mapData.eventColliders;
 }

@@ -199,6 +199,7 @@ void Player::murder(const std::unique_ptr<SceneCamera>& camera) {
         alpha = 0;
         m_dead = false;
 
+        // Fade in red
         while (alpha < 255) {
             ClearBackground({105, 7, 0, alpha});
             BeginDrawing();
@@ -218,6 +219,7 @@ void Player::murder(const std::unique_ptr<SceneCamera>& camera) {
         {9, 59,36, 255},
         {10,92,54, 255});
 
+    // Fade in black when continue button is clicked
     // NOTE: Static code analyzers will say m_dead is always true, this is incorrect.
     while (m_dead == true && !WindowShouldClose()) {
         BeginDrawing();

@@ -17,16 +17,16 @@ class EventDispatcher {
     using matcher = std::function<bool(const std::string&)>;
 
     struct subscription {
-        std::string id;
-        matcher matchFunction;
-        eventHandler handler;
+        std::string id;             // Id if the caller
+        matcher matchFunction;      // Function used to match a substring. Should return true if not npos
+        eventHandler handler;       // The function to be called when matcher finds a match
     };
 
     std::vector<subscription> m_activeSubscriptions;
 public:
-    void subscribe(std::string&& sensorId, matcher matchFunction, eventHandler handler);
-    void unsubscribe(const std::string& sensorId);
-    void dispatch(const std::string& sensorId, const EventType& e) const;
+    void subscribe(std::string&& sensorId, matcher matchFunction, eventHandler handler);    // Subscribe an id to a matcher and handler function
+    void unsubscribe(const std::string& sensorId);                                          // Unsubscribe an id from a matcher and handler
+    void dispatch(const std::string& sensorId, const EventType& e) const;                   // Dispatch an event
 };
 
 template<typename EventType>
@@ -35,11 +35,13 @@ void EventDispatcher<EventType>::subscribe(
     matcher matchFunction,
     eventHandler handler)
 {
+    // Add subscription object to current subscriptions.
     m_activeSubscriptions.emplace_back(sensorId, std::move(matchFunction), std::move(handler));
 }
 
 template<typename EventType>
 void EventDispatcher<EventType>::unsubscribe(const std::string& sensorId) {
+    // If a subscription matching sensorId is present in m_activeSubscriptions, find and erase it.
     m_activeSubscriptions.erase(
         std::remove_if(m_activeSubscriptions.begin(), m_activeSubscriptions.end(),
             [&](const subscription& sub) { return sub.id == sensorId; }),
@@ -48,6 +50,7 @@ void EventDispatcher<EventType>::unsubscribe(const std::string& sensorId) {
 
 template<typename EventType>
 void EventDispatcher<EventType>::dispatch(const std::string& sensorId, const EventType& e) const {
+    // If the matcher finds a substring match in m_activeSubscriptions, call the handler with e as param.
    for (const auto& sub : m_activeSubscriptions) {
        if (sub.matchFunction(sensorId)) {
            sub.handler(e);

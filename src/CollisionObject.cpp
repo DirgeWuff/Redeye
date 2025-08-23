@@ -2,12 +2,10 @@
 // Created by DirgeWuff on 7/15/25.
 //
 
-
-#include <iostream>
+#include <cstring>
 #include "box2d/types.h"
 #include "box2d/box2d.h"
 #include "CollisionObject.h"
-
 
 // Base class for a CollisionObject, generated from vertices in a tiled map's object layer.
 // These are used to generate collisions with the terrain in a world.

@@ -36,6 +36,9 @@ void drawDebugCollisionShapes(const std::unique_ptr<TiledMap>& map);
 // Draw collision vertices in a world, based on collisionWorld_t
 void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map);
 
+// Draw event colliders in the world
+void drawDebugEventColliders(const std::unique_ptr<TiledMap>& map);
+
 // Draw controls window for debugging features
 // Must be called AFTER SceneCamera->cameraEnd()
 void drawControlsWindow();

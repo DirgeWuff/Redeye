@@ -22,7 +22,9 @@ SceneCamera::SceneCamera(const TiledMap& map, const float zoomLevel) {
             GetScreenHeight() / m_camera->zoom
         };
 
-        m_cameraCenter = {m_cameraRect.x + m_cameraRect.width / 2.0f, m_cameraRect.y + m_cameraRect.height / 2.0f};
+        m_cameraCenter = {
+            m_cameraRect.x + m_cameraRect.width / 2.0f,
+            m_cameraRect.y + m_cameraRect.height / 2.0f};
         m_targetCenter = {0.0f, 0.0f}; // Init to zero might be bad???
         m_mapSize = {
             map.getTileWidth() * map.getMapWidth(),

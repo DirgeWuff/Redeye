@@ -59,11 +59,12 @@ public:
 
     void disableEventCollider(const std::string& id);
 
-    [[nodiscard]] float getMapWidth() const noexcept;                                           // Get the TiledMap's width in number of tiles
-    [[nodiscard]] float getMapHeight() const noexcept;                                          // Get the TieldMap's height in number of tiles
-    [[nodiscard]] float getTileWidth() const noexcept;                                          // Get the width of TiledMap's tiles in pixels
-    [[nodiscard]] float getTileHeight() const noexcept;                                         // Get the height of the TiledMap's tiles in pixels
-    [[nodiscard]] const std::vector<CollisionObject>& getCollisionShapes() const noexcept;      // Return a reference to the TiledMap's CollisionObjects
+    [[nodiscard]] float getMapWidth() const noexcept;                                                               // Get the TiledMap's width in number of tiles
+    [[nodiscard]] float getMapHeight() const noexcept;                                                              // Get the TiledMap's height in number of tiles
+    [[nodiscard]] float getTileWidth() const noexcept;                                                              // Get the width of TiledMap's tiles in pixels
+    [[nodiscard]] float getTileHeight() const noexcept;                                                             // Get the height of the TiledMap's tiles in pixels
+    [[nodiscard]] const std::vector<CollisionObject>& getCollisionShapes() const noexcept;                          // Return a reference to the TiledMap's CollisionObjects
+    [[nodiscard]] const std::unordered_map<std::string, EventCollider>& getEventColliders() const noexcept;         // Return a reference to the TiledMap's EventColliders
 };
 
 #endif //TILEMAP_H

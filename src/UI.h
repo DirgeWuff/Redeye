@@ -34,11 +34,15 @@ public:
 
     RectButton() = delete;
     ~RectButton() = default;
+
     // Write overloads to this as needed
     void setClickEvent(std::function<void()> event) noexcept;                               // Set the RectButton's click event
     void setColor(Color primaryColor, Color hoverColor) noexcept;                           // Set the primary and hover color of the RectButton
     void setCustomFont(Font font, int fontSize, float fontSpacing, Color color) noexcept;   // Set custom font parameters for a RectButton
     void draw(const std::unique_ptr<SceneCamera>& camera) const;                            // Update/draw functionality baked into one for simplicity.
+};
+
+class UI {
 
 };
 
