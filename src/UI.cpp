@@ -2,7 +2,6 @@
 // Created by DirgeWuff on 8/14/2025.
 //
 
-
 #include <cmath>
 #include "raylib.h"
 #include "raymath.h"
@@ -108,3 +107,65 @@ void RectButton::draw(const std::unique_ptr<SceneCamera>& camera) const {
     }
 }
 
+TextAlert::TextAlert(const std::string text, const float duration) :
+    m_duration(duration),
+    m_elapsedTime(0.0f),
+    m_fontSize(30.0f),
+    m_fontSpacing(1.0f),
+    m_font(LoadFontEx(
+        "../assets/Fonts/JetBrainsMono-Bold.ttf",
+        static_cast<int>(m_fontSize * 3.0f),
+        nullptr,
+        0)),
+        m_message(std::move(text))
+{
+    m_active = true;
+    m_posX = 10.0f;
+    m_posY = 10.0f;
+}
+
+void TextAlert::update() {
+    float deltaTime = GetFrameTime();
+
+    if (m_active) {
+        m_elapsedTime += deltaTime;
+
+        if (m_elapsedTime >= m_duration) {
+            m_active = false;
+        }
+    }
+}
+
+void TextAlert::draw() const {
+    if (m_active) {
+        DrawTextEx(
+            m_font,
+            m_message.c_str(),
+            {m_posX, m_posY},
+            m_fontSize,
+            m_fontSpacing,
+            RED);
+    }
+}
+
+void UIHandler::addElement(std::unique_ptr<UIElement> newElement) {
+    m_activeElements.push_back(std::move(newElement));
+}
+
+void UIHandler::updateUI() {
+    for (auto it = m_activeElements.begin(); it != m_activeElements.end();) {
+        if (!(*it)->getStatus()) {
+            m_activeElements.erase(it);
+        }
+        else {
+            (*it)->update();
+            ++it;
+        }
+    }
+}
+
+void UIHandler::drawUI() const {
+    for (const auto& element : m_activeElements) {
+        element->draw();
+    }
+}

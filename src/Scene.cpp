@@ -19,6 +19,7 @@ Scene::Scene(
     std::string&& playerSpritePath,
     std::string&& mapFilePath) :
 m_worldDef(b2DefaultWorldDef()),
+m_uiHandler(UIHandler()),
 m_playerInput(InputHandler())
 {
     m_worldDef.gravity = {0.0f, 50.0f};
@@ -88,6 +89,7 @@ m_playerInput(InputHandler())
                 const auto* info = static_cast<sensorInfo*>(b2Shape_GetUserData(e.visitorShape));
                 m_collisionEventDispatcher->unsubscribe(info->typeId);
                 m_map->disableEventCollider(info->typeId);
+                m_uiHandler.addElement(std::make_unique<TextAlert>("Checkpoint reached...", 2.0f));
             }
         });
 }
@@ -130,6 +132,7 @@ void Scene::handleSensorEvents() const {
 
 // Update our scene.
 void Scene::updateScene() {
+    m_uiHandler.updateUI();
     m_playerInput.handleInput(m_playerCharacter);
     b2World_Step(m_worldId, g_worldStep, g_subStep);
     handleSensorEvents();
@@ -160,7 +163,9 @@ void Scene::drawScene() const {
 
     m_camera->cameraEnd();
 
-    // Draw these outside of camera context!!!
+    // Draw these outside of camera context!
+    m_uiHandler.drawUI();
+
     #ifdef DEBUG
         drawControlsWindow();
         drawDebugFootpawSensorStatus(m_playerCharacter);
