@@ -20,6 +20,8 @@ float pixelsToMeters(float pixels);                                     // Conve
 Vector2 toRayVec2(const tson::Vector2f& vec);                           // Convert tson::Vector2i to Vector2
 b2Vec2 toB2Vec2(const tson::Vector2i& vec);                             // Convert tson::Vector2i to b2Vec2
 Rectangle toRayRect(const tson::Rect& rect);                            // Convert tson::Rect to Rectangle
+float getRandFloat(float min, float max);                               // Generate a random float between min and max
+int getRandInt(int min, int max);                                       // Generate a random int between min and max
 
 tson::Vector2i v2iAdd(
     const tson::Vector2i& vecOne,

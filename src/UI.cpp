@@ -7,6 +7,8 @@
 #include "raymath.h"
 #include "UI.h"
 
+// Buttons
+// =====================================================================================================================
 RectButton::RectButton(
     const float cornerX,
     const float cornerY,
@@ -107,6 +109,8 @@ void RectButton::draw(const std::unique_ptr<SceneCamera>& camera) const {
     }
 }
 
+// Text
+// =====================================================================================================================
 TextAlert::TextAlert(const std::string text, const float duration) :
     m_duration(duration),
     m_elapsedTime(0.0f),
@@ -125,7 +129,7 @@ TextAlert::TextAlert(const std::string text, const float duration) :
 }
 
 void TextAlert::update() {
-    float deltaTime = GetFrameTime();
+    const float deltaTime = GetFrameTime();
 
     if (m_active) {
         m_elapsedTime += deltaTime;
@@ -148,6 +152,8 @@ void TextAlert::draw() const {
     }
 }
 
+// UI handler
+// =====================================================================================================================
 void UIHandler::addElement(std::unique_ptr<UIElement> newElement) {
     m_activeElements.push_back(std::move(newElement));
 }

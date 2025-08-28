@@ -28,6 +28,8 @@ class Player final : public Entity, public CommandListener {
     uint8_t m_frameIndex;               // Currently selected sprite
     const uint8_t m_frameDelayAmount;   // Duration to delay next frame
     uint8_t m_frameDelayClock;          // Clock counting up to amount
+    const uint8_t m_soundDelayAmount;   // Amount to delay the footstep sound
+    uint8_t m_soundDelayClock;          // Clock counting up to next footstep sound
     bool m_moving;                      // Whether or not the player is moving
     bool m_onGround;                    // Whether the player is on the ground or not
     uint16_t m_activeGroundContacts;    // How many b2BeginContactEvents are active on the player
@@ -37,6 +39,7 @@ class Player final : public Entity, public CommandListener {
     b2ShapeDef m_footpawSensorShape{};  // Footpaw sensor box shape
     b2ShapeId m_footpawSensorId{};      // Footpaw sensor box shape ID
     saveData m_currentCheckpoint;       // Current checkpoint data
+    std::vector<Sound> m_footstepSounds;  // Footstep sounds for the player
 public:
     Player(
         float centerX,

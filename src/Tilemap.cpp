@@ -7,6 +7,7 @@
 #include "Tilemap.h"
 #include "Camera.h"
 #include "Error.h"
+#include "EventDispatcher.h"
 #include "Utils.h"
 
 

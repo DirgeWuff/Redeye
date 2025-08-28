@@ -20,7 +20,8 @@ Scene::Scene(
     std::string&& mapFilePath) :
 m_worldDef(b2DefaultWorldDef()),
 m_uiHandler(UIHandler()),
-m_playerInput(InputHandler())
+m_playerInput(InputHandler()),
+m_backgroundNoise(LoadMusicStream("../assets/Sounds/Brown noise.wav"))
 {
     m_worldDef.gravity = {0.0f, 50.0f};
     m_worldId = b2CreateWorld(&m_worldDef);
@@ -46,8 +47,6 @@ m_playerInput(InputHandler())
             "Constructor init failed, an unknown error has occurred. Ln 49, Scene.cpp");
         return;
     }
-
-    m_camera->setTarget(m_playerCharacter);
 
     // Subscribe footpaw sensor.
     m_collisionEventDispatcher->subscribe(
@@ -92,10 +91,16 @@ m_playerInput(InputHandler())
                 m_uiHandler.addElement(std::make_unique<TextAlert>("Checkpoint reached...", 2.0f));
             }
         });
+
+    m_camera->setTarget(m_playerCharacter);
+
+    SetMusicVolume(m_backgroundNoise, 0.30f);
+    PlayMusicStream(m_backgroundNoise);
 }
 
 Scene::~Scene() = default;
 
+// TODO: Consider moving all this to the update method and nix the separate function
 void Scene::handleSensorEvents() const {
     const b2SensorEvents sensorContactEvents = b2World_GetSensorEvents(m_worldId);
 
@@ -138,6 +143,7 @@ void Scene::updateScene() {
     handleSensorEvents();
     m_playerCharacter->update();
     m_camera->update(m_playerCharacter);
+    UpdateMusicStream(m_backgroundNoise);
 }
 
 // Draw our scene.

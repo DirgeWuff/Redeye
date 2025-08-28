@@ -3,6 +3,8 @@
 //
 
 #include <iostream>
+#include <filesystem>
+
 #include "box2d/box2d.h"
 
 #include "Player.h"
@@ -22,6 +24,8 @@ m_numFrames(3),
 m_frameIndex(0),
 m_frameDelayAmount(10),
 m_frameDelayClock(0),
+m_soundDelayAmount(m_frameDelayAmount * 3), // Still doesn't REALLY sync with footsteps
+m_soundDelayClock(0),
 m_moving(false),
 m_onGround(true),
 m_activeGroundContacts(0),
@@ -41,6 +45,16 @@ m_lastDirection(RIGHT)
     m_sizeMeters = pixelsToMetersVec(m_sizePx);
     m_centerPosition = {pixelsToMeters(centerX), pixelsToMeters(centerY)};
     m_cornerPosition ={centerX - m_sizePx.x / 2, centerY - m_sizePx.y / 2};
+
+    // SLIGHTLY scary, what if there's unicode chars in the path somehow???
+    for (const auto& sound : fs::directory_iterator("../assets/Player assets/Sounds")) {
+        std::string path = sound.path().string();
+
+        Sound footstep = LoadSound(path.c_str());
+        SetSoundVolume(footstep, 0.4f);
+
+        m_footstepSounds.push_back(footstep);
+    }
 
     // B2 body stuff
     m_bodyDef = b2DefaultBodyDef();
@@ -114,20 +128,49 @@ void Player::moveRight() {
     const float mass = b2Body_GetMass(m_body);
     m_lastDirection = RIGHT;
 
+    // Physically move player
     b2Body_ApplyLinearImpulse(
         m_body,
         {mass * .50f, 0.0f},
         b2Body_GetWorldCenterOfMass(m_body),
         true);
 
-    if (m_frameDelayClock >= m_frameDelayAmount) {
-        m_frameIndex++;
-        m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
-        m_spriteRect.x = m_sizePx.x * static_cast<float>(m_frameIndex);
-        m_frameDelayClock = 0;
+    // Switch sprites
+    if (m_onGround) {
+        if (m_frameDelayClock >= m_frameDelayAmount) {
+            m_frameIndex++;
+            m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
+            m_spriteRect.x = m_sizePx.x * static_cast<float>(m_frameIndex);
+            m_frameDelayClock = 0;
+        }
+        else {
+            m_frameDelayClock++;
+        }
     }
     else {
-        m_frameDelayClock++;
+        m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
+        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
+    }
+
+    // Play footstep sounds
+    // Try/catch here due to the sheer amount of issues I've had with this...
+    if (m_onGround) {
+        if (m_soundDelayClock >= m_soundDelayAmount) {
+            try {
+                PlaySound(m_footstepSounds.at(getRandInt(0, m_footstepSounds.size() - 1)));
+                m_soundDelayClock = 0;
+            }
+            catch (std::out_of_range& e) {
+                std::cerr << "Fatal error: value out of range. " << e.what() << std::endl;
+            }
+            catch (...) {
+                std::cerr << "Unhandled exception thrown." << std::endl;
+            }
+
+        }
+        else {
+            m_soundDelayClock++;
+        }
     }
 }
 
@@ -141,14 +184,37 @@ void Player::moveLeft() {
         b2Body_GetWorldCenterOfMass(m_body),
         true);
 
-    if (m_frameDelayClock >= m_frameDelayAmount) {
-        m_frameIndex++;
-        m_spriteRect.y = 0.0f;
-        m_spriteRect.x = m_sizePx.x * static_cast<float>(m_frameIndex);
-        m_frameDelayClock = 0;
+    if (m_onGround) {
+        if (m_frameDelayClock >= m_frameDelayAmount) {
+            m_frameIndex++;
+            m_spriteRect.y = 0.0f;
+            m_spriteRect.x = m_sizePx.x * static_cast<float>(m_frameIndex);
+            m_frameDelayClock = 0;
+        }
+        else {
+            m_frameDelayClock++;
+        }
     }
     else {
-        m_frameDelayClock++;
+        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
+    }
+
+    if (m_onGround) {
+        if (m_soundDelayClock >= m_soundDelayAmount) {
+            try {
+                PlaySound(m_footstepSounds.at(getRandInt(0, m_footstepSounds.size() - 1)));
+                m_soundDelayClock = 0;
+            }
+            catch (std::out_of_range& e) {
+                std::cerr << "Fatal error: value out of range. " << e.what() << std::endl;
+            }
+            catch (...) {
+                std::cerr << "Unhandled exception thrown." << std::endl;
+            }
+        }
+        else {
+            m_soundDelayClock++;
+        }
     }
 }
 
@@ -195,6 +261,7 @@ void Player::murder(const std::unique_ptr<SceneCamera>& camera) {
         30.0f,
         "Continue from last checkpoint",
         camera);
+
     loadCheckpointBtn.setClickEvent([this, &alpha, &rect, &camera] {
         alpha = 0;
         m_dead = false;
@@ -215,6 +282,7 @@ void Player::murder(const std::unique_ptr<SceneCamera>& camera) {
 
         reform();
     });
+
     loadCheckpointBtn.setColor(
         {9, 59,36, 255},
         {10,92,54, 255});

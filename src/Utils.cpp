@@ -3,48 +3,60 @@
 //
 
 #include <cstdint>
+#include <random>
 #include "box2d/types.h"
 #include "Utils.h"
 
-constexpr uint8_t PPM = 100; // 100 px/meter
+// Globals
+//======================================================================================================================
+constexpr uint8_t g_ppm = 100; // 100 px/meter
 
+std::random_device g_randomDevice;
+std::mt19937 g_randomGenerator(g_randomDevice());
+
+// Equality comparison
+//======================================================================================================================
 bool isShapeIdEqual(const b2ShapeId& idOne, const b2ShapeId& idTwo) {
     return idOne.generation == idTwo.generation &&
            idOne.index1 == idTwo.index1 &&
            idOne.world0 == idTwo.world0;
 }
 
+// Number conversion
+// =====================================================================================================================
 Vector2 metersToPixelsVec(const b2Vec2& vec) {
-    return Vector2{vec.x * PPM, vec.y * PPM};
+    return Vector2{vec.x * g_ppm, vec.y * g_ppm};
 }
 
 b2Vec2 pixelsToMetersVec(const Vector2& vec) {
-    return b2Vec2{vec.x / PPM, vec.y / PPM};
+    return b2Vec2{vec.x / g_ppm, vec.y / g_ppm};
 }
 
 float metersToPixels(const float meters) {
-    return meters * PPM;
+    return meters * g_ppm;
 }
 
 float pixelsToMeters(const float pixels) {
-    return pixels / PPM;
+    return pixels / g_ppm;
 }
 
-b2Vec2 toB2Vec2(const tson::Vector2i &vec) {
+// Type conversion
+// =====================================================================================================================
+b2Vec2 toB2Vec2(const tson::Vector2i& vec) {
     return b2Vec2{
     pixelsToMeters(vec.x),
     pixelsToMeters(vec.y)
     };
 }
 
-Vector2 toRayVec2(const tson::Vector2f &vec) {
+Vector2 toRayVec2(const tson::Vector2f& vec) {
     return Vector2{
         vec.x,
         vec.y
     };
 }
 
-Rectangle toRayRect(const tson::Rect &rect) {
+Rectangle toRayRect(const tson::Rect& rect) {
     return Rectangle{
     static_cast<float>(rect.x),
     static_cast<float>(rect.y),
@@ -62,6 +74,27 @@ tson::Vector2i v2iAdd(
     };
 }
 
+// RNG
+// =====================================================================================================================
+float getRandFloat(float min, float max) {
+    if (min > max)
+        std::swap(min, max);
+
+    std::uniform_real_distribution<>distribution(min, max);
+    return distribution(g_randomGenerator);
+}
+
+int getRandInt(int min, int max) {
+    if (min > max)
+        std::swap(min, max);
+
+    std::uniform_int_distribution<> distribution(min, max);
+    return distribution(g_randomGenerator);
+}
+
+// Timing and performance
+// =====================================================================================================================
+// TODO: Add more robust and varied timing/perf functions
 CodeClock::~CodeClock() {
     std::chrono::duration<float> totalTime = {};
 
