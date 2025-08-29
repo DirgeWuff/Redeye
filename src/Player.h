@@ -40,6 +40,7 @@ class Player final : public Entity, public CommandListener {
     b2ShapeId m_footpawSensorId{};      // Footpaw sensor box shape ID
     saveData m_currentCheckpoint;       // Current checkpoint data
     std::vector<Sound> m_footstepSounds;  // Footstep sounds for the player
+    std::vector<Sound> m_landingSounds;   // Sound for the player landing.
 public:
     Player(
         float centerX,

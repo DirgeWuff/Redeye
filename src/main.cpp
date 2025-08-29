@@ -4,8 +4,7 @@
 constexpr uint16_t g_windowWidth = 1500;
 constexpr uint16_t g_windowHeight = 800;
 
-// TODO: Create audio handler
-// TODO: Write proper copy/move/etc. constructors for custom classes  where needed
+// TODO: Write proper copy/move/etc. constructors for custom classes where needed
 
 int main() {
 
@@ -13,7 +12,7 @@ int main() {
     InitAudioDevice();
     SetTargetFPS(60);
 
-    Scene testScene = Scene(
+    auto testScene = Scene(
         "../assets/Player assets/PlayerWalk.png",
         "../assets/Map data/Version 2/TestLvl1.tmj");
 

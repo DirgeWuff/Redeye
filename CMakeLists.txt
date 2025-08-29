@@ -34,7 +34,6 @@ add_executable(Redeye src/main.cpp
         src/Tilemap.h
         src/Camera.cpp
         src/Camera.h
-        src/Error.cpp
         src/Error.h
         src/Utils.cpp
         src/Utils.h
@@ -51,6 +50,8 @@ add_executable(Redeye src/main.cpp
         src/EventCollider.h
         src/UI.cpp
         src/UI.h
+        src/Audio.cpp
+        src/Audio.h
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

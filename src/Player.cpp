@@ -10,8 +10,10 @@
 #include "Player.h"
 #include "Utils.h"
 #include "Debug.h"
+#include "Error.h"
 #include "EventCollider.h"
 #include "UI.h"
+#include "Audio.h"
 
 enum directions {RIGHT, LEFT};
 
@@ -34,6 +36,9 @@ m_lastDirection(RIGHT)
 {
     // Raylib/general stuff
     m_walkSprites = LoadTexture(spritePath.c_str());
+    if (!IsTextureValid(m_walkSprites))
+        logErr("Filepath to player texture missing or corrupted: " + spritePath);
+
     m_spriteRect = {
         0.0f,
         static_cast<float>(m_walkSprites.height) / 2,
@@ -46,15 +51,8 @@ m_lastDirection(RIGHT)
     m_centerPosition = {pixelsToMeters(centerX), pixelsToMeters(centerY)};
     m_cornerPosition ={centerX - m_sizePx.x / 2, centerY - m_sizePx.y / 2};
 
-    // SLIGHTLY scary, what if there's unicode chars in the path somehow???
-    for (const auto& sound : fs::directory_iterator("../assets/Player assets/Sounds")) {
-        std::string path = sound.path().string();
-
-        Sound footstep = LoadSound(path.c_str());
-        SetSoundVolume(footstep, 0.4f);
-
-        m_footstepSounds.push_back(footstep);
-    }
+    m_footstepSounds = loadSoundVector("../assets/Player assets/Sounds/Walk", 0.2f);
+    m_landingSounds = loadSoundVector("../assets/Player assets/Sounds/Jump", 0.2f);
 
     // B2 body stuff
     m_bodyDef = b2DefaultBodyDef();
@@ -82,7 +80,7 @@ m_lastDirection(RIGHT)
     m_footpawSensorBox = b2MakeOffsetBox(
         pixelsToMeters(20.0f),
         pixelsToMeters(12.0f),
-        {0.0f, m_sizeMeters.y / 2.3f},
+        {0.0f, m_sizeMeters.y / 3.0f},
         b2MakeRot(0.0f)
     );
     m_footpawSensorShape = b2DefaultShapeDef();
@@ -113,7 +111,10 @@ void Player::update() {
         metersToPixels(m_centerPosition.y) - m_sizePx.y / 2
     };
     if (m_activeGroundContacts > 0) {
-        m_onGround = true;
+        if (!m_onGround) {
+            m_onGround = true;
+            playRandomSound(m_landingSounds);
+        }
     }
     else {
         m_onGround = false;
@@ -135,7 +136,7 @@ void Player::moveRight() {
         b2Body_GetWorldCenterOfMass(m_body),
         true);
 
-    // Switch sprites
+    // Switch sprites and play footstep sounds
     if (m_onGround) {
         if (m_frameDelayClock >= m_frameDelayAmount) {
             m_frameIndex++;
@@ -146,31 +147,18 @@ void Player::moveRight() {
         else {
             m_frameDelayClock++;
         }
-    }
-    else {
-        m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
-        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
-    }
 
-    // Play footstep sounds
-    // Try/catch here due to the sheer amount of issues I've had with this...
-    if (m_onGround) {
         if (m_soundDelayClock >= m_soundDelayAmount) {
-            try {
-                PlaySound(m_footstepSounds.at(getRandInt(0, m_footstepSounds.size() - 1)));
-                m_soundDelayClock = 0;
-            }
-            catch (std::out_of_range& e) {
-                std::cerr << "Fatal error: value out of range. " << e.what() << std::endl;
-            }
-            catch (...) {
-                std::cerr << "Unhandled exception thrown." << std::endl;
-            }
-
+            playRandomSound(m_footstepSounds);
+            m_soundDelayClock = 0;
         }
         else {
             m_soundDelayClock++;
         }
+    }
+    else {
+        m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
+        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
     }
 }
 
@@ -194,27 +182,17 @@ void Player::moveLeft() {
         else {
             m_frameDelayClock++;
         }
-    }
-    else {
-        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
-    }
 
-    if (m_onGround) {
         if (m_soundDelayClock >= m_soundDelayAmount) {
-            try {
-                PlaySound(m_footstepSounds.at(getRandInt(0, m_footstepSounds.size() - 1)));
-                m_soundDelayClock = 0;
-            }
-            catch (std::out_of_range& e) {
-                std::cerr << "Fatal error: value out of range. " << e.what() << std::endl;
-            }
-            catch (...) {
-                std::cerr << "Unhandled exception thrown." << std::endl;
-            }
+            playRandomSound(m_footstepSounds);
+            m_soundDelayClock = 0;
         }
         else {
             m_soundDelayClock++;
         }
+    }
+    else {
+        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
     }
 }
 
