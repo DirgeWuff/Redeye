@@ -30,33 +30,39 @@ void logErr(const T& errorMessage) {
 
     std::string msg = "FATAL ERROR: " + std::string(errorMessage);
     const char* exitMsg = "Press Esc to exit.";
-    const int exitMsgPosX = (1500 - MeasureText(exitMsg, 35)) / 2;
-    int messageLen = MeasureText(msg.c_str(), 35);
+    const int exitMsgPosX = (1500 - MeasureText(exitMsg, 20)) / 2;
+    int messageLen = MeasureText(msg.c_str(), 20);
 
     while (!WindowShouldClose()) {
 
         // Wrap long messages
-        // Give a 300 px buffer to the screen size
-        if (messageLen > 1200) {
+        // Give a 500 px buffer to the screen size
+        if (messageLen > 1000) {
             std::string buff{};
             std::string line{};
             int currLineLen{};
             std::vector<std::string> wrappedMessage{};
             std::stringstream ss(msg);
 
-            // Break the text up and put it in vector
             while (ss) {
+                // Potentially very problematic.
+                // Error messages often contain large portions with many spaces, and large portions with few.
+                // Should really come up with a better way to split text up so it ALWAYS prints properly...
                 std::getline(ss, buff, ' ');
-                if (currLineLen < 1200) {
+                if (currLineLen < 1000) {
                     line += buff + " ";
-                    currLineLen = MeasureText(line.c_str(), 35);
+                    currLineLen = MeasureText(line.c_str(), 20);
+                    buff = "";
                 }
                 else {
+                    line += buff;
                     wrappedMessage.push_back(line);
                     currLineLen = 0;
                     line = "";
                 }
             }
+
+            wrappedMessage.push_back(line);
 
             // Draw each string in vector to screen at correct pos
             BeginDrawing();
@@ -64,14 +70,14 @@ void logErr(const T& errorMessage) {
 
             int msgPosY = 5;
             for (const auto& str : wrappedMessage) {
-                int posX  = (1500 - MeasureText(str.c_str(), 35)) / 2;
+                int posX  = (1500 - MeasureText(str.c_str(), 20)) / 2;
 
-                DrawText(str.c_str(), posX, msgPosY, 35, RED);
+                DrawText(str.c_str(), posX, msgPosY, 20, RED);
 
                 msgPosY += 40;
             }
 
-            DrawText(exitMsg, exitMsgPosX, msgPosY + 60, 35, RED);
+            DrawText(exitMsg, exitMsgPosX, msgPosY + 60, 20, RED);
 
             EndDrawing();
         }
@@ -80,10 +86,10 @@ void logErr(const T& errorMessage) {
 
             ClearBackground(BLACK);
 
-            const int posX = (1500 - MeasureText(msg.c_str(), 35)) / 2;
+            const int posX = (1500 - MeasureText(msg.c_str(), 20)) / 2;
 
-            DrawText(msg.c_str(), posX, 5, 35, RED);
-            DrawText(exitMsg, exitMsgPosX, 95, 35, RED);
+            DrawText(msg.c_str(), posX, 5, 20, RED);
+            DrawText(exitMsg, exitMsgPosX, 95, 20, RED);
 
             EndDrawing();
         }

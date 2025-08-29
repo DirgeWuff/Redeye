@@ -108,7 +108,7 @@ CodeClock::~CodeClock() {
     // Format to be more readable in case the time is REALLY fast.
     // Using scientific notation here
     if (seconds < 1e-3) {
-        std::cout << "Average time: " << seconds * 1e6 << " micro seconds." << std::endl;
+        std::cout << "Average time: " << seconds * 1e6 << " microseconds." << std::endl;
     }
     else if (seconds < 1) {
         std::cout << "Average time: " << seconds * 1e3 << "milliseconds" << std::endl;

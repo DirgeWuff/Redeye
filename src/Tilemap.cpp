@@ -34,7 +34,7 @@ TiledMap::TiledMap(std::string&& filepath, b2WorldId world)  {
 
         if (map->getStatus() != tson::ParseStatus::OK) {
             logErr(
-                "Constructor init failed: Unable to parse map: " + map->getStatusMessage() + "Ln 32, Tilemap.cpp");
+                "Constructor init failed: Unable to parse map: " + map->getStatusMessage() + ". Ln 32, Tilemap.cpp");
             return;
         }
 
