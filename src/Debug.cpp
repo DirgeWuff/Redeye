@@ -15,7 +15,6 @@
 #include "../external_libs/Raygui/raygui.h"
 #include "Debug.h"
 #include "Utils.h"
-#include "Error.h"
 #include "Scene.h"
 
 const Font g_debugFont = LoadFont("../assets/Fonts/JetBrainsMono-Bold.ttf");
@@ -225,12 +224,10 @@ void drawDebugFootpawSensorStatus(const std::shared_ptr<Player>& player) {
     }
 }
 
-void drawDebugCollisionShapes(const std::unique_ptr<TiledMap>& map) {
+void drawDebugCollisionShapes(const MapData& map) {
     if (!g_drawTerrainShapes) return;
 
-    assert(map != nullptr && "map == nullptr. Ln 227, Debug.cpp");
-
-    const std::vector<CollisionObject> shapes = map->getCollisionShapes();
+    const std::vector<CollisionObject>& shapes = map.collisionObjects;
 
     for (const auto& shape : shapes) {
         const b2Vec2* points = shape.getObjectVerts();
@@ -253,12 +250,10 @@ void drawDebugCollisionShapes(const std::unique_ptr<TiledMap>& map) {
 }
 
 // TODO: Improve speed on this, will tank framerate when used
-void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map) {
+void drawDebugCollisionVerts(const MapData& map) {
     if (!g_drawTerrainVerts) return;
 
-    assert(map !=nullptr && "map == nullptr. Ln 255, Debug.cpp");
-
-    const std::vector<CollisionObject> shapes = map->getCollisionShapes();
+    const std::vector<CollisionObject>& shapes = map.collisionObjects;
 
     for (const auto& shape : shapes) {
         const b2Vec2* points = shape.getObjectVerts();
@@ -274,10 +269,10 @@ void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map) {
     }
 }
 
-void drawDebugEventColliders(const std::unique_ptr<TiledMap>& map) {
+void drawDebugEventColliders(const MapData& map) {
     if (!g_drawEventColliders) return;
 
-    std::unordered_map<std::string, EventCollider> colliders = map->getEventColliders();
+    const std::unordered_map<std::string, EventCollider>& colliders = map.eventColliders;
 
     for (const auto& [id, collider] : colliders) {
         const Vector2 pos = collider.getPosPixels();

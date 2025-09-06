@@ -300,6 +300,10 @@ void Player::reform() const noexcept {
     return m_onGround;
 }
 
+[[nodiscard]] bool Player::isDead() const noexcept {
+    return m_dead;
+}
+
 void Player::addContactEvent() noexcept {
     m_activeGroundContacts++;
 }

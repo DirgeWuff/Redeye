@@ -8,8 +8,6 @@
 #include "Entity.h"
 #include "Tilemap.h"
 
-class TiledMap;
-
 class SceneCamera final : public Camera2D {
    std::shared_ptr<Camera2D> m_camera;    // Base Raylib Camera2D ptr
    Rectangle m_cameraRect;                // Rectangle defining the camera's bounds
@@ -19,7 +17,7 @@ class SceneCamera final : public Camera2D {
    Vector2 m_maxCameraPos;                // The maximum x/y position the camera have without viewing outside map bounds
 public:
    SceneCamera() = default;
-   SceneCamera(const TiledMap& map, float zoomLevel);
+   SceneCamera(const MapData& map, float zoomLevel);
    ~SceneCamera();
    void setTarget(const std::shared_ptr<Entity>& targetEntity) const;         // Set the camera to target an entity
    void update(const std::shared_ptr<Entity>& targetEntity);                  // Update the camera's target, based on entity position

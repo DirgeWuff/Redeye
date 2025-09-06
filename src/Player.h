@@ -60,6 +60,7 @@ public:
     void reform() const noexcept;                                   // Respawn the player
     [[nodiscard]] b2ShapeId getFootpawSenorId() const noexcept;     // Get the footpaw sensor id
     [[nodiscard]] bool getFootpawSensorStatus() const noexcept;     // Get the footpaw sensor status
+    [[nodiscard]] bool isDead() const noexcept;
     void addContactEvent() noexcept;                                // Add a player contact event to counter
     void removeContactEvent() noexcept;                             // Remove a player contact event from counter
     void setCurrentCheckpoint() noexcept;

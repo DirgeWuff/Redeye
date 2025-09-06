@@ -8,7 +8,7 @@
 #include "Camera.h"
 #include "Error.h"
 
-SceneCamera::SceneCamera(const TiledMap& map, const float zoomLevel) {
+SceneCamera::SceneCamera(const MapData& map, const float zoomLevel) {
     try {
         m_camera = std::make_shared<Camera2D>();
         m_camera->offset = {1500.0f / 2.0f, 800.0f / 2.0f}; // Hard coded value, no bueno, fix later
@@ -27,8 +27,8 @@ SceneCamera::SceneCamera(const TiledMap& map, const float zoomLevel) {
             m_cameraRect.y + m_cameraRect.height / 2.0f};
         m_targetCenter = {0.0f, 0.0f}; // Init to zero might be bad???
         m_mapSize = {
-            map.getTileWidth() * map.getMapWidth(),
-            map.getTileHeight() * map.getMapHeight()
+            static_cast<float>(map.tileWidth) * static_cast<float>(map.mapWidth),
+            static_cast<float>(map.tileHeight) * static_cast<float>(map.mapHeight)
         };
         m_maxCameraPos = {
             m_mapSize.x - m_cameraRect.width / 2.0f,

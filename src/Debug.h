@@ -31,13 +31,13 @@ void drawDebugPlayerPosition(const std::shared_ptr<Player>& player);
 void drawDebugFootpawSensorStatus(const std::shared_ptr<Player>& player);
 
 // Draw collision shapes in a world, based on vertices in collisionWorld_t
-void drawDebugCollisionShapes(const std::unique_ptr<TiledMap>& map);
+void drawDebugCollisionShapes(const MapData& map);
 
 // Draw collision vertices in a world, based on collisionWorld_t
-void drawDebugCollisionVerts(const std::unique_ptr<TiledMap>& map);
+void drawDebugCollisionVerts(const MapData& map);
 
 // Draw event colliders in the world
-void drawDebugEventColliders(const std::unique_ptr<TiledMap>& map);
+void drawDebugEventColliders(const MapData& map);
 
 // Draw controls window for debugging features
 // Must be called AFTER SceneCamera->cameraEnd()

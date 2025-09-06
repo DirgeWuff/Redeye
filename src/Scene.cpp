@@ -10,6 +10,7 @@
 #include "EventCollider.h"
 #include "Utils.h"
 #include "Debug.h"
+#include "TilemapRenderer.h"
 
 constexpr float g_worldStep = 1.0f / 60.0f;
 constexpr uint8_t g_subStep = 4;
@@ -25,6 +26,7 @@ m_backgroundNoise(LoadMusicStream("../assets/Sounds/Brown noise.wav"))
 {
     m_worldDef.gravity = {0.0f, 50.0f};
     m_worldId = b2CreateWorld(&m_worldDef);
+    m_map = loadMap(mapFilePath, m_worldId);
 
     try {
         m_playerCharacter = std::make_shared<Player>(
@@ -33,8 +35,7 @@ m_backgroundNoise(LoadMusicStream("../assets/Sounds/Brown noise.wav"))
             m_worldId,
             playerSpritePath);
 
-        m_map = std::make_unique<TiledMap>(mapFilePath.data(), m_worldId);
-        m_camera = std::make_unique<SceneCamera>(*m_map, 2.0f);
+        m_camera = std::make_unique<SceneCamera>(m_map, 2.0f);
         m_collisionEventDispatcher = std::make_unique<EventDispatcher<playerContactEvent>>();
     }
     catch (std::bad_alloc) { // NEVER EVER had this throw but worth having here
@@ -87,7 +88,7 @@ m_backgroundNoise(LoadMusicStream("../assets/Sounds/Brown noise.wav"))
 
                 const auto* info = static_cast<sensorInfo*>(b2Shape_GetUserData(e.visitorShape));
                 m_collisionEventDispatcher->unsubscribe(info->typeId);
-                m_map->disableEventCollider(info->typeId);
+                disableEventCollider(m_map, info->typeId);
                 m_uiHandler.addElement(std::make_unique<TextAlert>("Checkpoint reached...", 2.0f));
             }
         });
@@ -148,16 +149,17 @@ void Scene::updateScene() {
 
 // Draw our scene.
 void Scene::drawScene() const {
-    m_camera->cameraBegin();
+    if (!m_playerCharacter->isDead()) {
+        m_camera->cameraBegin();
 
-    ClearBackground(BLACK); // Might be unnecessary???
-    g_timer.begin();
-    m_map->draw(*m_camera, {0.0f, 0.0f}, WHITE);
-    g_timer.end();
-    m_playerCharacter->draw();
+        ClearBackground(BLACK); // Might be unnecessary???
+        g_timer.begin();
+        renderMap(m_camera, m_map, {0.0f, 0.0f}, WHITE);
+        g_timer.end();
+        m_playerCharacter->draw();
 
-    // TODO: Move these calls to their relevant classes and use generic raw pointers
-    #ifdef DEBUG
+        // TODO: Move these calls to their relevant classes and use generic raw pointers
+#ifdef DEBUG
         drawDebugBodyShapes(m_playerCharacter);
         drawDebugCollisionShapes(m_map);
         drawDebugBodyCenter(m_playerCharacter);
@@ -165,17 +167,18 @@ void Scene::drawScene() const {
         drawDebugCameraCrosshair(m_camera);
         drawDebugCameraRect(m_camera);
         drawDebugEventColliders(m_map);
-    #endif
+#endif
 
-    m_camera->cameraEnd();
+        m_camera->cameraEnd();
 
-    // Draw these outside of camera context!
-    m_uiHandler.drawUI();
+        // Draw these outside of camera context!
+        m_uiHandler.drawUI();
 
-    #ifdef DEBUG
+#ifdef DEBUG
         drawControlsWindow();
         drawDebugFootpawSensorStatus(m_playerCharacter);
         drawDebugPlayerPosition(m_playerCharacter);
-    #endif
+#endif
+    }
 
 }
