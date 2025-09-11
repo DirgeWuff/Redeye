@@ -979,6 +979,22 @@
  "nextlayerid":23,
  "nextobjectid":15,
  "orientation":"orthogonal",
+ "properties":[
+        {
+         "name":"bgNoisePath",
+         "type":"string",
+         "value":"..\/assets\/Map data\/Sounds\/Brown noise.wav"
+        }, 
+        {
+         "name":"playerStartX",
+         "type":"float",
+         "value":200
+        }, 
+        {
+         "name":"playerStartY",
+         "type":"float",
+         "value":390
+        }],
  "renderorder":"left-down",
  "tiledversion":"1.11.2",
  "tileheight":32,

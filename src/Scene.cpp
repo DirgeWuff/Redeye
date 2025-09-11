@@ -21,8 +21,7 @@ Scene::Scene(
     std::string&& mapFilePath) :
 m_worldDef(b2DefaultWorldDef()),
 m_uiHandler(UIHandler()),
-m_playerInput(InputHandler()),
-m_backgroundNoise(LoadMusicStream("../assets/Sounds/Brown noise.wav"))
+m_playerInput(InputHandler())
 {
     m_worldDef.gravity = {0.0f, 50.0f};
     m_worldId = b2CreateWorld(&m_worldDef);
@@ -30,8 +29,8 @@ m_backgroundNoise(LoadMusicStream("../assets/Sounds/Brown noise.wav"))
 
     try {
         m_playerCharacter = std::make_shared<Player>(
-            200.0f,
-            390.0f,
+            m_map.playerStartPos.x,
+            m_map.playerStartPos.y,
             m_worldId,
             playerSpritePath);
 
@@ -95,11 +94,14 @@ m_backgroundNoise(LoadMusicStream("../assets/Sounds/Brown noise.wav"))
 
     m_camera->setTarget(m_playerCharacter);
 
+    m_backgroundNoise = LoadMusicStream(m_map.bgNoisePath.c_str());
     SetMusicVolume(m_backgroundNoise, 0.30f);
     PlayMusicStream(m_backgroundNoise);
 }
 
-Scene::~Scene() = default;
+Scene::~Scene() {
+    unloadMap(m_map);
+};
 
 // TODO: Consider moving all this to the update method and nix the separate function
 void Scene::handleSensorEvents() const {

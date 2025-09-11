@@ -11,15 +11,16 @@
 #include "Entity.h"
 #include "Camera.h"
 
-class SceneCamera;
-
 struct saveData {
-    b2Vec2 centerPosition{};
+    b2Vec2 centerPosition;
+
+    // char levelPath[128];
     // uint8_t health;
     // uint8_t phoneBattery;
-    // Scene level; <- Maybe find a better way to do this later...
     // Any other data here
 };
+
+class SceneCamera;
 
 class Player final : public Entity, public CommandListener {
     Texture2D m_walkSprites{};          // Walk sprite sheet

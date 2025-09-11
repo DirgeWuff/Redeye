@@ -15,6 +15,10 @@
 #include "Error.h"
 #include "Utils.h"
 
+// TODO: Consider breaking up loadMap() into functions so it's more maintainable...
+
+namespace fs = std::filesystem;
+
 class SceneCamera;
 class EventCollider;
 
@@ -35,34 +39,40 @@ struct RenderData {
 
 // Structured data used to load a map. Used on a per-map basis.
 struct MapData {
+    fs::path baseDir;
+    std::shared_ptr<RenderData> renderDataPtr;
+    std::vector<CollisionObject> collisionObjects;
+    std::unordered_map<std::string, EventCollider> eventColliders;
+
     uint8_t tileWidth;
     uint8_t tileHeight;
     uint16_t mapWidth;
     uint16_t mapHeight;
 
-    fs::path baseDir;
-    std::shared_ptr<RenderData> renderDataPtr;
-    std::vector<CollisionObject> collisionObjects;
-    std::unordered_map<std::string, EventCollider> eventColliders;
+    Vector2 playerStartPos;
+    std::string bgNoisePath;
+    std::optional<std::string> ambientSoundsPath;
 };
 
 template<typename T>
 MapData loadMap(const T& filepath, b2WorldId world) {
     MapData mapData;
 
-    if (!exists(std::filesystem::path(filepath))) {
-        logErr(std::string("Invalid filepath: " + std::string(filepath)));
+    // Validate the filepath.
+    if (!exists(fs::path(filepath))) {
+        logErr(std::string("Invalid filepath to map: ") + std::string(filepath) + std::string("Ln 63, Tilemap.h"));
         return {};
     }
 
-    mapData.baseDir = std::filesystem::relative(filepath);
+    mapData.baseDir = fs::relative(filepath);
     if (mapData.baseDir.has_extension()) {
         mapData.baseDir.remove_filename();
     }
 
     try {
+        // Load map file and validate it.
         tson::Tileson t;
-        std::unique_ptr<tson::Map> map = t.parse(std::filesystem::path(filepath));
+        std::unique_ptr<tson::Map> map = t.parse(fs::path(filepath));
 
         if (map->getStatus() != tson::ParseStatus::OK) {
             logErr(
@@ -70,7 +80,8 @@ MapData loadMap(const T& filepath, b2WorldId world) {
             return {};
         }
 
-        const std::shared_ptr<RenderData> data = std::make_shared<RenderData>();
+        // Load and cache ptrs to the images/textures
+        const auto data = std::make_shared<RenderData>();
 
         for (const auto& tileset : map->getTilesets()) {
             std::string imagePath;
@@ -91,6 +102,7 @@ MapData loadMap(const T& filepath, b2WorldId world) {
         }
 
         for (auto& layer : map->getLayers()) {
+            // Parse image layers. Cheap to draw, so not bothering with ptrs
             if (layer.getType() == tson::LayerType::ImageLayer) {
                 std::string imagePath;
 
@@ -104,6 +116,7 @@ MapData loadMap(const T& filepath, b2WorldId world) {
                 const Texture texture = LoadTexture(imagePath.c_str());
                 data->textures[imagePath] = texture;
             }
+            // Parse collision mesh, create collision objects in Box2D
             else if (layer.getType() == tson::LayerType::ObjectGroup && layer.getName() == "Collision mesh") {
                 for (auto& object : layer.getObjects()) {
                     tson::ObjectType objType = object.getObjectType();
@@ -121,11 +134,12 @@ MapData loadMap(const T& filepath, b2WorldId world) {
                         mapData.collisionObjects.emplace_back(world, points);
                     }
                     else {
-                        logErr("Object layer contains incompatible type. Ln 124, Tilemap.h");
+                        logErr("Collision layer contains incompatible type. Ln 137, Tilemap.h");
                         return {};
                     }
                 }
             }
+            // Parse collider layer and create colliders
             else if (layer.getType() == tson::LayerType::ObjectGroup && layer.getName() == "Event colliders") {
                 std::vector<tson::Object> objects = layer.getObjects();
 
@@ -164,8 +178,13 @@ MapData loadMap(const T& filepath, b2WorldId world) {
 
                          checkpointCnt++;
                      }
+                     else {
+                         logErr(std::string("Incompatible object layer: " + object.getName()));
+                         return {};
+                     }
                  }
             }
+            // Parse tile layers, precompute position and cache texture ptr for each tile
             else if (layer.getType() == tson::LayerType::TileLayer) {
                 std::vector<TileData> renderData;
 
@@ -189,6 +208,57 @@ MapData loadMap(const T& filepath, b2WorldId world) {
 
                 data->layerRenderData[&layer] = std::move(renderData);
             }
+            else {
+                logErr("Incompatible layer type: Group Layer. Ln 212, Tilemap.h");
+                return {};
+            }
+        }
+
+        // Handle embedded map properties, messy as fuck but it works
+        tson::PropertyCollection embeddedData = map->getProperties();
+
+        // Player spawn position
+        // Maybe consider moving this to a new obj layer with point, this is rather clunky...
+        if (embeddedData.hasProperty("playerStartX")) {
+            mapData.playerStartPos.x = embeddedData.getValue<float>("playerStartX");
+        }
+        else {
+            logErr("playerStartX not specified in map. Ln 226, Tilemap.h");
+            return {};
+        }
+
+        if (embeddedData.hasProperty("playerStartY")) {
+            mapData.playerStartPos.y = embeddedData.getValue<float>("playerStartY");
+        }
+        else {
+            logErr("playerStartY not specified in map. Ln 234, Tilemap.h");
+            return {};
+        }
+
+        // Background "music" or noise
+        if (embeddedData.hasProperty("bgNoisePath")) {
+            const auto p = embeddedData.getValue<std::string>("bgNoisePath");
+            if (!exists(fs::path(p))) {
+                logErr(std::string("Missing or corrupted sound data path: " + p + std::string(" Ln 242, Tilemap.h")));
+            }
+
+            mapData.bgNoisePath = p;
+        }
+        else {
+            logErr("bgNoisePath not specified in map. Ln 248, Tilemap.h");
+            return {};
+        }
+
+        // Optional ambient sounds to be played at random intervals
+        // TODO: Add actual ambient noises to sound design so this actually does something
+        if (embeddedData.hasProperty("ambientNoisesPath")) {
+            const auto p = embeddedData.getValue<std::string>("ambientNoisesPath");
+            if (!exists(fs::path(p))) {
+                logErr(std::string("Missing or corrupted sound data path: " + p + std::string("Ln 257, Tilemap.h")));
+                return {};
+            }
+
+            mapData.ambientSoundsPath = p;
         }
 
         mapData.mapWidth = map->getSize().x;
@@ -199,14 +269,19 @@ MapData loadMap(const T& filepath, b2WorldId world) {
         mapData.renderDataPtr = data;
     }
     catch (std::bad_alloc) {
-        logErr("Constructor init failed, std::bad_alloc thrown Ln 198, Tilemap.h");
+        logErr("Failed to load map, std::bad_alloc thrown Ln 272, Tilemap.h");
+        return {};
+    }
+    catch (...) {
+        logErr("Failed to load map, an unknown error has occurred. Ln 276, Tilemap.h");
+        return {};
     }
 
     TraceLog(LOG_INFO, "Map loaded successfully.");
-
     return mapData;
 }
 
+// Unload or destroy map.
 inline void unloadMap(const MapData& map) {
     for (const auto& [name, texture] : map.renderDataPtr->textures) {
         UnloadTexture(texture);
@@ -215,6 +290,7 @@ inline void unloadMap(const MapData& map) {
     TraceLog(LOG_INFO, "Map unloaded successfully.");
 }
 
+// Disable an event collider within the map so player contact is no longer registered.
 template<typename T>
 void disableEventCollider(const MapData& map, const T& id) {
     const auto it = map.eventColliders.find(id);
