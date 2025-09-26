@@ -16,8 +16,8 @@ RectButton::RectButton(
     const float height,
     std::string text,
     const std::unique_ptr<SceneCamera>& camera) :
-m_primaryColor(95, 25, 25, 255),
-m_hoverColor(173, 28,28, 255),
+m_primaryColor({95, 25, 25, 255}),
+m_hoverColor({173, 28,28, 255}),
 m_buttonText(std::move(text)),
 m_fontSize(static_cast<int>(std::floor(height * 0.30f))),
 m_fontSpacing(1.0f),

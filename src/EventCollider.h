@@ -37,7 +37,7 @@ public:
         float cornerY,
         float fullWidthPx,
         float fullHeightPx,
-        const std::string&& id,
+        const std::string id,
         b2WorldId world);
 
     ~EventCollider() = default;

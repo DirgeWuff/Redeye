@@ -11,7 +11,7 @@ EventCollider::EventCollider (
     const float cornerY,
     const float fullWidthPx,
     const float fullHeightPx,
-    const std::string&& id,
+    const std::string id,
     const b2WorldId world) :
         m_sizeMeters{pixelsToMeters(fullWidthPx), pixelsToMeters(fullHeightPx)},
         m_sizePx{fullWidthPx, fullHeightPx},

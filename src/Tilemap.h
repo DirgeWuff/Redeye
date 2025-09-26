@@ -11,7 +11,6 @@
 #include "raylib.h"
 #include "../external_libs/Tson/tileson.hpp"
 #include "CollisionObject.h"
-#include "EventCollider.h"
 #include "Error.h"
 #include "Utils.h"
 
@@ -147,19 +146,20 @@ MapData loadMap(const T& filepath, b2WorldId world) {
                      const tson::Vector2i pos = object.getPosition();
                      const tson::Vector2i size = object.getSize();
 
-
+                     // Perfect forward in place with std::piecewise_construct, std::forward_as_tuple
                      if (object.getName() == "MurderBox") {
                          static uint8_t murderBoxCnt{};
 
                          mapData.eventColliders.emplace(
-                             "MurderBox" + std::to_string(murderBoxCnt),
-                             EventCollider(
-                                static_cast<float>(pos.x),
-                                static_cast<float>(pos.y),
-                                static_cast<float>(size.x),
-                                static_cast<float>(size.y),
-                                "MurderBox" + std::to_string(murderBoxCnt),
-                                world));
+                             std::piecewise_construct,
+                             std::forward_as_tuple("MurderBox" + std::to_string(murderBoxCnt)),
+                             std::forward_as_tuple(
+                                 static_cast<float>(pos.x),
+                                 static_cast<float>(pos.y),
+                                 static_cast<float>(size.x),
+                                 static_cast<float>(size.y),
+                                 "MurderBox" + std::to_string(murderBoxCnt),
+                                 world));
 
                          murderBoxCnt++;
                      }
@@ -167,14 +167,15 @@ MapData loadMap(const T& filepath, b2WorldId world) {
                          static uint8_t checkpointCnt{};
 
                          mapData.eventColliders.emplace(
-                             "Checkpoint" + std::to_string(checkpointCnt),
-                             EventCollider(
-                                static_cast<float>(pos.x),
-                                static_cast<float>(pos.y),
-                                static_cast<float>(size.x),
-                                static_cast<float>(size.y),
-                                "Checkpoint" + std::to_string(checkpointCnt),
-                                world));
+                             std::piecewise_construct,
+                             std::forward_as_tuple("Checkpoint" + std::to_string(checkpointCnt)),
+                             std::forward_as_tuple(
+                                 static_cast<float>(pos.x),
+                                 static_cast<float>(pos.y),
+                                 static_cast<float>(size.x),
+                                 static_cast<float>(size.y),
+                                 "Checkpoint" + std::to_string(checkpointCnt),
+                                 world));
 
                          checkpointCnt++;
                      }

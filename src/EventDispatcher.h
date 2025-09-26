@@ -16,11 +16,25 @@ class EventDispatcher {
     using eventHandler = std::function<void(const EventType&)>;
     using matcher = std::function<bool(const std::string&)>;
 
+    // Exceedingly bad and confusing naming in this struct...
     struct subscription {
         std::string id;             // Id if the caller
         matcher matchFunction;      // Function used to match a substring. Should return true if not npos
         eventHandler handler;       // The function to be called when matcher finds a match
+
+        subscription(
+            std::string id,
+            matcher matcher,
+            eventHandler handler) :
+        id(std::move(id)),
+        matchFunction(std::move(matcher)),
+        handler(std::move(handler))
+        {
+
+        }
     };
+
+
 
     std::vector<subscription> m_activeSubscriptions;
 public:
