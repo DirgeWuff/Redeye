@@ -1,8 +1,7 @@
-cmake_minimum_required(VERSION 3.30)
+cmake_minimum_required(VERSION 3.28.3)
 project(Redeye)
 
-include_directories(external_libs/Box2D/include)
-include_directories(external_libs/Raylib/include)
+include_directories(${PROJECT_SOURCE_DIR}/external_libs)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -22,54 +21,61 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libs only" FORCE)
 
 include(CMake/FetchDependencies.cmake)
 
-add_executable(Redeye src/main.cpp
-        src/Player.cpp
-        src/Player.h
-        src/CommandListener.h
-        src/InputHandler.cpp
-        src/InputHandler.h
-        src/Scene.cpp
-        src/Scene.h
-        src/Tilemap.h
-        src/Camera.cpp
-        src/Camera.h
-        src/Error.h
-        src/Utils.cpp
-        src/Utils.h
-        src/Debug.cpp
-        src/Debug.h
-        src/Entity.cpp
-        src/Entity.h
-        src/BoxBody.cpp
-        src/BoxBody.h
-        src/CollisionObject.cpp
-        src/CollisionObject.h
-        src/EventDispatcher.h
-        src/EventCollider.cpp
-        src/EventCollider.h
-        src/UI.cpp
-        src/UI.h
-        src/Audio.cpp
-        src/Audio.h
-        src/TilemapRenderer.cpp
-        src/TilemapRenderer.h
-)
-
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "Setting release flags...")
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        add_compile_options(-O3 -march=native -flto=${LTO_JOBS} -DNDEBUG)
+        add_link_options(-fsanitize=address)
         add_link_options(-flto=${LTO_JOBS})
     elseif (MSVC)
-        add_link_options(/02 /DNDEBUG)
-    endif ()
-elseif (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "Setting debug definitions...")
-    target_compile_definitions(Redeye PRIVATE DEBUG)
-elseif(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
-endif ()
+        add_link_options(/O2 /DNDEBUG)
+    endif()
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Setting debug flags...")
+    add_compile_options(-O3 -march=native -flto=${LTO_JOBS} -DNDEBUG)
+    add_compile_options(-fsanitize=address -g -O1 -fno-omit-frame-pointer)
+    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra")
+    add_link_options(-static-libgcc -static-libstdc++)
+    add_link_options(-fsanitize=address)
+endif()
 
+add_executable(Redeye Source/Core/Main/main.cpp
+        Source/Core/Entity/Player.cpp
+        Source/Core/Entity/Player.h
+        Source/Application/Layers/GameLayer.cpp
+        Source/Application/Layers/GameLayer.h
+        Source/Core/Renderer/Tilemap.h
+        Source/Core/Camera/Camera.cpp
+        Source/Core/Camera/Camera.h
+        Source/Core/Utility/Error.h
+        Source/Core/Utility/Utils.cpp
+        Source/Core/Utility/Utils.h
+        Source/Core/Utility/Debug.cpp
+        Source/Core/Utility/Debug.h
+        Source/Core/Phys/BoxBody.cpp
+        Source/Core/Phys/BoxBody.h
+        Source/Core/Phys/CollisionObject.cpp
+        Source/Core/Phys/CollisionObject.h
+        Source/Core/Event/EventDispatcher.h
+        Source/Core/Event/EventCollider.cpp
+        Source/Core/Event/EventCollider.h
+        Source/Core/UI/UI.cpp
+        Source/Core/UI/UI.h
+        Source/Core/Audio/Audio.cpp
+        Source/Core/Audio/Audio.h
+        Source/Core/Renderer/TilemapRenderer.cpp
+        Source/Core/Renderer/TilemapRenderer.h
+        Source/Core/Backend/Layer.h
+        Source/Core/Backend/LayerManager.cpp
+        Source/Core/Backend/LayerManager.h
+        Source/Core/Backend/Application.cpp
+        Source/Core/Backend/Application.h
+        Source/Application/Layers/StartMenuLayer.cpp
+        Source/Application/Layers/StartMenuLayer.h
+        Source/Application/Layers/DeathMenuLayer.cpp
+        Source/Application/Layers/DeathMenuLayer.h
+)
+
+target_compile_definitions(Redeye PRIVATE DEBUG)
 
 target_link_libraries(Redeye PRIVATE raylib box2d)
 if(WIN32)
@@ -82,7 +88,7 @@ elseif(APPLE)
     target_link_libraries(Redeye PRIVATE
             ${COCOA_LIBRARY} ${OpenGL_LIBRARY} ${IOKIT_LIBRARY} ${CoreVideo_LIBRARY})
 elseif (UNIX AND NOT APPLE)
-    target_link_libraries(Redeye PRIVATE m pthread dl GL X11 Xi Xrandr Xxf86vm Xinerama Xcursor)
+    target_link_libraries(Redeye PRIVATE m pthread dl GL X11 Xi Xrandr Xinerama Xcursor)
 endif()
 
 find_library(tileson

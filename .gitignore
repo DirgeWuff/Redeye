@@ -6,4 +6,6 @@ Tools
 *.log
 cmake-build-debug
 cmake-build-release
+cmake-build-debug-msys2g
+cmake-build-debug-wsl
 .idea
