@@ -17,7 +17,7 @@ class DeathMenuLayer final : public Layer {
     unsigned char m_backgroundOpacity;
 public:
     DeathMenuLayer() = delete;
-    explicit DeathMenuLayer(std::shared_ptr<Player> player);
+    explicit DeathMenuLayer(const std::shared_ptr<Player>& player);
     ~DeathMenuLayer() override;
 
     void update() override;

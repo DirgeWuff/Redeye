@@ -169,8 +169,9 @@ void Player::murder() {
     LayerManager::getInstance().suspendLayer(std::string("GameLayer"));
     LayerManager::getInstance().suspendOverlays();
 
+    // Pretty bad created unique_ptr<T> with shared_ptr<T> as argument, but it works better than anything else...
     try {
-        auto p = shared_from_this();
+        const auto p = shared_from_this();
 
         if (!LayerManager::getInstance().stackContains("DeathMenuLayer")) {
             LayerManager::getInstance().pushLayer(
@@ -182,8 +183,12 @@ void Player::murder() {
         }
     }
     catch (std::bad_weak_ptr& e) {
-        logErr("Cannot use shared_from_this(): " + std::string(e.what()));
+        logErr(std::string("Error using shared from this: ") +
+            std::string(e.what()) + std::string(". Player::murder()"));
         return;
+    }
+    catch (...) {
+        logErr("Unknown error occurred using shared_from_this(). Player::murder()");
     }
 
     m_dead = true;

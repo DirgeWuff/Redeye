@@ -6,7 +6,7 @@
 #include "../../Core/Backend/LayerManager.h"
 #include "../../Core/Backend/Application.h"
 
-DeathMenuLayer::DeathMenuLayer(std::shared_ptr<Player> player) :
+DeathMenuLayer::DeathMenuLayer(const std::shared_ptr<Player>& player) :
     m_continueBtn(RectButton(
         600.0f,
         300.0f,
@@ -39,7 +39,6 @@ DeathMenuLayer::DeathMenuLayer(std::shared_ptr<Player> player) :
         {183, 183, 183, 255});
 
     m_continueBtn.setClickEvent([player] {
-        assert(player);
         player->reform();
     });
 

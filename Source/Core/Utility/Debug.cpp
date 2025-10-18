@@ -38,20 +38,19 @@ constexpr Color g_debugCollisionColor{255, 0, 0, 255};
 constexpr Color g_debugColliderColor{5, 237, 16, 255};
 constexpr Color g_debugVertColor{181, 2, 157, 255};
 
-void drawDebugBodyShapes(const std::shared_ptr<Player>& player) {
+void drawDebugBodyShapes(const Player& player) {
     if (!g_drawPlayerShapes) return;
 
-    assert(player);
     assert(b2Body_GetShapeCount(player.getBodyID()) != 0);
 
-    const uint8_t maxShapes = b2Body_GetShapeCount(player->getBodyID());
+    const uint8_t maxShapes = b2Body_GetShapeCount(player.getBodyID());
 
     b2ShapeId shapes[maxShapes];
-    b2Body_GetShapes(player->getBodyID(), shapes, maxShapes);
+    b2Body_GetShapes(player.getBodyID(), shapes, maxShapes);
 
     b2Transform tf;
-    tf.q = b2Body_GetRotation(player->getBodyID());
-    tf.p = b2Body_GetPosition(player->getBodyID());
+    tf.q = b2Body_GetRotation(player.getBodyID());
+    tf.p = b2Body_GetPosition(player.getBodyID());
 
     // Probably really slow, but fuck it, this is a debug function
     for (const auto& shape : shapes) {
@@ -133,10 +132,10 @@ void drawDebugBodyShapes(const std::shared_ptr<Player>& player) {
     }
 }
 
-void drawDebugBodyCenter(const std::shared_ptr<Player>& player) {
+void drawDebugBodyCenter(const Player& player) {
     if (!g_drawPlayerCenter) return;
 
-    const auto [x, y] = b2Body_GetPosition(player->getBodyID());
+    const auto [x, y] = b2Body_GetPosition(player.getBodyID());
 
     DrawCircleLines(
         static_cast<int>(metersToPixels(x)),
@@ -146,10 +145,10 @@ void drawDebugBodyCenter(const std::shared_ptr<Player>& player) {
     );
 }
 
-void drawDebugCameraCrosshair(const std::unique_ptr<SceneCamera>& camera) {
+void drawDebugCameraCrosshair(const SceneCamera& camera) {
     if (!g_drawCameraCrosshair) return;
 
-    const Rectangle cameraRect = camera->getCameraRect();
+    const Rectangle cameraRect = camera.getCameraRect();
 
     DrawLine(
         static_cast<int>(cameraRect.x) + static_cast<int>(cameraRect.width) / 2,
@@ -166,10 +165,10 @@ void drawDebugCameraCrosshair(const std::unique_ptr<SceneCamera>& camera) {
         RED);
 }
 
-void drawDebugCameraRect(const std::unique_ptr<SceneCamera>& camera) {
+void drawDebugCameraRect(const SceneCamera& camera) {
     if (!g_drawCameraRect) return;
 
-    const Rectangle rect = camera->getCameraRect();
+    const Rectangle rect = camera.getCameraRect();
 
     // Add offset of 2px/edge so we can see the rectangle around the edges of camera
     DrawRectangleLines(
@@ -180,27 +179,27 @@ void drawDebugCameraRect(const std::unique_ptr<SceneCamera>& camera) {
             RED);
 }
 
-void drawDebugPlayerPosition(const std::shared_ptr<Player>& player) {
+void drawDebugPlayerPosition(const Player& player) {
     if (!g_drawPlayerPos) return;
 
     DrawText(
-        TextFormat("Position X: %f", player->getPositionCornerPx().x),
+        TextFormat("Position X: %f", player.getPositionCornerPx().x),
         10,
         10,
         20,
         RED);
     DrawText(
-        TextFormat("Position Y: %f", player->getPositionCornerPx().y),
+        TextFormat("Position Y: %f", player.getPositionCornerPx().y),
         10,
         30,
         20,
         RED);
 }
 
-void drawDebugFootpawSensorStatus(const std::shared_ptr<Player>& player) {
+void drawDebugFootpawSensorStatus(const Player& player) {
     if (!g_drawPlayerSensorStatus) return;
 
-    if (player->getFootpawSensorStatus()) {
+    if (player.getFootpawSensorStatus()) {
         DrawText(
             "Footpaw sensor in contact with object",
             10,

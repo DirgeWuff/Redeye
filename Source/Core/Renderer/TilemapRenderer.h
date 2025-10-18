@@ -10,7 +10,7 @@
 #include "../Renderer/Tilemap.h"
 
 void renderMap(
-    const std::unique_ptr<SceneCamera>& cam,
+    const SceneCamera& cam,
     const MapData& map,
     Vector2 offset,
     Color color);

@@ -36,6 +36,8 @@ void GameLayer::pollEvents() {
 }
 
 void GameLayer::update() {
+    assert(m_playerCharacter);
+
     pollEvents();
 
     if (!b2World_IsValid(m_worldId)) {
@@ -52,7 +54,7 @@ void GameLayer::update() {
         const auto& [sensorShapeId, visitorShapeId] = sensorContactEvents.beginEvents[i];
         const auto* userData = static_cast<sensorInfo*>(b2Shape_GetUserData(sensorShapeId));
         if (userData) {
-            m_collisionEventDispatcher->dispatch(
+            m_collisionEventDispatcher.dispatch(
                 userData->typeId,
                 playerContactEvent{true, sensorShapeId});
         }
@@ -67,7 +69,7 @@ void GameLayer::update() {
         const auto& [sensorShapeId, visitorShapeId] = sensorContactEvents.endEvents[i];
         const auto* userData = static_cast<sensorInfo*>(b2Shape_GetUserData(sensorShapeId));
         if (userData) {
-            m_collisionEventDispatcher->dispatch(
+            m_collisionEventDispatcher.dispatch(
                 userData->typeId,
                 playerContactEvent{false, sensorShapeId});
         }
@@ -78,13 +80,15 @@ void GameLayer::update() {
     }
 
     m_playerCharacter->update();
-    m_camera->update(m_playerCharacter);
+    m_camera.update(*m_playerCharacter);
     UpdateMusicStream(m_backgroundNoise);
 }
 
 void GameLayer::draw() {
+    assert(m_playerCharacter);
+
     if (!m_playerCharacter->isDead()) {
-        m_camera->cameraBegin();
+        m_camera.cameraBegin();
 
         ClearBackground(BLACK);
         renderMap(m_camera, m_map, {0.0f, 0.0f}, WHITE);
@@ -92,22 +96,22 @@ void GameLayer::draw() {
 
         // TODO: Make a debug layer
 #ifdef DEBUG
-        drawDebugBodyShapes(m_playerCharacter);
+        drawDebugBodyShapes(*m_playerCharacter);
         drawDebugCollisionShapes(m_map);
-        drawDebugBodyCenter(m_playerCharacter);
+        drawDebugBodyCenter(*m_playerCharacter);
         drawDebugCollisionVerts(m_map);
         drawDebugCameraCrosshair(m_camera);
         drawDebugCameraRect(m_camera);
         drawDebugEventColliders(m_map);
 #endif
 
-        m_camera->cameraEnd();
+        m_camera.cameraEnd();
 
 #ifdef DEBUG
         // Draw these outside of camera context!
         drawControlsWindow();
-        drawDebugFootpawSensorStatus(m_playerCharacter);
-        drawDebugPlayerPosition(m_playerCharacter);
+        drawDebugFootpawSensorStatus(*m_playerCharacter);
+        drawDebugPlayerPosition(*m_playerCharacter);
 #endif
     }
 }

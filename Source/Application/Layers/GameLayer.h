@@ -18,11 +18,11 @@
 class GameLayer final : public Layer {
     MapData m_map{};
     b2WorldDef m_worldDef{};
+    SceneCamera m_camera{};
     Music m_backgroundNoise{};
     bodyConfig playerCfg{};
     std::shared_ptr<Player> m_playerCharacter{};
-    std::unique_ptr<SceneCamera> m_camera{};
-    std::unique_ptr<EventDispatcher<playerContactEvent>> m_collisionEventDispatcher{};
+    EventDispatcher<playerContactEvent> m_collisionEventDispatcher{};
     b2WorldId m_worldId{};
 public:
     template<typename P, typename M>
@@ -36,17 +36,18 @@ public:
 
         m_worldDef.gravity = {0.0f, 50.0f};
         m_worldId = b2CreateWorld(&m_worldDef);
+
         m_map = loadMap(std::forward<M>(mapFilePath), m_worldId);
+        m_camera = SceneCamera(m_map, 2.0f);
+        m_collisionEventDispatcher = EventDispatcher<playerContactEvent>();
 
         try {
-            m_playerCharacter = std::make_unique<Player>(
+            // Has to be ptr. b2Body enters undefined state when moved.
+            m_playerCharacter = std::make_shared<Player>(
                 m_map.playerStartPos.x,
                 m_map.playerStartPos.y,
                 m_worldId,
                 std::forward<P>(playerSpritePath));
-
-            m_camera = std::make_unique<SceneCamera>(m_map, 2.0f);
-            m_collisionEventDispatcher = std::make_unique<EventDispatcher<playerContactEvent>>();
         }
         catch (std::bad_alloc& e) {
             logErr(std::string("GameLayer::GameLayer(Args...) failed: ") + e.what());
@@ -58,7 +59,7 @@ public:
         }
 
     // Subscribe footpaw sensor.
-    m_collisionEventDispatcher->subscribe(
+    m_collisionEventDispatcher.subscribe(
         "pawbs",
         [](const std::string& id) {
             return id.find("pawbs") != std::string::npos;
@@ -73,7 +74,7 @@ public:
         });
 
     // Subscribe death colliders.
-    m_collisionEventDispatcher->subscribe(
+    m_collisionEventDispatcher.subscribe(
         "MurderBox",
         [](const std::string& id) {
         return id.find("MurderBox") != std::string::npos;
@@ -85,7 +86,7 @@ public:
     });
 
     // Subscribe checkpoint colliders.
-    m_collisionEventDispatcher->subscribe(
+    m_collisionEventDispatcher.subscribe(
         "Checkpoint",
         [](const std::string& id) {
             return id.find("Checkpoint") != std::string::npos;
@@ -104,12 +105,12 @@ public:
                 }
 
                 const auto* info = static_cast<sensorInfo*>(b2Shape_GetUserData(e.visitorShape));
-                m_collisionEventDispatcher->unsubscribe(info->typeId);
+                m_collisionEventDispatcher.unsubscribe(info->typeId);
                 disableEventCollider(m_map, info->typeId);
             }
         });
 
-    m_camera->setTarget(m_playerCharacter);
+    m_camera.setTarget(*m_playerCharacter);
     m_backgroundNoise = LoadMusicStream(m_map.bgNoisePath.c_str());
     SetMusicVolume(m_backgroundNoise, 0.30f);
     PlayMusicStream(m_backgroundNoise);

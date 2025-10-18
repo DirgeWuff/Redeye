@@ -37,8 +37,8 @@ class Player final : public BoxBody, public std::enable_shared_from_this<Player>
     Rectangle m_spriteRect{};
     b2ShapeId m_footpawSensorId{};
     saveData m_currentCheckpoint{};
-    uint16_t m_activeGroundContacts{};
     std::unique_ptr<sensorInfo> m_footpawSensorInfo{};
+    uint16_t m_activeGroundContacts{};
     uint8_t m_numFrames{};
     uint8_t m_frameDelayAmount{};
     uint8_t m_soundDelayAmount{};
@@ -115,6 +115,7 @@ public:
             {0.0f, m_sizeMeters.y / 3.0f},
             b2MakeRot(0.0f)
         );
+
         m_footpawSensorShape = b2DefaultShapeDef();
         m_footpawSensorShape.isSensor = true;
         m_footpawSensorShape.enableSensorEvents = true;
@@ -132,8 +133,10 @@ public:
             std::cout << "Player object created object at address: " << this << std::endl;
         #endif
 }
-    Player(Player&) = delete;
-    Player& operator=(Player&) = delete;
+    Player(const Player&) = delete;
+    Player(Player&&) noexcept = delete;
+    Player& operator=(const Player&) = delete;
+    Player& operator=(Player&&) noexcept = delete;
 
     ~Player() override;
 

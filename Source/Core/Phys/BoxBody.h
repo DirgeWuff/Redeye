@@ -42,8 +42,10 @@ public:
         bodyConfig config,
         b2WorldId world);
 
-    BoxBody(BoxBody&) = delete;
-    BoxBody operator=(BoxBody&) = delete;
+    BoxBody(const BoxBody&) = default;
+    BoxBody(BoxBody&&) noexcept = delete;
+    BoxBody& operator=(const BoxBody&) = default;
+    BoxBody& operator=(BoxBody&&) noexcept = delete;
 
     virtual ~BoxBody() = default;
 

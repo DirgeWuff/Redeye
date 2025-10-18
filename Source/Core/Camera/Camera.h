@@ -5,7 +5,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <memory>
 #include "raylib.h"
 #include "../Entity/Player.h"
 #include "../Renderer/Tilemap.h"
@@ -20,13 +19,16 @@ class SceneCamera final : public Camera2D {
 public:
    SceneCamera() = default;
    SceneCamera(const MapData& map, float zoomLevel);
+
    SceneCamera(SceneCamera&) = delete;
-   SceneCamera operator=(SceneCamera&) = delete;
+   SceneCamera(SceneCamera&&) = default;
+   SceneCamera& operator=(SceneCamera&) = delete;
+   SceneCamera& operator=(SceneCamera&&) = default;
 
    ~SceneCamera();
 
-   void setTarget(const std::shared_ptr<Player>& player);
-   void update(const std::shared_ptr<Player>& player);
+   void setTarget(const Player& player);
+   void update(const Player& player);
    void cameraBegin() const;
    void cameraEnd() const;
    [[nodiscard]] Rectangle getCameraRect() const noexcept;

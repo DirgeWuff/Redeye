@@ -37,8 +37,8 @@ SceneCamera::SceneCamera(const MapData& map, const float zoomLevel) {
 
 SceneCamera::~SceneCamera() = default;
 
-void SceneCamera::setTarget(const std::shared_ptr<Player>& player) {
-    Vector2 targetEntityCenter = Vector2Add(player->getPositionCornerPx(), player->getSizePx() / 2.0f);
+void SceneCamera::setTarget(const Player& player) {
+    Vector2 targetEntityCenter = Vector2Add(player.getPositionCornerPx(), player.getSizePx() / 2.0f);
 
     m_camera.target.y = targetEntityCenter.y;
     m_camera.target.x = targetEntityCenter.x;
@@ -49,10 +49,10 @@ void SceneCamera::setTarget(const std::shared_ptr<Player>& player) {
         m_maxCameraPos);
 }
 
-void SceneCamera::update(const std::shared_ptr<Player>& player) {
+void SceneCamera::update(const Player& player) {
     m_targetCenter = {
-        player->getPositionCornerPx().x + player->getSizePx().x / 2.0f,
-        player->getPositionCornerPx().y + player->getSizePx().y / 2.0f
+        player.getPositionCornerPx().x + player.getSizePx().x / 2.0f,
+        player.getPositionCornerPx().y + player.getSizePx().y / 2.0f
     };
 
     m_camera.target = m_targetCenter;
