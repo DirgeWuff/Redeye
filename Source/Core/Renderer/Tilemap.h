@@ -40,12 +40,13 @@ struct RenderData {
 // Structured data used to load a map. Used on a per-map basis.
 struct MapData {
     std::unordered_map<std::string, EventCollider> eventColliders;
-    std::optional<std::string> ambientSoundsPath;
     fs::path baseDir;
-    std::string bgNoisePath;
+    fs::path fullMapPath;
+    fs::path bgNoisePath;
     std::vector<CollisionObject> collisionObjects;
     std::shared_ptr<RenderData> renderDataPtr;
 
+    // Leaving this as a vec2 so I don't need to set player POS in meters in Tiled
     Vector2 playerStartPos;
 
     uint8_t tileWidth;
@@ -53,6 +54,33 @@ struct MapData {
     uint16_t mapWidth;
     uint16_t mapHeight;
 };
+
+// If I end up adding more types, might be good to RTTI this whole thing...
+template<typename T>
+float getMapPropFloat(const std::unique_ptr<tson::Map>& map, T& propName) {
+    tson::PropertyCollection props = map->getProperties();
+
+    if (!props.hasProperty(std::string(propName))) {
+        logErr(std::string("Map has no property \"" + std::string(propName) +
+            std::string("\". Tilemap::GetMapPropFloat(Args...)")));
+        return {};
+    }
+
+    return props.getValue<float>(propName);
+}
+
+template<typename T>
+std::string getMapPropStr(const std::unique_ptr<tson::Map>& map, T& propName) {
+    tson::PropertyCollection props = map->getProperties();
+
+    if (!props.hasProperty(std::string(propName))) {
+        logErr(std::string("Map has no property \"" + std::string(propName) +
+            std::string("\". Tilemap::GetMapPropStr(Args...)")));
+        return {};
+    }
+
+    return props.getValue<std::string>(propName);
+}
 
 template<typename T>
 MapData loadMap(const T& filepath, b2WorldId world) {
@@ -65,6 +93,7 @@ MapData loadMap(const T& filepath, b2WorldId world) {
     }
 
     mapData.baseDir = fs::relative(filepath);
+    mapData.fullMapPath = fs::relative(filepath);
     if (mapData.baseDir.has_extension()) {
         mapData.baseDir.remove_filename();
     }
@@ -128,7 +157,7 @@ MapData loadMap(const T& filepath, b2WorldId world) {
 
                         for (std::size_t i = 0; i < tsonPoints.size(); i++) {
                             tsonPoints[i] = v2iAdd(tsonPoints[i], pos);
-                            points.push_back(toB2Vec2(tsonPoints[i]));
+                            points.push_back(pixelsToMetersVec(tsonPoints[i]));
                         }
 
                         mapData.collisionObjects.emplace_back(world, points);
@@ -149,6 +178,8 @@ MapData loadMap(const T& filepath, b2WorldId world) {
 
                      // Perfect forward in place with std::piecewise_construct, std::forward_as_tuple
                      if (object.getName() == "MurderBox") {
+                         // NOTE: Just sorta blindly assuming that there's never gonna be more than 255
+                         // colliders of a given type here...
                          static uint8_t murderBoxCnt{};
 
                          mapData.eventColliders.emplace(
@@ -216,53 +247,14 @@ MapData loadMap(const T& filepath, b2WorldId world) {
             }
         }
 
-        // Handle embedded map properties, messy as fuck but it works
-        tson::PropertyCollection embeddedData = map->getProperties();
+        // Handle embedded map properties
+        mapData.playerStartPos = {
+            getMapPropFloat(map, "playerStartX"),
+            getMapPropFloat(map, "playerStartY")};
 
-        // Player spawn position
-        // Maybe consider moving this to a new obj layer with point, this is rather clunky...
-        if (embeddedData.hasProperty("playerStartX")) {
-            mapData.playerStartPos.x = embeddedData.getValue<float>("playerStartX");
-        }
-        else {
-            logErr("playerStartX not specified in map: loadMap(Args...)");
-            return {};
-        }
+        mapData.bgNoisePath = fs::path(getMapPropStr(map, "bgNoisePath"));
 
-        if (embeddedData.hasProperty("playerStartY")) {
-            mapData.playerStartPos.y = embeddedData.getValue<float>("playerStartY");
-        }
-        else {
-            logErr("playerStartY not specified in map: loadMap(Args...)");
-            return {};
-        }
-
-        // Background "music" or noise
-        if (embeddedData.hasProperty("bgNoisePath")) {
-            const auto p = embeddedData.getValue<std::string>("bgNoisePath");
-            if (!exists(fs::path(p))) {
-                logErr(std::string("Missing or corrupted sound data path: " + p + std::string(". loadMap(Args...)")));
-            }
-
-            mapData.bgNoisePath = p;
-        }
-        else {
-            logErr("bgNoisePath not specified in map: loadMap(Args...)");
-            return {};
-        }
-
-        // Optional ambient sounds to be played at random intervals
-        // TODO: Add actual ambient noises to sound design so this actually does something
-        if (embeddedData.hasProperty("ambientNoisesPath")) {
-            const auto p = embeddedData.getValue<std::string>("ambientNoisesPath");
-            if (!exists(fs::path(p))) {
-                logErr(std::string("Missing or corrupted sound data path: " + p + std::string(" loadMap(Args...)")));
-                return {};
-            }
-
-            mapData.ambientSoundsPath = p;
-        }
-
+        // Assign everything else
         mapData.mapWidth = map->getSize().x;
         mapData.mapHeight = map->getSize().y;
         mapData.tileWidth = map->getTileSize().x;
@@ -298,6 +290,9 @@ void disableEventCollider(const MapData& map, const T& id) {
     const auto it = map.eventColliders.find(id);
     if (it != map.eventColliders.end()) {
         it->second.disableCollider();
+    }
+    else {
+        logErr("No matching collider found in world.");
     }
 }
 

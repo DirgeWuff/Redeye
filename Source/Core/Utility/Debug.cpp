@@ -19,24 +19,25 @@
 #include "../Entity/Player.h"
 #include "../../Application/Layers/GameLayer.h"
 
-const Font g_debugFont = LoadFont("../assets/Fonts/JetBrainsMono-Bold.ttf");
-const bool g_fontValid = IsFontValid(g_debugFont);
+// TODO: Create functions to disable camera lock and move camera on demand
 
-bool g_debugWindowBoxActive = false;
-bool g_drawPlayerShapes = false;
-bool g_drawPlayerSensorStatus = false;
-bool g_drawPlayerPos = false;
-bool g_drawPlayerCenter = false;
-bool g_drawTerrainShapes = false;
-bool g_drawTerrainVerts = false;
-bool g_drawCameraCrosshair = false;
-bool g_drawCameraRect = false;
-bool g_drawEventColliders = false;
+static const Font g_debugFont = LoadFont("../assets/Fonts/JetBrainsMono-Bold.ttf");
 
-constexpr Color g_debugBodyColor{0, 0, 255, 255};
-constexpr Color g_debugCollisionColor{255, 0, 0, 255};
-constexpr Color g_debugColliderColor{5, 237, 16, 255};
-constexpr Color g_debugVertColor{181, 2, 157, 255};
+static bool g_debugWindowBoxActive = false;
+static bool g_drawPlayerShapes = false;
+static bool g_drawPlayerSensorStatus = false;
+static bool g_drawPlayerPos = false;
+static bool g_drawPlayerCenter = false;
+static bool g_drawTerrainShapes = false;
+static bool g_drawTerrainVerts = false;
+static bool g_drawCameraCrosshair = false;
+static bool g_drawCameraRect = false;
+static bool g_drawEventColliders = false;
+
+static constexpr Color g_debugBodyColor{0, 0, 255, 255};
+static constexpr Color g_debugCollisionColor{255, 0, 0, 255};
+static constexpr Color g_debugColliderColor{5, 237, 16, 255};
+static constexpr Color g_debugVertColor{181, 2, 157, 255};
 
 void drawDebugBodyShapes(const Player& player) {
     if (!g_drawPlayerShapes) return;

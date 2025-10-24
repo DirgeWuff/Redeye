@@ -6,6 +6,7 @@
 #define GAMELAYER_H
 
 #include <memory>
+#include <filesystem>
 #include "../../Core/Camera/Camera.h"
 #include "../../Core/Event/EventCollider.h"
 #include "../../Core/Event/EventDispatcher.h"
@@ -14,38 +15,41 @@
 #include "../../Core/Backend/Layer.h"
 #include "../../Core/Backend/LayerManager.h"
 #include "../../Core/UI/UI.h"
+#include "../../Core/Serialization/Save.h"
+
+namespace fs = std::filesystem;
 
 class GameLayer final : public Layer {
     MapData m_map{};
     b2WorldDef m_worldDef{};
     SceneCamera m_camera{};
     Music m_backgroundNoise{};
-    bodyConfig playerCfg{};
+    saveData m_currentSave{};
     std::shared_ptr<Player> m_playerCharacter{};
     EventDispatcher<playerContactEvent> m_collisionEventDispatcher{};
     b2WorldId m_worldId{};
 public:
-    template<typename P, typename M>
+    template<typename P>
     GameLayer(
         P&& playerSpritePath,
-        M&& mapFilePath) :
+        const saveData& save) :
             m_worldDef(b2DefaultWorldDef())
 {
         m_type = layerType::PRIMARY_LAYER;
         m_isEnabled = true;
-
         m_worldDef.gravity = {0.0f, 50.0f};
         m_worldId = b2CreateWorld(&m_worldDef);
-
-        m_map = loadMap(std::forward<M>(mapFilePath), m_worldId);
+        m_map = loadMap(save.currentMapPath, m_worldId);
+        m_currentSave.currentMapPath = fs::path(save.currentMapPath);
+        m_currentSave.centerPosition = save.centerPosition;
         m_camera = SceneCamera(m_map, 2.0f);
         m_collisionEventDispatcher = EventDispatcher<playerContactEvent>();
 
         try {
             // Has to be ptr. b2Body enters undefined state when moved.
             m_playerCharacter = std::make_shared<Player>(
-                m_map.playerStartPos.x,
-                m_map.playerStartPos.y,
+                metersToPixels(m_currentSave.centerPosition.x),
+                metersToPixels(m_currentSave.centerPosition.y),
                 m_worldId,
                 std::forward<P>(playerSpritePath));
         }
@@ -93,7 +97,10 @@ public:
         },
         [this](const playerContactEvent& e) {
             if (e.contactBegan) {
-                m_playerCharacter->setCurrentCheckpoint();
+                m_currentSave.centerPosition = m_playerCharacter->getPositionCenterMeters();
+                m_currentSave.currentMapPath = m_map.fullMapPath;
+
+                saveGame(m_currentSave);
 
                 if (LayerManager::getInstance().stackContains(std::string("CheckpointAlert"))) {
                     LayerManager::getInstance().resumeLayer("CheckpointAlert");

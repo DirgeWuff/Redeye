@@ -36,7 +36,7 @@ public:
    [[nodiscard]] float getCameraRectHeight() const noexcept;
    [[nodiscard]] Vector2 getCameraCenter() const noexcept;
    [[nodiscard]] Vector2 getCameraTarget() const noexcept;
-   [[nodiscard]] Camera2D getCamera() const noexcept;
+   [[nodiscard]] Camera2D& getCamera() noexcept;
 };
 
 #endif //CAMERA_H

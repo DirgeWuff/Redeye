@@ -12,17 +12,9 @@
 #include "../../Core/Audio/Audio.h"
 #include "../../Core/Event/EventCollider.h"
 #include "../../Core/Utility/Utils.h"
+#include "../../Core/Serialization/Save.h"
 
 enum directions {RIGHT, LEFT};
-
-struct saveData {
-    b2Vec2 centerPosition;
-
-    // char levelPath[128];
-    // uint8_t health;
-    // uint8_t phoneBattery;
-    // Any other data here
-};
 
 class SceneCamera;
 
@@ -36,7 +28,6 @@ class Player final : public BoxBody, public std::enable_shared_from_this<Player>
     Texture2D m_walkSprites{};
     Rectangle m_spriteRect{};
     b2ShapeId m_footpawSensorId{};
-    saveData m_currentCheckpoint{};
     std::unique_ptr<sensorInfo> m_footpawSensorInfo{};
     uint16_t m_activeGroundContacts{};
     uint8_t m_numFrames{};
@@ -94,11 +85,9 @@ public:
         m_bodyDef.linearDamping = 8.0f;
         m_body = b2CreateBody(world, &m_bodyDef);
 
-        m_currentCheckpoint.centerPosition = m_centerPosition;
-
         const b2Capsule boundingCapsule = {
-            pixelsToMetersVec({Vector2{0.0f, -20.0f}}),
-            pixelsToMetersVec(Vector2{0.0f, 32.0f}),
+            pixelsToMetersVec(Vector2(0.0f, -20.0f)),
+            pixelsToMetersVec(Vector2(0.0f, 32.0f)),
             pixelsToMeters(28.0f)
         };
 
@@ -147,13 +136,12 @@ public:
     void jump() const;
     void moveNowhere();
     void murder();
-    void reform();
+    void reform(const saveData& save);
     [[nodiscard]] b2ShapeId getFootpawSenorId() const noexcept;
     [[nodiscard]] bool getFootpawSensorStatus() const noexcept;
     [[nodiscard]] bool isDead() const noexcept;
     void addContactEvent() noexcept;
     void removeContactEvent() noexcept;
-    void setCurrentCheckpoint() noexcept;
 };
 
 #endif //PLAYER_H

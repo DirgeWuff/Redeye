@@ -2,13 +2,12 @@
 // Created by DirgeWuff on 9/5/2025.
 //
 
-#include <cassert>
 #include "raylib.h"
 #include "raymath.h"
 #include "TilemapRenderer.h"
 
 void renderMap(
-    const SceneCamera& cam,
+    SceneCamera& cam,
     const MapData& map,
     const Vector2 offset,
     const Color color)

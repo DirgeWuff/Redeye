@@ -8,7 +8,9 @@
 
 SceneCamera::SceneCamera(const MapData& map, const float zoomLevel) {
     m_camera = Camera2D();
-    m_camera.offset = {1500.0f / 2.0f, 800.0f / 2.0f}; // Hard coded value, no bueno, fix later
+    m_camera.offset = {
+        static_cast<float>(GetScreenWidth()) / 2.0f,
+        static_cast<float>(GetScreenHeight()) / 2.0f};
     m_camera.zoom = zoomLevel;
     m_camera.rotation = 0.0f;
 
@@ -68,7 +70,6 @@ void SceneCamera::update(const Player& player) {
     m_cameraCenter.y = m_cameraRect.y + m_cameraRect.height / 2.0f;
 }
 
-// Deprecate
 void SceneCamera::cameraBegin() const {
     BeginMode2D(m_camera);
 }
@@ -97,6 +98,6 @@ void SceneCamera::cameraEnd() const {
     return m_camera.target;
 }
 
-[[nodiscard]] Camera2D SceneCamera::getCamera() const noexcept {
+[[nodiscard]] Camera2D& SceneCamera::getCamera() noexcept {
     return m_camera;
 }

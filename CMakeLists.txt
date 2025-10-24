@@ -1,44 +1,58 @@
-cmake_minimum_required(VERSION 3.28.3)
+cmake_minimum_required(VERSION 3.28)
 project(Redeye)
 
-include_directories(${PROJECT_SOURCE_DIR}/external_libs)
+include(GNUInstallDirs)
+include(ProcessorCount)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Automatically detect number of cores on the machine
-include(ProcessorCount)
+include_directories(${PROJECT_SOURCE_DIR}/external_libs)
+
+# Detect CPU cores
+# ======================================================================================================================
 ProcessorCount(NCPU)
-
-If(NCPU EQUAL 0)
+if(NOT NCPU OR NCPU EQUAL 0)
     set(NCPU 2)
-endif ()
-
-# Set number of jobs to cores -1
+endif()
 math(EXPR LTO_JOBS "${NCPU} - 1")
 
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libs only" FORCE)
 
 include(CMake/FetchDependencies.cmake)
 
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    message(STATUS "Setting release flags...")
-    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        add_link_options(-fsanitize=address)
-        add_link_options(-flto=${LTO_JOBS})
-    elseif (MSVC)
-        add_link_options(/O2 /DNDEBUG)
-    endif()
-elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "Setting debug flags...")
-    add_compile_options(-O3 -march=native -flto=${LTO_JOBS} -DNDEBUG)
-    add_compile_options(-fsanitize=address -g -O1 -fno-omit-frame-pointer)
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall -Wextra")
-    add_link_options(-static-libgcc -static-libstdc++)
-    add_link_options(-fsanitize=address)
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose build type" FORCE)
 endif()
 
-add_executable(Redeye Source/Core/Main/main.cpp
+
+# Compiler/config flags
+# ======================================================================================================================
+if (MSVC)
+    message(STATUS "Setting MSVC flags...")
+    target_compile_options(Redeye PRIVATE /W4 /permissive- /Zc:__cplusplus)
+
+    set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi /RTC1")
+    set(CMAKE_CXX_FLAGS_RELEASE "/O2 /DNDEBUG")
+
+else()
+    message(STATUS "Setting GCC/Clang flags...")
+
+    add_compile_options(-Wall -Wextra -Wpedantic -fno-omit-frame-pointer -march=native)
+    add_link_options(-static-libgcc -static-libstdc++)
+
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG -flto=${LTO_JOBS}")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-flto=${LTO_JOBS}")
+
+    set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -fno-omit-frame-pointer")
+endif()
+
+
+# Target
+# ======================================================================================================================
+add_executable(Redeye
+        Source/Core/Main/main.cpp
         Source/Core/Entity/Player.cpp
         Source/Core/Entity/Player.h
         Source/Application/Layers/GameLayer.cpp
@@ -73,11 +87,22 @@ add_executable(Redeye Source/Core/Main/main.cpp
         Source/Application/Layers/StartMenuLayer.h
         Source/Application/Layers/DeathMenuLayer.cpp
         Source/Application/Layers/DeathMenuLayer.h
+        Source/Core/Serialization/Save.cpp
+        Source/Core/Serialization/Save.h
 )
 
-target_compile_definitions(Redeye PRIVATE DEBUG)
+# Compile definitions
+# ======================================================================================================================
+target_compile_definitions(Redeye PRIVATE
+        $<$<CONFIG:Debug>:DEBUG>
+        $<$<CONFIG:Release>:NDEBUG>
+)
 
+#
+# External libs
+# ======================================================================================================================
 target_link_libraries(Redeye PRIVATE raylib box2d)
+
 if(WIN32)
     target_link_libraries(Redeye PRIVATE opengl32 gdi32 winmm)
 elseif(APPLE)
@@ -87,7 +112,7 @@ elseif(APPLE)
     find_library(CoreVideo_LIBRARY CoreVideo)
     target_link_libraries(Redeye PRIVATE
             ${COCOA_LIBRARY} ${OpenGL_LIBRARY} ${IOKIT_LIBRARY} ${CoreVideo_LIBRARY})
-elseif (UNIX AND NOT APPLE)
+elseif(UNIX AND NOT APPLE)
     target_link_libraries(Redeye PRIVATE m pthread dl GL X11 Xi Xrandr Xinerama Xcursor)
 endif()
 

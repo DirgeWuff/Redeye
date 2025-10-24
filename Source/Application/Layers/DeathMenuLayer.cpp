@@ -39,7 +39,7 @@ DeathMenuLayer::DeathMenuLayer(const std::shared_ptr<Player>& player) :
         {183, 183, 183, 255});
 
     m_continueBtn.setClickEvent([player] {
-        player->reform();
+        player->reform(loadGame());
     });
 
     m_quitBtn.setColor(

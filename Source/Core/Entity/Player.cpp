@@ -194,7 +194,7 @@ void Player::murder() {
     m_dead = true;
 }
 
-void Player::reform() {
+void Player::reform(const saveData& save) {
     if (!b2Body_IsValid(m_body)) {
         logErr("m_body invalid: Player::reform()");
         return;
@@ -206,7 +206,7 @@ void Player::reform() {
 
     b2Body_SetTransform(
         m_body,
-        m_currentCheckpoint.centerPosition,
+        save.centerPosition,
         b2MakeRot(0.0f));
 
     m_dead = false;
@@ -230,8 +230,4 @@ void Player::addContactEvent() noexcept {
 
 void Player::removeContactEvent() noexcept {
     m_activeGroundContacts--;
-}
-
-void Player::setCurrentCheckpoint() noexcept {
-    m_currentCheckpoint.centerPosition = m_centerPosition;
 }

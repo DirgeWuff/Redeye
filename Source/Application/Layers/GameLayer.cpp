@@ -11,8 +11,8 @@
 #include "../../Core/Utility/Debug.h"
 #include "../../Core/Renderer/TilemapRenderer.h"
 
-constexpr float g_worldStep = 1.0f / 60.0f;
-constexpr uint8_t g_subStep = 4;
+static constexpr float g_worldStep = 1.0f / 60.0f;
+static constexpr uint8_t g_subStep = 4;
 
 GameLayer::~GameLayer() {
     destroy();

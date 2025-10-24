@@ -38,14 +38,7 @@ StartMenuLayer::StartMenuLayer() :
         {183, 183, 183, 255});
 
     m_startButton.setClickEvent([] {
-        LayerManager::getInstance().pushLayer(
-            std::string("GameLayer"),
-            // This is basically equivalent to "New game" at this point...
-            // Need a continue button down the line once save games are working
-            std::make_unique<GameLayer>(
-                std::string("../assets/Player assets/PlayerWalk.png"),
-                std::string("../assets/Map data/Version 2/TestLvl1.tmj")));
-
+            LayerManager::getInstance().resumeLayer("GameLayer");
             LayerManager::getInstance().requestLayerPop("StartMenuLayer");
     });
 

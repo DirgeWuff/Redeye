@@ -9,10 +9,10 @@
 
 // Globals
 //======================================================================================================================
-constexpr uint8_t g_ppm = 100; // 100 px/meter
+static constexpr uint8_t g_ppm = 100; // 100 px/meter
 
-std::random_device g_randomDevice;
-std::mt19937 g_randomGenerator(g_randomDevice());
+static std::random_device g_randomDevice;
+static std::mt19937 g_randomGenerator(g_randomDevice());
 
 // Equality comparison
 //======================================================================================================================
@@ -28,10 +28,6 @@ Vector2 metersToPixelsVec(const b2Vec2& vec) {
     return Vector2{vec.x * g_ppm, vec.y * g_ppm};
 }
 
-b2Vec2 pixelsToMetersVec(const Vector2& vec) {
-    return b2Vec2{vec.x / g_ppm, vec.y / g_ppm};
-}
-
 float metersToPixels(const float meters) {
     return meters * g_ppm;
 }
@@ -40,31 +36,8 @@ float pixelsToMeters(const float pixels) {
     return pixels / g_ppm;
 }
 
-// Type conversion
+// Misc math
 // =====================================================================================================================
-b2Vec2 toB2Vec2(const tson::Vector2i& vec) {
-    return b2Vec2{
-    pixelsToMeters(vec.x),
-    pixelsToMeters(vec.y)
-    };
-}
-
-Vector2 toRayVec2(const tson::Vector2f& vec) {
-    return Vector2{
-        vec.x,
-        vec.y
-    };
-}
-
-Rectangle toRayRect(const tson::Rect& rect) {
-    return Rectangle{
-    static_cast<float>(rect.x),
-    static_cast<float>(rect.y),
-    static_cast<float>(rect.width),
-    static_cast<float>(rect.height)
-    };
-}
-
 tson::Vector2i v2iAdd(
     const tson::Vector2i& vecOne,
     const tson::Vector2i& vecTwo) {
@@ -80,7 +53,7 @@ float getRandFloat(float min, float max) {
     if (min > max)
         std::swap(min, max);
 
-    std::uniform_real_distribution<> distribution(min, max);
+    std::uniform_real_distribution distribution(min, max);
     return distribution(g_randomGenerator);
 }
 
@@ -88,7 +61,7 @@ int getRandInt(int min, int max) {
     if (min > max)
         std::swap(min, max);
 
-    std::uniform_int_distribution<> distribution(min, max);
+    std::uniform_int_distribution distribution(min, max);
     return distribution(g_randomGenerator);
 }
 
