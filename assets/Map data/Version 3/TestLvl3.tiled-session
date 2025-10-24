@@ -13,9 +13,9 @@
         },
         "TestLvl3.tmj": {
             "scale": 1.5,
-            "selectedLayer": 8,
+            "selectedLayer": 3,
             "viewCenter": {
-                "x": 772.6666666666666,
+                "x": 644.6666666666666,
                 "y": 238
             }
         },

@@ -38,8 +38,8 @@ StartMenuLayer::StartMenuLayer() :
         {183, 183, 183, 255});
 
     m_startButton.setClickEvent([] {
-            LayerManager::getInstance().resumeLayer("GameLayer");
-            LayerManager::getInstance().requestLayerPop("StartMenuLayer");
+            LayerManager::getInstance().resumeLayer(layerKey::GAME_LAYER);
+            LayerManager::getInstance().requestLayerPop(layerKey::START_MENU);
     });
 
     m_quitButton.setColor(

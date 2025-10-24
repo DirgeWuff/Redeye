@@ -2,8 +2,9 @@
 // Created by DirgeWuff on 9/26/25.
 //
 
-#include "LayerManager.h"
+#include <cassert>
 #include "ranges"
+#include "LayerManager.h"
 
 LayerManager LayerManager::m_managerInstance = LayerManager();
 
@@ -11,7 +12,7 @@ LayerManager& LayerManager::getInstance() {
     return m_managerInstance;
 }
 
-void LayerManager::popLayer(const std::string& id) {
+void LayerManager::popLayer(const layerKey& id) {
     const auto it = m_layers.find(id);
 
     if (it != m_layers.end()) {
@@ -22,8 +23,47 @@ void LayerManager::popLayer(const std::string& id) {
     }
     else {
         logErr(
-            std::string("Cannot pop layer, no such key found: " + id +
+            std::string("Cannot pop layer, no such key found: " + keyToStr(id) +
                 std::string("LayerManger::popLayer()")));
+    }
+}
+
+void LayerManager::requestLayerPop(const layerKey& id) {
+        m_popRequestQueue.push_back(id);
+}
+
+void LayerManager::pushLayer(const layerKey& id, std::unique_ptr<Layer> layer) {
+    m_layers.emplace(
+        std::piecewise_construct,
+        std::forward_as_tuple(id),
+        std::forward_as_tuple(std::move(layer)));
+}
+
+bool LayerManager::stackContains(const layerKey& id) const {
+    return m_layers.contains(id);
+}
+
+void LayerManager::resumeLayer(const layerKey& id) {
+    const auto it = m_layers.find(id);
+
+    if (it != m_layers.end()) {
+        assert(it->second);
+        it->second->resume();
+    }
+    else {
+        logErr(std::string("Cannot enable layer, no such key found: " + keyToStr(id)));
+    }
+}
+
+void LayerManager::suspendLayer(const layerKey& id) {
+    const auto it = m_layers.find(id);
+
+    if (it != m_layers.end()) {
+        assert(it->second);
+        it->second->suspend();
+    }
+    else {
+        logErr(std::string("Cannot suspend layer, no such key found: " + keyToStr(id)));
     }
 }
 

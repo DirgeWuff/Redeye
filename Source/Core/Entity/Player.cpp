@@ -166,20 +166,20 @@ void Player::moveNowhere() {
 }
 
 void Player::murder() {
-    LayerManager::getInstance().suspendLayer(std::string("GameLayer"));
+    LayerManager::getInstance().suspendLayer(layerKey::GAME_LAYER);
     LayerManager::getInstance().suspendOverlays();
 
     // Pretty bad created unique_ptr<T> with shared_ptr<T> as argument, but it works better than anything else...
     try {
         const auto p = shared_from_this();
 
-        if (!LayerManager::getInstance().stackContains("DeathMenuLayer")) {
+        if (!LayerManager::getInstance().stackContains(layerKey::DEATH_MENU)) {
             LayerManager::getInstance().pushLayer(
-           std::string("DeathMenuLayer"),
+           layerKey::DEATH_MENU,
            std::make_unique<DeathMenuLayer>(p));
         }
         else {
-            LayerManager::getInstance().resumeLayer("DeathMenuLayer");
+            LayerManager::getInstance().resumeLayer(layerKey::DEATH_MENU);
         }
     }
     catch (std::bad_weak_ptr& e) {
@@ -200,9 +200,9 @@ void Player::reform(const saveData& save) {
         return;
     }
 
-    LayerManager::getInstance().resumeLayer("GameLayer");
+    LayerManager::getInstance().resumeLayer(layerKey::GAME_LAYER);
     LayerManager::getInstance().resumeOverlays();
-    LayerManager::getInstance().requestLayerPop("DeathMenuLayer");
+    LayerManager::getInstance().requestLayerPop(layerKey::DEATH_MENU);
 
     b2Body_SetTransform(
         m_body,

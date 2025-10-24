@@ -5,11 +5,7 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-// Type of layer. Whether or not the layer can overlay/stack on another layer
-enum class layerType {
-    PRIMARY_LAYER,
-    OVERLAY_LAYER
-};
+#include "LayerTypes.h"
 
 // Base layer class. Any type of object that can be placed into layer stack for use.
 class Layer {

@@ -102,12 +102,12 @@ public:
 
                 saveGame(m_currentSave);
 
-                if (LayerManager::getInstance().stackContains(std::string("CheckpointAlert"))) {
-                    LayerManager::getInstance().resumeLayer("CheckpointAlert");
+                if (LayerManager::getInstance().stackContains(layerKey::CHECKPOINT_ALERT)) {
+                    LayerManager::getInstance().resumeLayer(layerKey::CHECKPOINT_ALERT);
                 }
                 else {
                     LayerManager::getInstance().pushLayer(
-                        std::string("CheckpointAlert"),
+                        layerKey::CHECKPOINT_ALERT,
                         std::make_unique<TextAlert>("checkpoint reached", 5.0f));
                 }
 

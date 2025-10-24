@@ -35,8 +35,8 @@ Vector2 toRayVec2(const T& vec) {
     static_assert(!std::is_same_v<noConstRef, b2Vec2>);
 
     return {
-    static_cast<float>(vec.x),
-    static_cast<float>(vec.y)};
+        static_cast<float>(vec.x),
+        static_cast<float>(vec.y)};
 }
 
 template<typename T>

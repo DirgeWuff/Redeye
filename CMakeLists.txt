@@ -89,6 +89,8 @@ add_executable(Redeye
         Source/Application/Layers/DeathMenuLayer.h
         Source/Core/Serialization/Save.cpp
         Source/Core/Serialization/Save.h
+        Source/Core/Backend/LayerTypes.h
+        Source/Core/Backend/LayerTypes.cpp
 )
 
 # Compile definitions

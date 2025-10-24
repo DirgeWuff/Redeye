@@ -9,6 +9,7 @@
 #include "raylib.h"
 #include "Application.h"
 #include "LayerManager.h"
+#include "LayerTypes.h"
 #include "../../Application/Layers/GameLayer.h"
 #include "../../Application/Layers/StartMenuLayer.h"
 #include "../Serialization/Save.h"
@@ -46,14 +47,14 @@ void Application::init() {
     }
 
     LayerManager::getInstance().pushLayer(
-        std::string("StartMenuLayer"),
+        layerKey::START_MENU,
         std::make_unique<StartMenuLayer>());
 
     LayerManager::getInstance().pushLayer(
-         std::string("GameLayer"),
+         layerKey::GAME_LAYER,
          std::make_unique<GameLayer>(g_playerSpritePath, initSave));
 
-    LayerManager::getInstance().suspendLayer("GameLayer");
+    LayerManager::getInstance().suspendLayer(layerKey::GAME_LAYER);
 }
 
 // Main loop

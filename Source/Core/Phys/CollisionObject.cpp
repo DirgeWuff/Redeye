@@ -134,6 +134,7 @@ CollisionObject & CollisionObject::operator=(CollisionObject&& other) noexcept {
 
 CollisionObject::~CollisionObject() {
     delete[] m_verts;
+    m_verts = nullptr;
 }
 
 [[nodiscard]] b2Vec2* CollisionObject::getObjectVerts() const noexcept {
