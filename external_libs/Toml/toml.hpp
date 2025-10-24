@@ -17083,8 +17083,6 @@ TOML_ANON_NAMESPACE_START
 
 			case node_type::string:
 			{
-				// todo: proper utf8 decoding?
-				// todo: tab awareness?
 				auto& str = (*reinterpret_cast<const value<std::string>*>(&node)).get();
 				return str.length() + 2u; // + ""
 			}

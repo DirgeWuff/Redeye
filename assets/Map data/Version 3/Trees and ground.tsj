@@ -1,0 +1,14 @@
+{ "columns":22,
+ "image":"Trees and ground.png",
+ "imageheight":512,
+ "imagewidth":704,
+ "margin":0,
+ "name":"Trees and ground",
+ "spacing":0,
+ "tilecount":352,
+ "tiledversion":"1.11.2",
+ "tileheight":32,
+ "tilewidth":32,
+ "type":"tileset",
+ "version":"1.10"
+}
