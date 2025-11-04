@@ -63,7 +63,7 @@ void Player::moveRight() {
     }
 
     const float mass = b2Body_GetMass(m_body);
-    m_lastDirection = RIGHT;
+    m_lastDirection = directions::RIGHT;
 
     // Physically move player
     b2Body_ApplyLinearImpulse(
@@ -105,7 +105,7 @@ void Player::moveLeft() {
     }
 
     const float mass = b2Body_GetMass(m_body);
-    m_lastDirection = LEFT;
+    m_lastDirection = directions::LEFT;
 
     b2Body_ApplyLinearImpulse(
         m_body,
@@ -156,7 +156,7 @@ void Player::jump() const {
 
 // Control player idle sprite
 void Player::moveNowhere() {
-    if (m_lastDirection == RIGHT) {
+    if (m_lastDirection == directions::RIGHT) {
         m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
         m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
     }
@@ -222,6 +222,10 @@ void Player::reform(const saveData& save) {
 
 [[nodiscard]] bool Player::isDead() const noexcept {
     return m_dead;
+}
+
+[[nodiscard]] directions Player::getPlayerDirection() const noexcept {
+    return m_lastDirection;
 }
 
 void Player::addContactEvent() noexcept {

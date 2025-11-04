@@ -3,22 +3,11 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "TestLvl3.tmj",
+    "activeFile": "",
     "expandedProjectPaths": [
     ],
+    "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
-        "Dead trees and foliage.tsj": {
-            "scaleInDock": 1,
-            "scaleInEditor": 1
-        },
-        "TestLvl3.tmj": {
-            "scale": 1.5,
-            "selectedLayer": 3,
-            "viewCenter": {
-                "x": 644.6666666666666,
-                "y": 238
-            }
-        },
         "Trees and ground.tsj": {
             "scaleInDock": 1,
             "scaleInEditor": 1
@@ -27,19 +16,13 @@
     "last.imagePath": "C:/Users/DirgeWuff/Documents/code/CPP/Redeye/assets/Map data/Version 3",
     "map.height": 16,
     "map.lastUsedFormat": "json",
-    "map.renderOrder": "2",
     "map.width": 64,
     "openFiles": [
-        "TestLvl3.tmj",
-        "Trees and ground.tsj",
-        "Dead trees and foliage.tsj"
     ],
     "project": "TestLvl3.tiled-project",
-    "property.type": "float",
+    "property.type": "string",
     "recentFiles": [
-        "Dead trees and foliage.tsj",
-        "Trees and ground.tsj",
-        "TestLvl3.tmj"
+        "Trees and ground.tsj"
     ],
     "tileset.lastUsedFormat": "json"
 }

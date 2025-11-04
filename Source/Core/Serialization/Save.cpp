@@ -20,16 +20,16 @@ void createDefaultSave() {
 
     std::ofstream f(g_saveFilePath);
 
-    // TODO: Figure out how to dynamically load playerX/Y from map file
+    // TODO: Figure out how to dynamically load playerX/Y from starting map file
     constexpr std::string_view saveData = R"(
         [save]
         currentMapPath = "../assets/Map data/Version 3/TestLvl3.tmj"
         playerPosX = 64.0
         playerPosY = 315.0
-        )";
+           )";
 
     try {
-        toml::table tbl = toml::parse(saveData);
+        const toml::table tbl = toml::parse(saveData);
 
         if (f.is_open()) {
             f << tbl;
@@ -76,7 +76,7 @@ saveData loadGame() {
         createDefaultSave();
 
     try {
-        toml::table tbl = toml::parse_file(g_saveFilePath);
+        const toml::table tbl = toml::parse_file(g_saveFilePath);
         saveData data{};
 
         data.currentMapPath = getNestedStringFromToml(tbl, "save", "currentMapPath");

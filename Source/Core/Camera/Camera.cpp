@@ -8,6 +8,7 @@
 
 SceneCamera::SceneCamera(const MapData& map, const float zoomLevel) {
     m_camera = Camera2D();
+
     m_camera.offset = {
         static_cast<float>(GetScreenWidth()) / 2.0f,
         static_cast<float>(GetScreenHeight()) / 2.0f};
@@ -42,8 +43,8 @@ SceneCamera::~SceneCamera() = default;
 void SceneCamera::setTarget(const Player& player) {
     Vector2 targetEntityCenter = Vector2Add(player.getPositionCornerPx(), player.getSizePx() / 2.0f);
 
-    m_camera.target.y = targetEntityCenter.y;
-    m_camera.target.x = targetEntityCenter.x;
+    m_camera.target.y = roundf(targetEntityCenter.y);
+    m_camera.target.x = roundf(targetEntityCenter.x);
 
     m_camera.target = Vector2Clamp(
         m_camera.target,
@@ -62,6 +63,10 @@ void SceneCamera::update(const Player& player) {
         m_camera.target,
         {m_cameraRect.width / 2.0f, m_cameraRect.height / 2.0f},
         m_maxCameraPos);
+
+    // Round up here to fix flickering gaps between tiles...
+    m_camera.target.x = roundf(m_camera.target.x);
+    m_camera.target.y = roundf(m_camera.target.y);
 
     m_cameraRect.x = m_camera.target.x - m_cameraRect.width / 2.0f;
     m_cameraRect.y = m_camera.target.y - m_cameraRect.height / 2.0f;
@@ -90,6 +95,10 @@ void SceneCamera::cameraEnd() const {
     return m_cameraRect.height;
 }
 
+[[nodiscard]] float SceneCamera::getCameraZoom() const noexcept {
+    return m_camera.zoom;
+}
+
 [[nodiscard]] Vector2 SceneCamera::getCameraCenter() const noexcept {
     return m_cameraCenter;
 }
@@ -98,6 +107,10 @@ void SceneCamera::cameraEnd() const {
     return m_camera.target;
 }
 
-[[nodiscard]] Camera2D& SceneCamera::getCamera() noexcept {
-    return m_camera;
+[[nodiscard]] Vector2 SceneCamera::getCameraOffset() const noexcept {
+    return m_camera.offset;
+}
+
+[[nodiscard]] Vector2 SceneCamera::getCamToWorld(const Vector2& position) const {
+    return GetWorldToScreen2D(position, m_camera);
 }

@@ -17,7 +17,7 @@ void renderMap(
 
         const Vector2 parallaxFactor = toRayVec2(layer.getParallax());
         const Vector2 layerOffset = toRayVec2(layer.getOffset());
-        const Vector2 cameraTarget = cam.getCamera().target;
+        const Vector2 cameraTarget = cam.getCameraTarget();
         const Vector2 parallaxOffset = cameraTarget * (Vector2{1.0f, 1.0f} - parallaxFactor);
 
         const Vector2 adjustedOffset = offset + layerOffset + parallaxOffset;

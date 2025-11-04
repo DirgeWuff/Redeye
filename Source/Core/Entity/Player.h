@@ -14,7 +14,10 @@
 #include "../../Core/Utility/Utils.h"
 #include "../../Core/Serialization/Save.h"
 
-enum directions {RIGHT, LEFT};
+enum class directions : std::uint8_t {
+    RIGHT,
+    LEFT
+};
 
 class SceneCamera;
 
@@ -36,7 +39,7 @@ class Player final : public BoxBody, public std::enable_shared_from_this<Player>
     uint8_t m_frameIndex{};
     uint8_t m_frameDelayClock{};
     uint8_t m_soundDelayClock{};
-    uint8_t m_lastDirection{};
+    directions m_lastDirection{};
     bool m_moving{};
     bool m_onGround{};
     bool m_dead{};
@@ -53,7 +56,7 @@ public:
             m_numFrames(3),
             m_frameDelayAmount(20),
             m_soundDelayAmount(m_frameDelayAmount * 3),
-            m_lastDirection(RIGHT),
+            m_lastDirection(directions::RIGHT),
             m_onGround(true)
 {
         // Raylib/general stuff
@@ -140,6 +143,7 @@ public:
     [[nodiscard]] b2ShapeId getFootpawSenorId() const noexcept;
     [[nodiscard]] bool getFootpawSensorStatus() const noexcept;
     [[nodiscard]] bool isDead() const noexcept;
+    [[nodiscard]] directions getPlayerDirection() const noexcept;
     void addContactEvent() noexcept;
     void removeContactEvent() noexcept;
 };

@@ -83,12 +83,12 @@ std::string getMapPropStr(const std::unique_ptr<tson::Map>& map, T& propName) {
 }
 
 template<typename T>
-MapData loadMap(const T& filepath, b2WorldId world) {
+MapData loadMap(T&& filepath, b2WorldId world) {
     MapData mapData;
 
     // Validate the filepath.
     if (!exists(fs::path(filepath))) {
-        logErr(std::string("Invalid filepath to map: ") + std::string(filepath) + std::string("loadMap(Args...)"));
+        logErr(std::string("Invalid filepath to map: ") + filepath + std::string("loadMap(Args...)"));
         return {};
     }
 
@@ -123,7 +123,8 @@ MapData loadMap(const T& filepath, b2WorldId world) {
             }
 
             if (!data->textures.contains(imagePath)) {
-                const Texture texture = LoadTexture(imagePath.c_str());
+                const Texture2D texture = LoadTexture(imagePath.c_str());
+                // SetTextureFilter(texture, TEXTURE_FILTER_POINT);
                 data->textures[imagePath] = texture;
             }
 
@@ -232,6 +233,9 @@ MapData loadMap(const T& filepath, b2WorldId world) {
                     }
 
                     TileData tileData;
+                    // Vector2 position = toRayVec2(tile.getPosition());
+                    // position.x = roundf(position.x);
+                    // position.y = roundf(position.y);
                     tileData.position = toRayVec2(tile.getPosition());
                     tileData.sourceRect = toRayRect(tile.getDrawingRect());
                     tileData.texture = iterator->second;

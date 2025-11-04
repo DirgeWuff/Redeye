@@ -34,9 +34,11 @@ public:
    [[nodiscard]] Rectangle getCameraRect() const noexcept;
    [[nodiscard]] float getCameraRectWidth() const noexcept;
    [[nodiscard]] float getCameraRectHeight() const noexcept;
+   [[nodiscard]] float getCameraZoom() const noexcept;
    [[nodiscard]] Vector2 getCameraCenter() const noexcept;
    [[nodiscard]] Vector2 getCameraTarget() const noexcept;
-   [[nodiscard]] Camera2D& getCamera() noexcept;
+   [[nodiscard]] Vector2 getCameraOffset() const noexcept;
+   [[nodiscard]] Vector2 getCamToWorld(const Vector2& position) const;
 };
 
 #endif //CAMERA_H

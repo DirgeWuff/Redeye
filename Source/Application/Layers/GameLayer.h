@@ -5,6 +5,8 @@
 #ifndef GAMELAYER_H
 #define GAMELAYER_H
 
+#define GLSL_VERSION 330
+
 #include <memory>
 #include <filesystem>
 #include "../../Core/Camera/Camera.h"
@@ -25,9 +27,16 @@ class GameLayer final : public Layer {
     SceneCamera m_camera{};
     Music m_backgroundNoise{};
     saveData m_currentSave{};
+    RenderTexture2D m_frameBuffer{};
+    Shader m_fragShader{};
     std::shared_ptr<Player> m_playerCharacter{};
     EventDispatcher<playerContactEvent> m_collisionEventDispatcher{};
     b2WorldId m_worldId{};
+    int m_flashlightPosLoc{};
+    int m_flashlightDirLoc{};
+    int m_screenResLoc{};
+    Vector2 m_beamPosition{};
+    Vector2 m_beamAngle{};
 public:
     template<typename P>
     GameLayer(
@@ -39,11 +48,29 @@ public:
         m_isEnabled = true;
         m_worldDef.gravity = {0.0f, 50.0f};
         m_worldId = b2CreateWorld(&m_worldDef);
-        m_map = loadMap(save.currentMapPath, m_worldId);
+        m_map = loadMap(save.currentMapPath.string(), m_worldId);
         m_currentSave.currentMapPath = fs::path(save.currentMapPath);
         m_currentSave.centerPosition = save.centerPosition;
-        m_camera = SceneCamera(m_map, 2.0f);
+        m_frameBuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+        m_camera = SceneCamera(m_map, 1.50f);
         m_collisionEventDispatcher = EventDispatcher<playerContactEvent>();
+        m_fragShader = LoadShader(NULL, "../assets/Shaders/lighting.fsh");
+
+        if (!IsShaderValid(m_fragShader)) {
+            logErr("Unable to load shader. GameLayer::GameLayer()");
+        }
+
+        m_flashlightPosLoc = GetShaderLocation(m_fragShader, "lightPos");
+        m_flashlightDirLoc = GetShaderLocation(m_fragShader, "lightDirection");
+        m_screenResLoc = GetShaderLocation(m_fragShader, "screenResolution");
+
+        const Vector2 screenRes = {static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())};
+
+        SetShaderValue(
+            m_fragShader,
+            m_screenResLoc,
+            &screenRes,
+            SHADER_UNIFORM_VEC2);
 
         try {
             // Has to be ptr. b2Body enters undefined state when moved.
@@ -118,13 +145,14 @@ public:
         });
 
     m_camera.setTarget(*m_playerCharacter);
-    m_backgroundNoise = LoadMusicStream(m_map.bgNoisePath.c_str());
+    m_backgroundNoise = LoadMusicStream(m_map.bgNoisePath.string().c_str());
     SetMusicVolume(m_backgroundNoise, 0.30f);
     PlayMusicStream(m_backgroundNoise);
 }
 
     ~GameLayer() override;
 
+    void updateBeam();
     void pollEvents() override;
     void update() override;
     void draw() override;

@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 static constexpr uint16_t g_windowWidth = 1500;
 static constexpr uint16_t g_windowHeight = 800;
 // Replace this with a serialized config later...
-static std::string g_playerSpritePath = "../assets/Player assets/Player walk white.png";
+static std::string g_playerSpritePath = "../assets/Player assets/PlayerWalkWhiteFL.png";
 
 Application Application::m_appInstance = Application();
 
@@ -32,6 +32,7 @@ m_gameRunning(true)
 }
 
 void Application::init() {
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow(g_windowWidth, g_windowHeight, "Redeye");
     InitAudioDevice();
     SetTargetFPS(60);
