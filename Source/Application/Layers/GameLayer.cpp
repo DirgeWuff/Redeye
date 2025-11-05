@@ -28,7 +28,7 @@ void GameLayer::updateBeam() {
     const float camZoom = m_camera.getCameraZoom();
 
     // Player pos in screen space
-    const Vector2 playerScreenPos = {
+    Vector2 playerScreenPos = {
         (playerWorldPos.x - camTarget.x) * camZoom + camOffset.x,
         (playerWorldPos.y - camTarget.y) * camZoom + camOffset.y
     };
@@ -37,43 +37,45 @@ void GameLayer::updateBeam() {
     const bool playerFacingRight = m_playerCharacter->getPlayerDirection() == directions::RIGHT;
     const Vector2 beamOffset = playerFacingRight ? Vector2{110.0f, 132.5f} : Vector2{30.0f, 132.5f};
     m_beamPosition = Vector2Add(playerScreenPos, beamOffset);
-    m_beamPosition.y = GetScreenHeight() - m_beamPosition.y;
+    m_beamPosition.y = static_cast<float>(GetScreenHeight()) - m_beamPosition.y;
 
     SetShaderValue(m_fragShader, m_flashlightPosLoc, &m_beamPosition, SHADER_UNIFORM_VEC2);
 
     // Flip normals 180 deg if player is facing left
-    const Vector2 playerXNormals = playerFacingRight ? Vector2{1.0f, 0.0f} : Vector2{-1.0f, 0.0f};
+    Vector2 playerXNormals = playerFacingRight ? Vector2{1.0f, 0.0f} : Vector2{-1.0f, 0.0f};
     Vector2 beamDir = m_beamAngle;
 
     static bool lastFacingRight = playerFacingRight;
 
     if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-        // Calculate direction vector to mouse and light angle
-        Vector2 vecToMouse = Vector2Subtract(GetMousePosition(), m_beamPosition);
-        vecToMouse.y = -vecToMouse.y;
-        float relativeAngle = std::atan2f(vecToMouse.y, vecToMouse.x) - std::atan2f(playerXNormals.y, playerXNormals.x);
+        const Vector2 mousePos = GetMousePosition();
+        const Vector2 shaderMousePos = { mousePos.x, GetScreenHeight() - mousePos.y };
+
+        // Calculate direction vector from beam to mouse and relative angle
+        const Vector2 vecToMouse = Vector2Normalize(Vector2Subtract(shaderMousePos, m_beamPosition));
+        float angleToMouse = std::atan2f(vecToMouse.y, vecToMouse.x) - std::atan2f(playerXNormals.y, playerXNormals.x);
 
         // Normalize for both negative pi and pi
-        if (relativeAngle >  g_pi) relativeAngle -= 2.0f * g_pi;
-        if (relativeAngle < -g_pi) relativeAngle += 2.0f * g_pi;
+        if (angleToMouse > g_pi) angleToMouse -= 2.0f * g_pi;
+        if (angleToMouse < -g_pi) angleToMouse += 2.0f * g_pi;
 
         // Clamp beam y angle
-        constexpr float minAngle = -75.0f * g_pi / 180.0f;
         constexpr float maxAngle = 75.0f * g_pi / 180.0f;
-        relativeAngle = std::clamp(relativeAngle, minAngle, maxAngle);
+        constexpr float minAngle = -75.0f * g_pi / 180.0f;
+        angleToMouse = std::clamp(angleToMouse, minAngle, maxAngle);
 
-        // Build a normalized direction vector
-        const float worldAngle = relativeAngle + std::atan2f(playerXNormals.y, playerXNormals.x);
-        beamDir = Vector2Normalize({std::cos(worldAngle), std::sin(worldAngle)});
-
-    } // Flip X normals 180 deg if player turns around
+        // Calculate final beam direction
+        const float finalAngle = std::atan2f(playerXNormals.y, playerXNormals.x) + angleToMouse;
+        beamDir = { std::cos(finalAngle), std::sin(finalAngle) };
+    }
+    // Flip X normals 180 deg if player turns around
     else if (playerFacingRight != lastFacingRight) {
         beamDir.x *= -1.0f;
     }
 
     m_beamAngle = beamDir;
-    SetShaderValue(m_fragShader, m_flashlightDirLoc, &m_beamAngle, SHADER_UNIFORM_VEC2);
     lastFacingRight = playerFacingRight;
+    SetShaderValue(m_fragShader, m_flashlightDirLoc, &m_beamAngle, SHADER_UNIFORM_VEC2);
 }
 
 void GameLayer::pollEvents() {
