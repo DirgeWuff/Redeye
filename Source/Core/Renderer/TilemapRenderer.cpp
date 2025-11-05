@@ -7,7 +7,7 @@
 #include "TilemapRenderer.h"
 
 void renderMap(
-    SceneCamera& cam,
+    const SceneCamera& cam,
     const MapData& map,
     const Vector2 offset,
     const Color color)

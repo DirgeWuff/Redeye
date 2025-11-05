@@ -39,7 +39,7 @@ void Application::init() {
 
     saveData initSave{};
 
-    if (fs::exists("./Savegame/save.toml")) {
+    if (fs::exists("../Savegame/save.toml")) {
         initSave = loadGame();
     }
     else {
