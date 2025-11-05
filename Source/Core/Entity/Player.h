@@ -14,14 +14,20 @@
 #include "../../Core/Utility/Utils.h"
 #include "../../Core/Serialization/Save.h"
 
+// Keeping these separate because it's easier
 enum class directions : std::uint8_t {
     RIGHT,
     LEFT
 };
 
+enum class playerStates : std::uint8_t {
+    ON_GROUND,
+    IN_AIR,
+    DEAD
+};
+
 class SceneCamera;
 
-// TODO: replace state-related bools with enum class
 class Player final : public BoxBody, public std::enable_shared_from_this<Player> {
     b2Polygon m_footpawSensorBox{};
     b2ShapeDef m_footpawSensorShape{};
@@ -40,9 +46,7 @@ class Player final : public BoxBody, public std::enable_shared_from_this<Player>
     uint8_t m_frameDelayClock{};
     uint8_t m_soundDelayClock{};
     directions m_lastDirection{};
-    bool m_moving{};
-    bool m_onGround{};
-    bool m_dead{};
+    playerStates m_currentState{};
 public:
     Player() = default;
 
@@ -57,7 +61,7 @@ public:
             m_frameDelayAmount(20),
             m_soundDelayAmount(m_frameDelayAmount * 3),
             m_lastDirection(directions::RIGHT),
-            m_onGround(true)
+            m_currentState(playerStates::ON_GROUND)
 {
         // Raylib/general stuff
         m_walkSprites = LoadTexture(m_playerSpritePath.c_str());
@@ -141,7 +145,7 @@ public:
     void murder();
     void reform(const saveData& save);
     [[nodiscard]] b2ShapeId getFootpawSenorId() const noexcept;
-    [[nodiscard]] bool getFootpawSensorStatus() const noexcept;
+    [[nodiscard]] bool isOnGround() const noexcept;
     [[nodiscard]] bool isDead() const noexcept;
     [[nodiscard]] directions getPlayerDirection() const noexcept;
     void addContactEvent() noexcept;

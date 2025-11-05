@@ -200,7 +200,7 @@ void drawDebugPlayerPosition(const Player& player) {
 void drawDebugFootpawSensorStatus(const Player& player) {
     if (!g_drawPlayerSensorStatus) return;
 
-    if (player.getFootpawSensorStatus()) {
+    if (player.isOnGround()) {
         DrawText(
             "Footpaw sensor in contact with object",
             10,

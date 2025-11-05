@@ -111,6 +111,6 @@ void SceneCamera::cameraEnd() const {
     return m_camera.offset;
 }
 
-[[nodiscard]] Vector2 SceneCamera::getCamToWorld(const Vector2& position) const {
+[[nodiscard]] Vector2 SceneCamera::getToWorldCam(const Vector2& position) const {
     return GetWorldToScreen2D(position, m_camera);
 }

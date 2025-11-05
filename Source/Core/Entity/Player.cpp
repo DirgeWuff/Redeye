@@ -42,13 +42,13 @@ void Player::update() {
         metersToPixels(m_centerPosition.y) - m_sizePx.y / 2
     };
     if (m_activeGroundContacts > 0) {
-        if (!m_onGround) {
-            m_onGround = true;
+        if (m_currentState != playerStates::ON_GROUND) {
+            m_currentState = playerStates::ON_GROUND;
             playRandomSound(m_landingSounds);
         }
     }
     else {
-        m_onGround = false;
+         m_currentState = playerStates::IN_AIR;
     }
 }
 
@@ -73,7 +73,7 @@ void Player::moveRight() {
         true);
 
     // Switch sprites and play footstep sounds
-    if (m_onGround) {
+    if (m_currentState == playerStates::ON_GROUND) {
         if (m_frameDelayClock >= m_frameDelayAmount) {
             m_frameIndex++;
             m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
@@ -113,7 +113,7 @@ void Player::moveLeft() {
         b2Body_GetWorldCenterOfMass(m_body),
         true);
 
-    if (m_onGround) {
+    if (m_currentState == playerStates::ON_GROUND) {
         if (m_frameDelayClock >= m_frameDelayAmount) {
             m_frameIndex++;
             m_spriteRect.y = 0.0f;
@@ -143,7 +143,7 @@ void Player::jump() const {
         return;
     }
 
-    if (m_onGround) {
+    if (m_currentState == playerStates::ON_GROUND) {
         const float mass = b2Body_GetMass(m_body);
 
         b2Body_ApplyLinearImpulse(
@@ -191,7 +191,7 @@ void Player::murder() {
         logErr("Unknown error occurred using shared_from_this(). Player::murder()");
     }
 
-    m_dead = true;
+    m_currentState = playerStates::DEAD;
 }
 
 void Player::reform(const saveData& save) {
@@ -209,19 +209,19 @@ void Player::reform(const saveData& save) {
         save.centerPosition,
         b2MakeRot(0.0f));
 
-    m_dead = false;
+    m_currentState = playerStates::ON_GROUND;
 }
 
 [[nodiscard]] b2ShapeId Player::getFootpawSenorId() const noexcept {
     return m_footpawSensorId;
 }
 
-[[nodiscard]] bool Player::getFootpawSensorStatus() const noexcept { // May be able to deprecate
-    return m_onGround;
+[[nodiscard]] bool Player::isOnGround() const noexcept {
+    return m_currentState == playerStates::ON_GROUND;
 }
 
 [[nodiscard]] bool Player::isDead() const noexcept {
-    return m_dead;
+    return m_currentState == playerStates::DEAD;
 }
 
 [[nodiscard]] directions Player::getPlayerDirection() const noexcept {

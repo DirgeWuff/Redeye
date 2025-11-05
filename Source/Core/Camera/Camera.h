@@ -38,7 +38,7 @@ public:
    [[nodiscard]] Vector2 getCameraCenter() const noexcept;
    [[nodiscard]] Vector2 getCameraTarget() const noexcept;
    [[nodiscard]] Vector2 getCameraOffset() const noexcept;
-   [[nodiscard]] Vector2 getCamToWorld(const Vector2& position) const;
+   [[nodiscard]] Vector2 getToWorldCam(const Vector2& position) const;
 };
 
 #endif //CAMERA_H
