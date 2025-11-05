@@ -22,13 +22,14 @@ GameLayer::~GameLayer() {
 // TODO: Move all this shader logic to it's own class
 void GameLayer::updateBeam() {
     // Someone smarter than me could probably do this in half the LoC...
+    // Extra comments here because math is fucking hard
     const Vector2 playerWorldPos = m_playerCharacter->getPositionCornerPx();
     const Vector2 camTarget = m_camera.getCameraTarget();
     const Vector2 camOffset = m_camera.getCameraOffset();
     const float camZoom = m_camera.getCameraZoom();
 
     // Player pos in screen space
-    Vector2 playerScreenPos = {
+    const Vector2 playerScreenPos = {
         (playerWorldPos.x - camTarget.x) * camZoom + camOffset.x,
         (playerWorldPos.y - camTarget.y) * camZoom + camOffset.y
     };
@@ -42,7 +43,7 @@ void GameLayer::updateBeam() {
     SetShaderValue(m_fragShader, m_flashlightPosLoc, &m_beamPosition, SHADER_UNIFORM_VEC2);
 
     // Flip normals 180 deg if player is facing left
-    Vector2 playerXNormals = playerFacingRight ? Vector2{1.0f, 0.0f} : Vector2{-1.0f, 0.0f};
+    const Vector2 playerXNormals = playerFacingRight ? Vector2{1.0f, 0.0f} : Vector2{-1.0f, 0.0f};
     Vector2 beamDir = m_beamAngle;
 
     static bool lastFacingRight = playerFacingRight;

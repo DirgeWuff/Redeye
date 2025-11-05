@@ -124,7 +124,6 @@ MapData loadMap(T&& filepath, b2WorldId world) {
 
             if (!data->textures.contains(imagePath)) {
                 const Texture2D texture = LoadTexture(imagePath.c_str());
-                // SetTextureFilter(texture, TEXTURE_FILTER_POINT);
                 data->textures[imagePath] = texture;
             }
 

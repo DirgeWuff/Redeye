@@ -28,8 +28,8 @@ void renderMap(
 
                 for (const auto& data : renderDataVec) {
                     const Vector2 drawingPos = {
-                        data.position.x + adjustedOffset.x,
-                        data.position.y + adjustedOffset.y
+                        roundf(data.position.x + adjustedOffset.x),
+                        roundf(data.position.y + adjustedOffset.y)
                     };
 
                     const Rectangle tileBounds = {

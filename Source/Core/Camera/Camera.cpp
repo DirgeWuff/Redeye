@@ -41,7 +41,7 @@ SceneCamera::SceneCamera(const MapData& map, const float zoomLevel) {
 SceneCamera::~SceneCamera() = default;
 
 void SceneCamera::setTarget(const Player& player) {
-    Vector2 targetEntityCenter = Vector2Add(player.getPositionCornerPx(), player.getSizePx() / 2.0f);
+    const Vector2 targetEntityCenter = Vector2Add(player.getPositionCornerPx(), player.getSizePx() / 2.0f);
 
     m_camera.target.y = roundf(targetEntityCenter.y);
     m_camera.target.x = roundf(targetEntityCenter.x);
@@ -63,10 +63,6 @@ void SceneCamera::update(const Player& player) {
         m_camera.target,
         {m_cameraRect.width / 2.0f, m_cameraRect.height / 2.0f},
         m_maxCameraPos);
-
-    // Round up here to fix flickering gaps between tiles...
-    m_camera.target.x = roundf(m_camera.target.x);
-    m_camera.target.y = roundf(m_camera.target.y);
 
     m_cameraRect.x = m_camera.target.x - m_cameraRect.width / 2.0f;
     m_cameraRect.y = m_camera.target.y - m_cameraRect.height / 2.0f;
