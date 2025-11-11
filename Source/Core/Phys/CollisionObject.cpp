@@ -6,6 +6,7 @@
 #include "box2d/types.h"
 #include "box2D/box2d.h"
 #include "CollisionObject.h"
+#include "../Utility/Globals.h"
 
 // Base class for a CollisionObject, generated from vertices in a tiled map's object layer.
 // These are used to generate collision geometry for the terrain in a world.
@@ -33,6 +34,8 @@ CollisionObject::CollisionObject(
     m_chainDef.materialCount = 1;
     m_chainDef.isLoop = false;
     m_chainDef.enableSensorEvents = true;
+    m_chainDef.filter.categoryBits = g_groundCategoryBits;
+    m_chainDef.filter.maskBits = g_universalMaskBits;
     m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
 }
 

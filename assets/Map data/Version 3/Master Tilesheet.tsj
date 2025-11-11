@@ -1,0 +1,14 @@
+{ "columns":49,
+ "image":"Master Tilesheet.png",
+ "imageheight":1184,
+ "imagewidth":1568,
+ "margin":0,
+ "name":"Master Tilesheet",
+ "spacing":0,
+ "tilecount":1813,
+ "tiledversion":"1.11.2",
+ "tileheight":32,
+ "tilewidth":32,
+ "type":"tileset",
+ "version":"1.10"
+}

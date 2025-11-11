@@ -10,10 +10,10 @@
 #include "../../Core/Event/EventCollider.h"
 #include "../../Core/Utility/Debug.h"
 #include "../../Core/Renderer/TilemapRenderer.h"
+#include "../../Core/Utility/Globals.h"
 
 static constexpr float g_worldStep = 1.0f / 60.0f;
 static constexpr std::uint8_t g_subStep = 4;
-static constexpr double g_pi = 3.14159265359;
 
 GameLayer::~GameLayer() {
     GameLayer::destroy();
@@ -81,10 +81,10 @@ void GameLayer::updateBeam() {
 
 void GameLayer::pollEvents() {
     if (IsKeyDown(KEY_A)) {
-        m_playerCharacter->moveLeft();
+        m_playerCharacter->moveLeft(m_worldId);
     }
     else if (IsKeyDown(KEY_D)) {
-        m_playerCharacter->moveRight();
+        m_playerCharacter->moveRight(m_worldId);
     }
 
     if (!IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
@@ -170,7 +170,7 @@ void GameLayer::draw() {
         m_camera.cameraEnd();
 
         // TODO: Make a debug layer
-#ifdef DEBUG
+    #ifdef DEBUG
         drawDebugBodyShapes(*m_playerCharacter);
         drawDebugCollisionShapes(m_map);
         drawDebugBodyCenter(*m_playerCharacter);
@@ -178,16 +178,16 @@ void GameLayer::draw() {
         drawDebugCameraCrosshair(m_camera);
         drawDebugCameraRect(m_camera);
         drawDebugEventColliders(m_map);
-#endif
+    #endif
 
         m_camera.cameraEnd();
 
-#ifdef DEBUG
+    #ifdef DEBUG
         // Draw these outside of camera context!
         drawControlsWindow();
         drawDebugFootpawSensorStatus(*m_playerCharacter);
         drawDebugPlayerPosition(*m_playerCharacter);
-#endif
+    #endif
     }
 }
 

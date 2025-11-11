@@ -91,6 +91,7 @@ add_executable(Redeye
         Source/Core/Serialization/Save.h
         Source/Core/Backend/LayerTypes.h
         Source/Core/Backend/LayerTypes.cpp
+        Source/Core/Utility/Globals.h
 )
 
 # Compile definitions

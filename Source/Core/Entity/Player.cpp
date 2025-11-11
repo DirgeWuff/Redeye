@@ -16,6 +16,7 @@
 #include "../../Core/Utility/Utils.h"
 #include "../../Core/Backend/LayerManager.h"
 #include "../../Application/Layers/DeathMenuLayer.h"
+#include "../../Core/Utility/Globals.h"
 
 Player::~Player() {
 #ifdef DEBUG
@@ -31,10 +32,7 @@ Player::~Player() {
 }
 
 void Player::update() {
-    if (!b2Body_IsValid(m_body)) {
-        logErr("m_body invalid: Player::update()");
-        return;
-    }
+    assert(b2Body_IsValid(m_body));
 
     m_centerPosition = b2Body_GetPosition(m_body);
     m_cornerPosition = {
@@ -56,19 +54,32 @@ void Player::draw() const {
     DrawTextureRec(m_walkSprites, m_spriteRect, m_cornerPosition, WHITE);
 }
 
-void Player::moveRight() {
-    if (!b2Body_IsValid(m_body)) {
-        logErr("m_body invalid: Player::moveRight()");
-        return;
+void Player::moveRight(const b2WorldId& world) {
+    assert(b2Body_IsValid(m_body));
+    assert(b2World_IsValid(world));
+
+    // Calculate ground normals, adjust direction of force applied and amount of force applied based on ground angle
+    const float mass = b2Body_GetMass(m_body);
+    float movementForce = mass * 0.30f;
+    b2Vec2 impulseNormals = {movementForce, 0.0f};
+
+    if (m_currentState == playerStates::ON_GROUND) {
+        const b2Vec2 groundNormals = getGroundNormals(world);
+
+        b2Vec2 tangent = {groundNormals.y, -groundNormals.x};
+        tangent = b2Normalize(tangent);
+        const float slopeMagnitude = std::fabs(tangent.y);
+        movementForce += slopeMagnitude;
+
+        impulseNormals = b2MulSV(-movementForce, tangent);
     }
 
-    const float mass = b2Body_GetMass(m_body);
     m_lastDirection = directions::RIGHT;
 
     // Physically move player
     b2Body_ApplyLinearImpulse(
         m_body,
-        {mass * .30f, 0.0f},
+        impulseNormals,
         b2Body_GetWorldCenterOfMass(m_body),
         true);
 
@@ -98,18 +109,30 @@ void Player::moveRight() {
     }
 }
 
-void Player::moveLeft() {
-    if (!b2Body_IsValid(m_body)) {
-        logErr("m_body invalid: Player::moveLeft()");
-        return;
-    }
+void Player::moveLeft(const b2WorldId& world) {
+    assert(b2Body_IsValid(m_body));
+    assert(b2World_IsValid(world));
 
     const float mass = b2Body_GetMass(m_body);
+    float movementForce = mass * 0.30f;
+    b2Vec2 impulseNormals = {-movementForce, 0.0f};
+
+    if (m_currentState == playerStates::ON_GROUND) {
+        const b2Vec2 groundNormals = getGroundNormals(world);
+
+        b2Vec2 tangent = {groundNormals.y, -groundNormals.x};
+        tangent = b2Normalize(tangent);
+        const float slopeMagnitude = std::fabs(tangent.y);
+        movementForce += slopeMagnitude;
+
+        impulseNormals = b2MulSV(movementForce, tangent);
+    }
+
     m_lastDirection = directions::LEFT;
 
     b2Body_ApplyLinearImpulse(
         m_body,
-        {-(mass * .30f), 0.0f},
+        impulseNormals,
         b2Body_GetWorldCenterOfMass(m_body),
         true);
 
@@ -234,4 +257,21 @@ void Player::addContactEvent() noexcept {
 
 void Player::removeContactEvent() noexcept {
     m_activeGroundContacts--;
+}
+
+b2Vec2 Player::getGroundNormals(const b2WorldId& world) const {
+    assert(b2Body_IsValid(m_body));
+
+    const b2Vec2 origin = b2Body_GetPosition(m_body);
+    const b2Vec2 endPoint = {origin.x, origin.y + 1.0f};
+    const b2Vec2 translation = b2Sub(endPoint, origin);
+
+    b2QueryFilter filter = b2DefaultQueryFilter();
+    filter.categoryBits = g_raycastCategoryBits;
+    filter.maskBits = g_groundCategoryBits;
+
+    assert(b2World_IsValid(world));
+    const b2RayResult result = b2World_CastRayClosest(world, origin, translation, filter);
+
+    return result.normal;
 }

@@ -225,19 +225,16 @@ MapData loadMap(T&& filepath, b2WorldId world) {
                     const tson::Tile* tilePtr = tile.getTile();
                     const tson::Tileset* tileset = tilePtr->getTileset();
 
-                    auto iterator = data->texturePtrs.find(tileset);
-                    if (iterator == data->texturePtrs.end()) {
+                    auto it = data->texturePtrs.find(tileset);
+                    if (it == data->texturePtrs.end()) {
                         logErr("Texture missing: loadMap(Args...)");
                         continue;
                     }
 
                     TileData tileData;
-                    // Vector2 position = toRayVec2(tile.getPosition());
-                    // position.x = roundf(position.x);
-                    // position.y = roundf(position.y);
                     tileData.position = toRayVec2(tile.getPosition());
                     tileData.sourceRect = toRayRect(tile.getDrawingRect());
-                    tileData.texture = iterator->second;
+                    tileData.texture = it->second;
 
                     renderData.push_back(tileData);
                 }

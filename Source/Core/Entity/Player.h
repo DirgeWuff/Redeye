@@ -13,6 +13,9 @@
 #include "../../Core/Event/EventCollider.h"
 #include "../../Core/Utility/Utils.h"
 #include "../../Core/Serialization/Save.h"
+#include "../../Core/Utility/Globals.h"
+
+class SceneCamera;
 
 // Keeping these separate because it's easier
 enum class directions : std::uint8_t {
@@ -25,8 +28,6 @@ enum class playerStates : std::uint8_t {
     IN_AIR,
     DEAD
 };
-
-class SceneCamera;
 
 class Player final : public BoxBody, public std::enable_shared_from_this<Player> {
     b2Polygon m_footpawSensorBox{};
@@ -102,6 +103,8 @@ public:
         m_shapeDef.material.friction = 0.50f;
         m_shapeDef.material.restitution = 0.0f;
         m_shapeDef.density = 8.0f;
+        m_shapeDef.filter.categoryBits = g_playerCategoryBits;
+        m_shapeDef.filter.maskBits = g_universalMaskBits;   // Using this for now, may change later...
         b2CreateCapsuleShape(m_body, &m_shapeDef, &boundingCapsule);
 
         // Footpaw sensor :3
@@ -115,6 +118,8 @@ public:
         m_footpawSensorShape = b2DefaultShapeDef();
         m_footpawSensorShape.isSensor = true;
         m_footpawSensorShape.enableSensorEvents = true;
+        m_footpawSensorShape.filter.categoryBits = g_footpawCategoryBits;
+        m_footpawSensorShape.filter.maskBits = g_universalMaskBits;
 
         // Set our userData for the EventDispatcher to use later
         m_footpawSensorInfo = std::make_unique<sensorInfo>("pawbs");
@@ -138,8 +143,8 @@ public:
 
     void update() override;
     void draw() const override;
-    void moveRight();
-    void moveLeft();
+    void moveRight(const b2WorldId& world);
+    void moveLeft(const b2WorldId& world);
     void jump() const;
     void moveNowhere();
     void murder();
@@ -150,6 +155,7 @@ public:
     [[nodiscard]] directions getPlayerDirection() const noexcept;
     void addContactEvent() noexcept;
     void removeContactEvent() noexcept;
+    b2Vec2 getGroundNormals(const b2WorldId& world) const;
 };
 
 #endif //PLAYER_H

@@ -146,6 +146,11 @@ public:
 
     m_camera.setTarget(*m_playerCharacter);
     m_backgroundNoise = LoadMusicStream(m_map.bgNoisePath.string().c_str());
+    if (!IsMusicValid(m_backgroundNoise)) {
+        logErr(std::string("Cannot load background noise: " + m_map.bgNoisePath.string()));
+        return;
+    }
+
     SetMusicVolume(m_backgroundNoise, 0.30f);
     PlayMusicStream(m_backgroundNoise);
 }

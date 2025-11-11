@@ -14,6 +14,8 @@ static std::string g_saveFilePath = g_saveFolderPath + "/save.toml";
 
 namespace fs = std::filesystem;
 
+// TODO: Add data/code to save and load the player's direction and flashlight beam angle
+
 void createDefaultSave() {
     if (!fs::exists(g_saveFolderPath))
         fs::create_directory(g_saveFolderPath);
