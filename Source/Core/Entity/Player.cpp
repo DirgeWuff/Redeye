@@ -259,6 +259,7 @@ void Player::removeContactEvent() noexcept {
     m_activeGroundContacts--;
 }
 
+// Consider returning the full result if other raycast info is needed down the line...
 b2Vec2 Player::getGroundNormals(const b2WorldId& world) const {
     assert(b2Body_IsValid(m_body));
 
