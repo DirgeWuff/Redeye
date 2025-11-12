@@ -52,7 +52,7 @@ public:
         m_currentSave.currentMapPath = fs::path(save.currentMapPath);
         m_currentSave.centerPosition = save.centerPosition;
         m_frameBuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
-        m_camera = SceneCamera(m_map, 1.50f);
+        m_camera = SceneCamera(m_map, 1.5f);
         m_collisionEventDispatcher = EventDispatcher<playerContactEvent>();
         m_fragShader = LoadShader(NULL, "../assets/Shaders/lighting.fsh");
 

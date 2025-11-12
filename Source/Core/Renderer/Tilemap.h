@@ -15,8 +15,6 @@
 #include "../Utility/Error.h"
 #include "../Utility/Utils.h"
 
-// TODO: Consider breaking up loadMap() into functions so it's more maintainable...
-
 namespace fs = std::filesystem;
 
 class SceneCamera;
@@ -55,6 +53,30 @@ struct MapData {
     uint16_t mapHeight;
 };
 
+void loadTilesets(
+    const MapData& mapData,
+    const std::unique_ptr<tson::Map>& map,
+    const std::shared_ptr<RenderData>& renderData);
+
+void loadImageLayer(
+    const MapData& mapData,
+    const tson::Layer& layer,
+    const std::shared_ptr<RenderData>& renderData);
+
+void loadCollisionMesh(
+    MapData& mapData,
+    tson::Layer& layer,
+    b2WorldId world);
+
+void loadEventColliders(
+    MapData& mapData,
+    tson::Layer& layer,
+    b2WorldId world);
+
+void loadTileLayer(
+    tson::Layer& layer,
+    const std::shared_ptr<RenderData>& renderData);
+
 // If I end up adding more types, might be good to RTTI this whole thing...
 template<typename T>
 float getMapPropFloat(const std::unique_ptr<tson::Map>& map, T& propName) {
@@ -83,7 +105,7 @@ std::string getMapPropStr(const std::unique_ptr<tson::Map>& map, T& propName) {
 }
 
 template<typename T>
-MapData loadMap(T&& filepath, b2WorldId world) {
+MapData loadMap(T&& filepath, const b2WorldId world) {
     MapData mapData;
 
     // Validate the filepath.
@@ -99,7 +121,6 @@ MapData loadMap(T&& filepath, b2WorldId world) {
     }
 
     try {
-        // Load map file and validate it.
         tson::Tileson t;
         std::unique_ptr<tson::Map> map = t.parse(fs::path(filepath));
 
@@ -109,137 +130,21 @@ MapData loadMap(T&& filepath, b2WorldId world) {
             return {};
         }
 
-        // Load and cache ptrs to the images/textures
         const auto data = std::make_shared<RenderData>();
-
-        for (const auto& tileset : map->getTilesets()) {
-            std::string imagePath;
-
-            if (!mapData.baseDir.empty()) {
-                imagePath = mapData.baseDir.string() + tileset.getImage().string();
-            }
-            else {
-                imagePath = tileset.getImage().string();
-            }
-
-            if (!data->textures.contains(imagePath)) {
-                const Texture2D texture = LoadTexture(imagePath.c_str());
-                data->textures[imagePath] = texture;
-            }
-
-            data->texturePtrs[&tileset] = &data->textures[imagePath];
-        }
+        loadTilesets(mapData, map, data);
 
         for (auto& layer : map->getLayers()) {
-            // Parse image layers. Cheap to draw, so not bothering with ptrs
             if (layer.getType() == tson::LayerType::ImageLayer) {
-                std::string imagePath;
-
-                if (!mapData.baseDir.empty()) {
-                    imagePath = mapData.baseDir.string() + layer.getImage();
-                }
-                else {
-                    imagePath = layer.getImage();
-                }
-
-                const Texture texture = LoadTexture(imagePath.c_str());
-                data->textures[imagePath] = texture;
+                loadImageLayer(mapData, layer, data);
             }
-            // Parse collision mesh, create collision objects in Box2D
             else if (layer.getType() == tson::LayerType::ObjectGroup && layer.getName() == "Collision mesh") {
-                for (auto& object : layer.getObjects()) {
-                    tson::ObjectType objType = object.getObjectType();
-
-                    if (objType == tson::ObjectType::Polyline) {
-                        tson::Vector2i pos = object.getPosition();
-                        std::vector<tson::Vector2i> tsonPoints = object.getPolylines();
-                        std::vector<b2Vec2> points;
-
-                        for (std::size_t i = 0; i < tsonPoints.size(); i++) {
-                            tsonPoints[i] = v2iAdd(tsonPoints[i], pos);
-                            points.push_back(pixelsToMetersVec(tsonPoints[i]));
-                        }
-
-                        mapData.collisionObjects.emplace_back(world, points);
-                    }
-                    else {
-                        logErr("Collision layer contains incompatible type: loadMap(Args...)");
-                        return {};
-                    }
-                }
+                loadCollisionMesh(mapData, layer, world);
             }
-            // Parse collider layer and create colliders
             else if (layer.getType() == tson::LayerType::ObjectGroup && layer.getName() == "Event colliders") {
-                std::vector<tson::Object> objects = layer.getObjects();
-
-                 for (const auto& object : layer.getObjects()) {
-                     const tson::Vector2i pos = object.getPosition();
-                     const tson::Vector2i size = object.getSize();
-
-                     // Perfect forward in place with std::piecewise_construct, std::forward_as_tuple
-                     if (object.getName() == "MurderBox") {
-                         // NOTE: Just sorta blindly assuming that there's never gonna be more than 255
-                         // colliders of a given type here...
-                         static uint8_t murderBoxCnt{};
-
-                         mapData.eventColliders.emplace(
-                             std::piecewise_construct,
-                             std::forward_as_tuple("MurderBox" + std::to_string(murderBoxCnt)),
-                             std::forward_as_tuple(
-                                 static_cast<float>(pos.x),
-                                 static_cast<float>(pos.y),
-                                 static_cast<float>(size.x),
-                                 static_cast<float>(size.y),
-                                 "MurderBox" + std::to_string(murderBoxCnt),
-                                 world));
-
-                         murderBoxCnt++;
-                     }
-                     else if (object.getName() == "Checkpoint") {
-                         static uint8_t checkpointCnt{};
-
-                         mapData.eventColliders.emplace(
-                             std::piecewise_construct,
-                             std::forward_as_tuple("Checkpoint" + std::to_string(checkpointCnt)),
-                             std::forward_as_tuple(
-                                 static_cast<float>(pos.x),
-                                 static_cast<float>(pos.y),
-                                 static_cast<float>(size.x),
-                                 static_cast<float>(size.y),
-                                 "Checkpoint" + std::to_string(checkpointCnt),
-                                 world));
-
-                         checkpointCnt++;
-                     }
-                     else {
-                         logErr(std::string("Incompatible object layer: " + object.getName() + "loadMap(Args...)"));
-                         return {};
-                     }
-                 }
+                loadEventColliders(mapData, layer, world);
             }
-            // Parse tile layers, precompute position and cache texture ptr for each tile
             else if (layer.getType() == tson::LayerType::TileLayer) {
-                std::vector<TileData> renderData;
-
-                for (auto& tile : std::views::values(layer.getTileObjects())) {
-                    const tson::Tile* tilePtr = tile.getTile();
-                    const tson::Tileset* tileset = tilePtr->getTileset();
-
-                    auto it = data->texturePtrs.find(tileset);
-                    if (it == data->texturePtrs.end()) {
-                        logErr("Texture missing: loadMap(Args...)");
-                        continue;
-                    }
-
-                    TileData tileData;
-                    tileData.position = toRayVec2(tile.getPosition());
-                    tileData.sourceRect = toRayRect(tile.getDrawingRect());
-                    tileData.texture = it->second;
-
-                    renderData.push_back(tileData);
-                }
-
-                data->layerRenderData[&layer] = std::move(renderData);
+                loadTileLayer(layer, data);
             }
             else {
                 logErr("Incompatible layer type: Group Layer: loadMap(Args...)");

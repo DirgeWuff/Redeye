@@ -92,6 +92,7 @@ add_executable(Redeye
         Source/Core/Backend/LayerTypes.h
         Source/Core/Backend/LayerTypes.cpp
         Source/Core/Utility/Globals.h
+        Source/Core/Renderer/Tilemap.cpp
 )
 
 # Compile definitions
