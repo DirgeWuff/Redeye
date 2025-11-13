@@ -6,80 +6,112 @@
 #include "raymath.h"
 #include "TilemapRenderer.h"
 
-void renderMap(
+// Very sloppy way of dealing with layers of render pass modes in the same function.
+// Tried to do this using groups, however there seems to be a bug in tson that causes tiled layers not to load properly
+// this seems like the second-best option.
+
+void renderLayer(
+    const SceneCamera& cam,
+    const MapData& map,
+    const tson::Layer& layer,
+    const Vector2 offset,
+    const Color color)
+{
+    const Vector2 parallaxFactor = toRayVec2(layer.getParallax());
+    const Vector2 layerOffset = toRayVec2(layer.getOffset());
+    const Vector2 cameraTarget = cam.getCameraTarget();
+    const Vector2 parallaxOffset = cameraTarget * (Vector2{1.0f, 1.0f} - parallaxFactor);
+    const Vector2 adjustedOffset = offset + layerOffset + parallaxOffset;
+
+    switch (layer.getType()) {
+        case tson::LayerType::TileLayer: {
+            const auto it = map.renderDataPtr->layerRenderData.find(&layer);
+            if (it == map.renderDataPtr->layerRenderData.end()) return;
+
+            for (const auto& tile : it->second) {
+                const Vector2 drawingPos = {
+                    tile.position.x + adjustedOffset.x,
+                    tile.position.y + adjustedOffset.y
+                };
+
+                const Rectangle tileBounds = {
+                    drawingPos.x,
+                    drawingPos.y,
+                    tile.sourceRect.width,
+                    tile.sourceRect.height
+                };
+
+                // Camera cull
+                if (!CheckCollisionRecs(tileBounds, cam.getCameraRect())) {
+                    continue;
+                }
+
+                DrawTextureRec(
+                    *tile.texture,
+                    tile.sourceRect,
+                    drawingPos,
+                    color);
+            }
+
+            break;
+        }
+        case tson::LayerType::ImageLayer: {
+            const std::string imagePath = map.baseDir.string() + layer.getImage();
+
+            if (!map.renderDataPtr->textures.contains(imagePath)) {
+                logErr("Unable to load texture: " + layer.getImage() + ": renderMap(Args...)");
+                return;
+            }
+
+            DrawTexture(
+                map.renderDataPtr->textures[imagePath],
+                adjustedOffset.x,
+                adjustedOffset.y,
+                color);
+
+            break;
+        }
+        // Need to handle this even though it's a NOP, otherwise default is hit
+        case tson::LayerType::ObjectGroup: {
+            break;
+        }
+        default: {
+            logErr("Map contains unsupported layer type: renderMap(Args...)");
+            break;
+        }
+    }
+}
+
+void renderLayerGroup(
+    const SceneCamera& cam,
+    const MapData& map,
+    const Vector2 offset,
+    const Color color,
+    const renderPassType mode)
+{
+    for (auto& layer : map.tsonMapPtr->getLayers()) {
+        if (layer.getClassType() == "DifferedLayer" && mode == renderPassType::PRIMARY_PASS) continue;
+        if (layer.getClassType() == "PrimaryLayer" && mode == renderPassType::DIFFERED_PASS) continue;
+
+        renderLayer(cam, map, layer, offset, color);
+    }
+}
+
+// Don't need these, but it makes intentions clearer IMO
+void renderBackgroundLayers(
     const SceneCamera& cam,
     const MapData& map,
     const Vector2 offset,
     const Color color)
 {
-    const std::vector<tson::Layer>& layers = map.renderDataPtr->tsonMapPtr->getLayers();
-    for (auto& layer : layers) {
+    renderLayerGroup(cam, map, offset, color, renderPassType::PRIMARY_PASS);
+}
 
-        const Vector2 parallaxFactor = toRayVec2(layer.getParallax());
-        const Vector2 layerOffset = toRayVec2(layer.getOffset());
-        const Vector2 cameraTarget = cam.getCameraTarget();
-        const Vector2 parallaxOffset = cameraTarget * (Vector2{1.0f, 1.0f} - parallaxFactor);
-
-        const Vector2 adjustedOffset = offset + layerOffset + parallaxOffset;
-
-        switch (layer.getType()) {
-            case tson::LayerType::TileLayer: {
-                const std::vector<TileData> renderDataVec = map.renderDataPtr->layerRenderData[&layer];
-
-                for (const auto& data : renderDataVec) {
-                    const Vector2 drawingPos = {
-                        data.position.x + adjustedOffset.x,
-                        data.position.y + adjustedOffset.y
-                    };
-
-                    const Rectangle tileBounds = {
-                        drawingPos.x,
-                        drawingPos.y,
-                        data.sourceRect.width,
-                        data.sourceRect.height
-                    };
-
-                    // Camera cull
-                    if (!CheckCollisionRecs(tileBounds, cam.getCameraRect())) {
-                        continue;
-                    }
-
-                    DrawTextureRec(
-                        *data.texture,
-                        data.sourceRect,
-                        drawingPos,
-                        color);
-                }
-
-                break;
-            }
-
-            case tson::LayerType::ImageLayer: {
-                const std::string imagePath = map.baseDir.string() + layer.getImage();
-
-                if (!map.renderDataPtr->textures.contains(imagePath)) {
-                    logErr("Unable to load texture: " + layer.getImage() + ": renderMap(Args...)");
-                    return;
-                }
-
-                DrawTexture(
-                    map.renderDataPtr->textures[imagePath],
-                    adjustedOffset.x,
-                    adjustedOffset.y,
-                    color);
-
-                break;
-            }
-
-            // Need to handle this even though it's a NOP, otherwise default is hit
-            case tson::LayerType::ObjectGroup: {
-                break;
-            }
-
-            default: {
-                logErr("Map contains unsupported layer type: renderMap(Args...)");
-                break;
-            }
-        }
-    }
+void renderForegroundLayers(
+    const SceneCamera& cam,
+    const MapData &map,
+    const Vector2 offset,
+    const Color color)
+{
+    renderLayerGroup(cam, map, offset, color, renderPassType::DIFFERED_PASS);
 }

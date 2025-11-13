@@ -218,10 +218,7 @@ void Player::murder() {
 }
 
 void Player::reform(const saveData& save) {
-    if (!b2Body_IsValid(m_body)) {
-        logErr("m_body invalid: Player::reform()");
-        return;
-    }
+    assert(b2Body_IsValid(m_body));
 
     LayerManager::getInstance().resumeLayer(layerKey::GAME_LAYER);
     LayerManager::getInstance().resumeOverlays();

@@ -148,7 +148,7 @@ void GameLayer::draw() {
         BeginTextureMode(m_frameBuffer);
             ClearBackground(BLACK);
             m_camera.cameraBegin();
-                renderMap(m_camera, m_map, {0.0f, 0.0f}, WHITE);
+                renderBackgroundLayers(m_camera, m_map, {0.0f, 0.0f}, WHITE);
             m_camera.cameraEnd();
         EndTextureMode();
 
@@ -167,6 +167,7 @@ void GameLayer::draw() {
 
         m_camera.cameraBegin();
             m_playerCharacter->draw();
+            renderForegroundLayers(m_camera, m_map, {0.0f, 0.0f}, WHITE);
         m_camera.cameraEnd();
 
         // TODO: Make a debug layer

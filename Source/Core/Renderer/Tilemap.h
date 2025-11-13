@@ -8,6 +8,7 @@
 #include <vector>
 #include <map>
 #include <filesystem>
+#include <cstdint>
 #include "ranges"
 #include "raylib.h"
 #include "../external_libs/Tson/tileson.hpp"
@@ -32,7 +33,6 @@ struct RenderData {
     std::unordered_map<const tson::Tileset*, Texture2D*> texturePtrs;
     std::unordered_map<const tson::Layer*, std::vector<TileData>> layerRenderData;
     std::map<std::string, Texture> textures;
-    std::shared_ptr<tson::Map> tsonMapPtr;
 };
 
 // Structured data used to load a map. Used on a per-map basis.
@@ -43,6 +43,7 @@ struct MapData {
     fs::path bgNoisePath;
     std::vector<CollisionObject> collisionObjects;
     std::shared_ptr<RenderData> renderDataPtr;
+    std::shared_ptr<tson::Map> tsonMapPtr;
 
     // Leaving this as a vec2 so I don't need to set player POS in meters in Tiled
     Vector2 playerStartPos;
@@ -76,6 +77,7 @@ void loadEventColliders(
 void loadTileLayer(
     tson::Layer& layer,
     const std::shared_ptr<RenderData>& renderData);
+
 
 // If I end up adding more types, might be good to RTTI this whole thing...
 template<typename T>
@@ -164,8 +166,9 @@ MapData loadMap(T&& filepath, const b2WorldId world) {
         mapData.mapHeight = map->getSize().y;
         mapData.tileWidth = map->getTileSize().x;
         mapData.tileHeight = map->getTileSize().y;
-        data->tsonMapPtr = std::move(map);
+        mapData.tsonMapPtr = std::move(map);
         mapData.renderDataPtr = data;
+
     }
     catch (std::bad_alloc) {
         logErr("loadMap(Args...) failed, std::bad_alloc thrown");
