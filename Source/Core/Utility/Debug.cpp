@@ -18,27 +18,9 @@
 #include "Utils.h"
 #include "../Entity/Player.h"
 #include "../../Application/Layers/GameLayer.h"
+#include "../Utility/Globals.h"
 
 // TODO: Create functions to disable camera lock and move camera on demand
-
-static const Font g_debugFont = LoadFont("../assets/Fonts/JetBrainsMono-Bold.ttf");
-
-static bool g_debugWindowBoxActive = false;
-static bool g_drawPlayerShapes = false;
-static bool g_drawPlayerSensorStatus = false;
-static bool g_drawPlayerPos = false;
-static bool g_drawPlayerCenter = false;
-static bool g_drawTerrainShapes = false;
-static bool g_drawTerrainVerts = false;
-static bool g_drawCameraCrosshair = false;
-static bool g_drawCameraRect = false;
-static bool g_drawEventColliders = false;
-
-static constexpr Color g_debugBodyColor{0, 0, 255, 255};
-static constexpr Color g_debugCollisionColor{255, 0, 0, 255};
-static constexpr Color g_debugColliderColor{5, 237, 16, 255};
-static constexpr Color g_debugVertColor{181, 2, 157, 255};
-
 void drawDebugBodyShapes(const Player& player) {
     if (!g_drawPlayerShapes) return;
 

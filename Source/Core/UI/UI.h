@@ -12,13 +12,7 @@
 #include "raymath.h"
 #include "../Camera/Camera.h"
 #include "../Backend/Layer.h"
-
-// Might wanna tweak these to make animations smoother at some point...
-constexpr float g_buttonPosXScaleFactor = 0.02f;
-constexpr float g_buttonPosYScaleFactor = 0.004f;
-constexpr float g_buttonWidthScaleFactor = 0.97f;
-constexpr float g_buttonHeightScaleFactor = 0.98f;
-constexpr float g_buttonTextScaleFactor = 0.30f;
+#include "../Utility/Globals.h"
 
 enum class buttonStates {
     BUTTON_IDLE,

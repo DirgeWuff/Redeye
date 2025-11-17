@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <cstdint>
 #include <memory>
 #include <filesystem>
 #include "raylib.h"
@@ -12,14 +11,10 @@
 #include "LayerTypes.h"
 #include "../../Application/Layers/GameLayer.h"
 #include "../../Application/Layers/StartMenuLayer.h"
+#include "../Utility/Globals.h"
 #include "../Serialization/Save.h"
 
 namespace fs = std::filesystem;
-
-static constexpr uint16_t g_windowWidth = 1500;
-static constexpr uint16_t g_windowHeight = 800;
-// Replace this with a serialized config later...
-static std::string g_playerSpritePath = "../assets/Player assets/PlayerWalkWhiteFL.png";
 
 Application Application::m_appInstance = Application();
 

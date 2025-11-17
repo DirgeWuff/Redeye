@@ -6,13 +6,7 @@
 #include <random>
 #include "box2d/types.h"
 #include "Utils.h"
-
-// Globals
-//======================================================================================================================
-static constexpr uint8_t g_ppm = 100; // 100 px/meter
-
-static std::random_device g_randomDevice;
-static std::mt19937 g_randomGenerator(g_randomDevice());
+#include "Globals.h"
 
 // Equality comparison
 //======================================================================================================================

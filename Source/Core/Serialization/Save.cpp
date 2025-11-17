@@ -7,10 +7,8 @@
 #include "../external_libs/Toml/toml.hpp"
 #include "../Utility/Error.h"
 #include "../Utility/Utils.h"
+#include "../Utility/Globals.h"
 #include "Save.h"
-
-static std::string g_saveFolderPath = "../Savegame";
-static std::string g_saveFilePath = g_saveFolderPath + "/save.toml";
 
 namespace fs = std::filesystem;
 

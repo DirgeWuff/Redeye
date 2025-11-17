@@ -10,3 +10,11 @@ cmake-build-debug-msys2g
 cmake-build-debug-wsl
 Savegame
 .idea
+/assets/Map data/Version 3/FG layer 1.aseprite
+/assets/Map data/Version 3/FG layer 1.psd
+/assets/Map data/Version 3/Layer 1.aseprite
+/assets/Map data/Version 3/Layer 2.aseprite
+/assets/Shaders/NOP.vsh
+/assets/Shaders/passthroughTest.fsh
+/assets/Map data/Version 3/TestLevel3.tiled-project
+/assets/Map data/Version 3/TestLevel3.tiled-session

@@ -165,19 +165,17 @@ void GameLayer::draw() {
         m_camera.cameraBegin();
             m_playerCharacter->draw();
             renderForegroundLayers(m_camera, m_map, {0.0f, 0.0f}, WHITE);
-        m_camera.cameraEnd();
 
-        // TODO: Make a debug layer
-    #ifdef DEBUG
-        drawDebugBodyShapes(*m_playerCharacter);
-        drawDebugCollisionShapes(m_map);
-        drawDebugBodyCenter(*m_playerCharacter);
-        drawDebugCollisionVerts(m_map);
-        drawDebugCameraCrosshair(m_camera);
-        drawDebugCameraRect(m_camera);
-        drawDebugEventColliders(m_map);
-    #endif
-
+            // TODO: Make a debug layer
+            #ifdef DEBUG
+                    drawDebugBodyShapes(*m_playerCharacter);
+                    drawDebugCollisionShapes(m_map);
+                    drawDebugBodyCenter(*m_playerCharacter);
+                    drawDebugCollisionVerts(m_map);
+                    drawDebugCameraCrosshair(m_camera);
+                    drawDebugCameraRect(m_camera);
+                    drawDebugEventColliders(m_map);
+            #endif
         m_camera.cameraEnd();
 
     #ifdef DEBUG
