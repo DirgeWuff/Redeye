@@ -9,7 +9,7 @@
 #include <sstream>
 #include <chrono>
 #include <filesystem>
-#include "../../../cmake-build-debug-wsl/_deps/raylib-src/src/raylib.h"
+#include "raylib.h"
 
 // Get current system time and return it as a string
 inline std::string getTime() {

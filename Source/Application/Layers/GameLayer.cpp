@@ -12,9 +12,6 @@
 #include "../../Core/Renderer/TilemapRenderer.h"
 #include "../../Core/Utility/Globals.h"
 
-static constexpr float g_worldStep = 1.0f / 60.0f;
-static constexpr std::uint8_t g_subStep = 4;
-
 GameLayer::~GameLayer() {
     GameLayer::destroy();
 }

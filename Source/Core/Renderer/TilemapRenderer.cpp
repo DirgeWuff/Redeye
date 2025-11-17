@@ -63,11 +63,34 @@ void renderLayer(
                 return;
             }
 
-            DrawTexture(
-                map.renderDataPtr->textures[imagePath],
-                adjustedOffset.x,
-                adjustedOffset.y,
-                color);
+            if (layer.hasRepeatX()) {
+                const float camWidth = cam.getCameraRectWidth();
+                const float imageWidth = map.renderDataPtr->textures[imagePath].width;
+                const int mapWidth = map.mapWidth * map.tileWidth;
+                const float camTravelX = mapWidth - camWidth;
+                const float totalParallaxShift = camTravelX * (1.0f - parallaxFactor.x);
+
+                const std::size_t maxRepetitions = std::ceil((camWidth + totalParallaxShift) / imageWidth);
+                const int yPos = adjustedOffset.y;
+                int xPos = adjustedOffset.x;
+
+                for (std::size_t i = 0; i < maxRepetitions; i++) {
+                    DrawTexture(
+                        map.renderDataPtr->textures[imagePath],
+                        xPos,
+                        yPos,
+                        color);
+
+                    xPos += imageWidth;
+                }
+            }
+            else {
+                DrawTexture(
+                    map.renderDataPtr->textures[imagePath],
+                    adjustedOffset.x,
+                    adjustedOffset.y,
+                    color);
+            }
 
             break;
         }
