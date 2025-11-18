@@ -135,7 +135,9 @@ void GameLayer::update() {
     m_playerCharacter->update();
     m_camera.update(*m_playerCharacter);
     UpdateMusicStream(m_backgroundNoise);
-    updateBeam();
+
+    if (g_drawShaderEffects)
+        updateBeam();
 }
 
 void GameLayer::draw() {
@@ -150,17 +152,18 @@ void GameLayer::draw() {
         EndTextureMode();
 
         // Single render pass for the shader.
-        BeginShaderMode(m_fragShader);
-            DrawTextureRec(
-                m_frameBuffer.texture,
-                {
-                    0.0f,
-                    0.0f,
-                    static_cast<float>(m_frameBuffer.texture.width),
-                    static_cast<float>(-m_frameBuffer.texture.height)},
-                {0.0f, 0.0f},
-                WHITE);
-        EndShaderMode();
+        if (g_drawShaderEffects) BeginShaderMode(m_fragShader);
+        DrawTextureRec(
+            m_frameBuffer.texture,
+            {
+                0.0f,
+                0.0f,
+                static_cast<float>(m_frameBuffer.texture.width),
+                static_cast<float>(-m_frameBuffer.texture.height)},
+            {0.0f, 0.0f},
+            WHITE);
+        if (g_drawShaderEffects) EndShaderMode();
+
 
         m_camera.cameraBegin();
             m_playerCharacter->draw();

@@ -38,6 +38,7 @@ inline bool g_drawTerrainVerts = false;
 inline bool g_drawCameraCrosshair = false;
 inline bool g_drawCameraRect = false;
 inline bool g_drawEventColliders = false;
+inline bool g_drawShaderEffects = true;
 
 constexpr Color g_debugBodyColor{0, 0, 255, 255};
 constexpr Color g_debugCollisionColor{255, 0, 0, 255};

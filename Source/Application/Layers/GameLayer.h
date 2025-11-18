@@ -95,8 +95,8 @@ public:
         [](const std::string& id) {
             return id.find("pawbs") != std::string::npos;
         },
-        [this](const playerContactEvent& e) {
-            if (e.contactBegan) {
+        [this](const playerContactEvent& event) {
+            if (event.contactBegan) {
                 m_playerCharacter->addContactEvent();
             }
             else {
@@ -110,8 +110,8 @@ public:
         [](const std::string& id) {
         return id.find("MurderBox") != std::string::npos;
         },
-        [this](const playerContactEvent& e) {
-        if (e.contactBegan) {
+        [this](const playerContactEvent& event) {
+        if (event.contactBegan) {
             m_playerCharacter->murder();
         }
     });
@@ -122,8 +122,8 @@ public:
         [](const std::string& id) {
             return id.find("Checkpoint") != std::string::npos;
         },
-        [this](const playerContactEvent& e) {
-            if (e.contactBegan) {
+        [this](const playerContactEvent& event) {
+            if (event.contactBegan) {
                 m_currentSave.centerPosition = m_playerCharacter->getPositionCenterMeters();
                 m_currentSave.currentMapPath = m_map.fullMapPath;
 
@@ -148,7 +148,7 @@ public:
                     }
                 }
 
-                const auto* info = static_cast<sensorInfo*>(b2Shape_GetUserData(e.visitorShape));
+                const auto* info = static_cast<sensorInfo*>(b2Shape_GetUserData(event.visitorShape));
                 m_collisionEventDispatcher.unsubscribe(info->typeId);
                 disableEventCollider(m_map, info->typeId);
             }

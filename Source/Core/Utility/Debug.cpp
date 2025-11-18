@@ -235,10 +235,10 @@ void drawDebugCollisionVerts(const MapData& map) {
         const b2Vec2* points = shape.getObjectVerts();
 
         for (std::size_t i = 0; i < shape.getVertCount(); i++) {
-            Vector2 v = metersToPixelsVec(points[i]);
+            const Vector2 translatedPoint = metersToPixelsVec(points[i]);
 
             DrawCircleV(
-                v,
+                translatedPoint,
                 1.0f,
                 g_debugVertColor);
         }
@@ -285,5 +285,6 @@ void drawControlsWindow() {
         GuiCheckBox(Rectangle{ 16, 672, 12, 12 }, "Draw camera center crosshair", &g_drawCameraCrosshair);
         GuiCheckBox(Rectangle{ 16, 696, 12, 12}, "Draw camera edge rectangle", &g_drawCameraRect);
         GuiCheckBox(Rectangle{16, 720, 12,12}, "Draw event colliders", &g_drawEventColliders);
+        GuiCheckBox(Rectangle{16, 744, 12, 12}, "Enable shader effects", &g_drawShaderEffects);
     }
 }
