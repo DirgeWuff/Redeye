@@ -133,9 +133,19 @@ public:
                     LayerManager::getInstance().resumeLayer(layerKey::CHECKPOINT_ALERT);
                 }
                 else {
-                    LayerManager::getInstance().pushLayer(
+                    try {
+                        LayerManager::getInstance().pushLayer(
                         layerKey::CHECKPOINT_ALERT,
                         std::make_unique<TextAlert>("checkpoint reached", 5.0f));
+                    }
+                    catch (const std::bad_alloc& e) {
+                        logErr(std::string("Checkpoint collider failed: ") + std::string(e.what()));
+                        return;
+                    }
+                    catch (...) {
+                        logErr("Checkpoint collider failed due to an unknown error.");
+                        return;
+                    }
                 }
 
                 const auto* info = static_cast<sensorInfo*>(b2Shape_GetUserData(e.visitorShape));

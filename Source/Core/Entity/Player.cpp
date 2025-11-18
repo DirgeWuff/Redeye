@@ -192,7 +192,7 @@ void Player::murder() {
     LayerManager::getInstance().suspendLayer(layerKey::GAME_LAYER);
     LayerManager::getInstance().suspendOverlays();
 
-    // Pretty bad created unique_ptr<T> with shared_ptr<T> as argument, but it works better than anything else...
+    // Pretty bad creating unique_ptr<T> with shared_ptr<T> as argument, but it works better than anything else...
     try {
         const auto p = shared_from_this();
 
@@ -208,10 +208,12 @@ void Player::murder() {
     catch (std::bad_weak_ptr& e) {
         logErr(std::string("Error using shared from this: ") +
             std::string(e.what()) + std::string(". Player::murder()"));
+
         return;
     }
     catch (...) {
         logErr("Unknown error occurred using shared_from_this(). Player::murder()");
+        return;
     }
 
     m_currentState = playerStates::DEAD;

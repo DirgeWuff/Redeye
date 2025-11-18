@@ -64,10 +64,9 @@ public:
             m_sensorInfo = std::make_unique<sensorInfo>(std::string(std::forward<T>(id)));
             m_shapeDef.userData = static_cast<void*>(m_sensorInfo.get());
         }
-        catch (std::bad_alloc& e) {
+        catch (const std::bad_alloc& e) {
             logErr(
-                std::string(
-                    "EventCollider::EventCollider() failed, std::bad_alloc thrown: " +
+                std::string("EventCollider::EventCollider() failed, std::bad_alloc thrown: " +
                     std::string(e.what())));
 
             return;

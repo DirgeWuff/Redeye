@@ -12,6 +12,7 @@
 #include "../../Application/Layers/GameLayer.h"
 #include "../../Application/Layers/StartMenuLayer.h"
 #include "../Utility/Globals.h"
+#include "../Utility/Error.h"
 #include "../Serialization/Save.h"
 
 namespace fs = std::filesystem;
@@ -42,18 +43,30 @@ void Application::init() {
         initSave = loadGame();
     }
 
-    LayerManager::getInstance().pushLayer(
-        layerKey::START_MENU,
-        std::make_unique<StartMenuLayer>());
+    try {
+        LayerManager::getInstance().pushLayer(
+            layerKey::START_MENU,
+            std::make_unique<StartMenuLayer>());
 
-    LayerManager::getInstance().pushLayer(
-         layerKey::GAME_LAYER,
-         std::make_unique<GameLayer>(g_playerSpritePath, initSave));
+        LayerManager::getInstance().pushLayer(
+             layerKey::GAME_LAYER,
+             std::make_unique<GameLayer>(g_playerSpritePath, initSave));
+    }
+    catch (std::bad_alloc& e) {
+        logErr(std::string("Application::init() failed: " + std::string(e.what())));
+        m_gameRunning = false;
+        return;
+    }
+    catch (...) {
+        logErr("Application::init() failed: An unknown error has occurred.");
+        m_gameRunning = false;
+        return;
+    }
 
     LayerManager::getInstance().suspendLayer(layerKey::GAME_LAYER);
 }
 
-// Main loop
+// Main game loop
 void Application::run() const {
     while (m_gameRunning && !WindowShouldClose()) {
         // Poll input

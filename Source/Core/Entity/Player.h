@@ -66,10 +66,13 @@ public:
 {
         // Raylib/general stuff
         m_walkSprites = LoadTexture(m_playerSpritePath.c_str());
-        if (!IsTextureValid(m_walkSprites))
+        if (!IsTextureValid(m_walkSprites)) {
             logErr(
                 std::string("Cannot load player sprites: ") + std::string(spritePath) +
                 std::string(". Player::Player()"));
+
+            return;
+        }
 
         m_spriteRect = {
             0.0f,
@@ -121,9 +124,21 @@ public:
         m_footpawSensorShape.filter.categoryBits = g_footpawCategoryBits;
         m_footpawSensorShape.filter.maskBits = g_universalMaskBits;
 
-        // Set our userData for the EventDispatcher to use later
-        m_footpawSensorInfo = std::make_unique<sensorInfo>("pawbs");
-        m_footpawSensorShape.userData = static_cast<void*>(m_footpawSensorInfo.get());
+        try {
+            // Set our userData for the EventDispatcher to use later
+            m_footpawSensorInfo = std::make_unique<sensorInfo>("pawbs");
+            m_footpawSensorShape.userData = static_cast<void*>(m_footpawSensorInfo.get());
+        }
+        catch (const std::bad_alloc& e) {
+            logErr("Failed to allocate for m_footpawSensorInfo: " + std::string(e.what()) +
+                std::string(". Player::Player(Args...)"));
+
+            return;
+        }
+        catch (...) {
+            logErr("An unknown error occurred. Player::Player(Args...)");
+            return;
+        }
 
         m_footpawSensorId = b2CreatePolygonShape(
             m_body,
