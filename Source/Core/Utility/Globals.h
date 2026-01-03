@@ -13,7 +13,7 @@
 static constexpr uint16_t g_windowWidth = 1500;
 static constexpr uint16_t g_windowHeight = 800;
 // Replace this with a serialized config later...
-inline std::string g_playerSpritePath = "../assets/Player assets/PlayerWalkWhiteFL.png";
+inline std::string g_playerSpritePath = "../assets/Player assets/Walksprites_v4.png";
 
 constexpr double g_pi = 3.14159265359;
 
@@ -59,5 +59,9 @@ constexpr float g_buttonPosYScaleFactor = 0.004f;
 constexpr float g_buttonWidthScaleFactor = 0.97f;
 constexpr float g_buttonHeightScaleFactor = 0.98f;
 constexpr float g_buttonTextScaleFactor = 0.30f;
+
+constexpr float g_beamOffsetXRight = 123.5f;
+constexpr float g_beamOffsetXLeft = 40.0f;
+constexpr float g_beamOffsetY = 110.0f;
 
 #endif //GLOBALS_H

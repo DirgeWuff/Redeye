@@ -33,7 +33,7 @@ void GameLayer::updateBeam() {
 
     // Adjust beam offset depending on which direction player is facing, invert beam Y movement
     const bool playerFacingRight = m_playerCharacter->getPlayerDirection() == directions::RIGHT;
-    const Vector2 beamOffset = playerFacingRight ? Vector2{110.0f, 132.5f} : Vector2{30.0f, 132.5f};
+    const Vector2 beamOffset = playerFacingRight ? Vector2{g_beamOffsetXRight, g_beamOffsetY} : Vector2{g_beamOffsetXLeft, g_beamOffsetY};
     m_beamPosition = Vector2Add(playerScreenPos, beamOffset);
     m_beamPosition.y = static_cast<float>(GetScreenHeight()) - m_beamPosition.y;
 
@@ -171,13 +171,13 @@ void GameLayer::draw() {
 
             // TODO: Make a debug layer
             #ifdef DEBUG
-                    drawDebugBodyShapes(*m_playerCharacter);
-                    drawDebugCollisionShapes(m_map);
-                    drawDebugBodyCenter(*m_playerCharacter);
-                    drawDebugCollisionVerts(m_map);
-                    drawDebugCameraCrosshair(m_camera);
-                    drawDebugCameraRect(m_camera);
-                    drawDebugEventColliders(m_map);
+                drawDebugBodyShapes(*m_playerCharacter);
+                drawDebugCollisionShapes(m_map);
+                drawDebugBodyCenter(*m_playerCharacter);
+                drawDebugCollisionVerts(m_map);
+                drawDebugCameraCrosshair(m_camera);
+                drawDebugCameraRect(m_camera);
+                drawDebugEventColliders(m_map);
             #endif
         m_camera.cameraEnd();
 
