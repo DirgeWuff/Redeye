@@ -9,11 +9,6 @@
 #include "../Camera/Camera.h"
 #include "../Renderer/Tilemap.h"
 
-enum class renderPassType {
-    PRIMARY_PASS,
-    DIFFERED_PASS
-};
-
 void renderLayer(
     const SceneCamera& cam,
     const MapData& map,

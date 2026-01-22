@@ -46,8 +46,14 @@ else()
     set(CMAKE_EXE_LINKER_FLAGS_RELEASE "-flto=${LTO_JOBS}")
 
     set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -fno-omit-frame-pointer")
-endif()
 
+    option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+    if(ENABLE_ASAN)
+        message(STATUS "Enabling AddressSanitizer")
+        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
+        set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
+    endif()
+endif()
 
 # Target
 # ======================================================================================================================
@@ -60,7 +66,7 @@ add_executable(Redeye
         Source/Core/Renderer/Tilemap.h
         Source/Core/Camera/Camera.cpp
         Source/Core/Camera/Camera.h
-        Source/Core/Utility/Error.h
+        Source/Core/Utility/Logging.h
         Source/Core/Utility/Utils.cpp
         Source/Core/Utility/Utils.h
         Source/Core/Utility/Debug.cpp
@@ -89,10 +95,14 @@ add_executable(Redeye
         Source/Application/Layers/DeathMenuLayer.h
         Source/Core/Serialization/Save.cpp
         Source/Core/Serialization/Save.h
-        Source/Core/Backend/LayerTypes.h
-        Source/Core/Backend/LayerTypes.cpp
         Source/Core/Utility/Globals.h
         Source/Core/Renderer/Tilemap.cpp
+        Source/Core/Renderer/Animation.cpp
+        Source/Core/Renderer/Animation.h
+        Source/Core/Renderer/AnimationManager.cpp
+        Source/Core/Renderer/AnimationManager.h
+        Source/Core/Utility/Enum.cpp
+        Source/Core/Utility/Enum.h
 )
 
 # Compile definitions

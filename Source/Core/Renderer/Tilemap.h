@@ -13,7 +13,7 @@
 #include "raylib.h"
 #include "../external_libs/Tson/tileson.hpp"
 #include "../Phys/CollisionObject.h"
-#include "../Utility/Error.h"
+#include "../Utility/Logging.h"
 #include "../Utility/Utils.h"
 
 namespace fs = std::filesystem;
@@ -85,7 +85,7 @@ float getMapPropFloat(const std::unique_ptr<tson::Map>& map, T& propName) {
     tson::PropertyCollection props = map->getProperties();
 
     if (!props.hasProperty(std::string(propName))) {
-        logErr(std::string("Map has no property \"" + std::string(propName) +
+        logFatal(std::string("Map has no property \"" + std::string(propName) +
             std::string("\". Tilemap::GetMapPropFloat(Args...)")));
         return {};
     }
@@ -98,7 +98,7 @@ std::string getMapPropStr(const std::unique_ptr<tson::Map>& map, T& propName) {
     tson::PropertyCollection props = map->getProperties();
 
     if (!props.hasProperty(std::string(propName))) {
-        logErr(std::string("Map has no property \"" + std::string(propName) +
+        logFatal(std::string("Map has no property \"" + std::string(propName) +
             std::string("\". Tilemap::GetMapPropStr(Args...)")));
         return {};
     }
@@ -112,7 +112,7 @@ MapData loadMap(T&& filepath, const b2WorldId world) {
 
     // Validate the filepath.
     if (!exists(fs::path(filepath))) {
-        logErr(std::string("Invalid filepath to map: ") + filepath + std::string("loadMap(Args...)"));
+        logFatal(std::string("Invalid filepath to map: ") + filepath + std::string("loadMap(Args...)"));
         return {};
     }
 
@@ -127,7 +127,7 @@ MapData loadMap(T&& filepath, const b2WorldId world) {
         std::unique_ptr<tson::Map> map = t.parse(fs::path(filepath));
 
         if (map->getStatus() != tson::ParseStatus::OK) {
-            logErr(
+            logFatal(
                 "Constructor init failed: Unable to parse map: " + map->getStatusMessage() + ". loadMap(Args...)");
             return {};
         }
@@ -149,7 +149,7 @@ MapData loadMap(T&& filepath, const b2WorldId world) {
                 loadTileLayer(layer, data);
             }
             else {
-                logErr("Incompatible layer type: Group Layer: loadMap(Args...)");
+                logFatal("Incompatible layer type: Group Layer: loadMap(Args...)");
                 return {};
             }
         }
@@ -170,16 +170,19 @@ MapData loadMap(T&& filepath, const b2WorldId world) {
         mapData.renderDataPtr = data;
 
     }
-    catch (std::bad_alloc) {
-        logErr("loadMap(Args...) failed, std::bad_alloc thrown");
+    catch (const std::exception& e) {
+        logFatal(std::string("loadMap(Args...) failed: ") + std::string(e.what()));
         return {};
     }
     catch (...) {
-        logErr("loadMap(Args...) failed, an unknown error has occurred");
+        logFatal("loadMap(Args...) failed, an unknown error has occurred");
         return {};
     }
 
-    TraceLog(LOG_INFO, "Map loaded successfully.");
+    #ifdef DEBUG
+        logDbg("Tilemap loaded successfully.");
+    #endif
+
     return mapData;
 }
 
@@ -189,7 +192,9 @@ inline void unloadMap(const MapData& map) {
         UnloadTexture(texture);
     }
 
-    TraceLog(LOG_INFO, "Map unloaded successfully.");
+    #ifdef DEBUG
+        logDbg("Tilemap unloaded successfully.");
+    #endif
 }
 
 // Disable an event collider within the map so player contact is no longer registered.
@@ -200,7 +205,7 @@ void disableEventCollider(const MapData& map, const T& id) {
         it->second.disableCollider();
     }
     else {
-        logErr("No matching collider found in world.");
+        logFatal("No matching collider found in world.");
     }
 }
 

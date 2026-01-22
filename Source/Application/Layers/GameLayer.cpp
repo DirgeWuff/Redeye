@@ -6,7 +6,7 @@
 #include "raylib.h"
 #include "box2d/box2d.h"
 #include "GameLayer.h"
-#include "../../Core/Utility/Error.h"
+#include "../../Core/Utility/Logging.h"
 #include "../../Core/Event/EventCollider.h"
 #include "../../Core/Utility/Debug.h"
 #include "../../Core/Renderer/TilemapRenderer.h"
@@ -16,7 +16,6 @@ GameLayer::~GameLayer() {
     GameLayer::destroy();
 }
 
-// TODO: Move all this shader logic to it's own class
 void GameLayer::updateBeam() {
     // Someone smarter than me could probably do this in half the LoC...
     // Extra comments here because math is fucking hard
@@ -32,7 +31,7 @@ void GameLayer::updateBeam() {
     };
 
     // Adjust beam offset depending on which direction player is facing, invert beam Y movement
-    const bool playerFacingRight = m_playerCharacter->getPlayerDirection() == directions::RIGHT;
+    const bool playerFacingRight = m_playerCharacter->getPlayerDirection() == direction::RIGHT;
     const Vector2 beamOffset = playerFacingRight ? Vector2{g_beamOffsetXRight, g_beamOffsetY} : Vector2{g_beamOffsetXLeft, g_beamOffsetY};
     m_beamPosition = Vector2Add(playerScreenPos, beamOffset);
     m_beamPosition.y = static_cast<float>(GetScreenHeight()) - m_beamPosition.y;
@@ -51,7 +50,7 @@ void GameLayer::updateBeam() {
 
         // Calculate direction vector from beam to mouse and relative angle
         const Vector2 vecToMouse = Vector2Normalize(Vector2Subtract(shaderMousePos, m_beamPosition));
-        float angleToMouse = std::atan2f(vecToMouse.y, vecToMouse.x) - std::atan2f(playerXNormals.y, playerXNormals.x);
+        float angleToMouse = atan2f(vecToMouse.y, vecToMouse.x) - atan2f(playerXNormals.y, playerXNormals.x);
 
         // Normalize for both negative pi and pi
         if (angleToMouse > g_pi) angleToMouse -= 2.0f * g_pi;
@@ -63,7 +62,7 @@ void GameLayer::updateBeam() {
         angleToMouse = std::clamp(angleToMouse, minAngle, maxAngle);
 
         // Calculate final beam direction
-        const float finalAngle = std::atan2f(playerXNormals.y, playerXNormals.x) + angleToMouse;
+        const float finalAngle = atan2f(playerXNormals.y, playerXNormals.x) + angleToMouse;
         beamDir = { std::cos(finalAngle), std::sin(finalAngle) };
     }
     // Flip X normals 180 deg if player turns around
@@ -76,30 +75,7 @@ void GameLayer::updateBeam() {
     SetShaderValue(m_fragShader, m_flashlightDirLoc, &m_beamAngle, SHADER_UNIFORM_VEC2);
 }
 
-void GameLayer::pollEvents() {
-    if (IsKeyDown(KEY_A)) {
-        m_playerCharacter->moveLeft(m_worldId);
-    }
-    else if (IsKeyDown(KEY_D)) {
-        m_playerCharacter->moveRight(m_worldId);
-    }
-
-    if (!IsKeyDown(KEY_A) && !IsKeyDown(KEY_D)) {
-        m_playerCharacter->moveNowhere();
-    }
-
-    if (IsKeyDown(KEY_SPACE)) {
-        m_playerCharacter->jump();
-    }
-}
-
-void GameLayer::update() {
-    assert(m_playerCharacter);
-    assert(b2World_IsValid(m_worldId));
-
-    pollEvents();
-    b2World_Step(m_worldId, g_worldStep, g_subStep);
-
+void GameLayer::processSensorEvents() const {
     const b2SensorEvents sensorContactEvents = b2World_GetSensorEvents(m_worldId);
 
     // Process all b2SensorBeginTouch events for the current step.
@@ -112,7 +88,7 @@ void GameLayer::update() {
                 playerContactEvent{true, sensorShapeId});
         }
         else {
-            logErr("Unhandled b2BeginContactEvent. sensorShapeId.userData blank. GameLayer::update()");
+            logFatal("Unhandled b2BeginContactEvent. sensorShapeId.userData blank. GameLayer::update()");
             break;
         }
     }
@@ -127,12 +103,20 @@ void GameLayer::update() {
                 playerContactEvent{false, sensorShapeId});
         }
         else {
-            logErr("Unhandled b2EndContactEvent. senorShapeId.userData blank. GameLayer::update()");
+            logFatal("Unhandled b2EndContactEvent. senorShapeId.userData blank. GameLayer::update()");
             break;
         }
     }
+}
 
-    m_playerCharacter->update();
+void GameLayer::update() {
+    assert(m_playerCharacter);
+    assert(b2World_IsValid(m_worldId));
+
+    m_playerCharacter->pollEvents();
+    b2World_Step(m_worldId, g_worldStep, g_subStep);
+    processSensorEvents();
+    m_playerCharacter->update(m_worldId);
     m_camera.update(*m_playerCharacter);
     UpdateMusicStream(m_backgroundNoise);
 
@@ -164,7 +148,6 @@ void GameLayer::draw() {
             WHITE);
         if (g_drawShaderEffects) EndShaderMode();
 
-
         m_camera.cameraBegin();
             m_playerCharacter->draw();
             renderForegroundLayers(m_camera, m_map, {0.0f, 0.0f}, WHITE);
@@ -181,21 +164,24 @@ void GameLayer::draw() {
             #endif
         m_camera.cameraEnd();
 
-    #ifdef DEBUG
-        // Draw these outside of camera context!
-        drawControlsWindow();
-        drawDebugFootpawSensorStatus(*m_playerCharacter);
-        drawDebugPlayerPosition(*m_playerCharacter);
-    #endif
+        #ifdef DEBUG
+            // Draw these outside of camera context!
+            drawControlsWindow();
+            drawDebugFootpawSensorStatus(*m_playerCharacter);
+            drawDebugPlayerPosition(*m_playerCharacter);
+            drawDebugPlayerAnimId(m_playerCharacter->getCurrentAnimId());
+            drawDebugPlayerAnimState(m_playerCharacter->getCurrentActionState());
+        #endif
     }
 }
 
 void GameLayer::destroy() {
     #ifdef DEBUG
-        std::cout << "GameLayer object destroyed at address: " << this << std::endl;
+        logDbg("GameLayer destroyed at address: ", this);
     #endif
 
     UnloadMusicStream(m_backgroundNoise);
     UnloadShader(m_fragShader);
     unloadMap(m_map);
 }
+

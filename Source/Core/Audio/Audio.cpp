@@ -12,12 +12,12 @@ void playRandomSound(const std::vector<Sound>& vec) {
         PlaySound(vec.at(getRandInt(0, vec.size() - 1)));
     }
     catch (std::out_of_range& e) {
-        logErr(
+        logFatal(
             std::string("Unable to play sound, value out of range: "
                 + std::string(e.what())) + std::string(": playRandomSound(Args...)"));
     }
     catch (...) {
-        logErr("Unknown exception thrown while playing sound: playRandomSound(Args...)");
+        logFatal("Unknown exception thrown while playing sound: playRandomSound(Args...)");
     }
 }
 

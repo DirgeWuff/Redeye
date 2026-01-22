@@ -13,12 +13,7 @@
 #include "../Camera/Camera.h"
 #include "../Backend/Layer.h"
 #include "../Utility/Globals.h"
-
-enum class buttonStates {
-    BUTTON_IDLE,
-    BUTTON_HOVERED,
-    BUTTON_CLICKED
-};
+#include "../Utility/Enum.h"
 
 // Animated rectangular button, based on Raylib Rectangle
 class RectButton {
@@ -37,6 +32,9 @@ class RectButton {
     int m_fontSize;
     float m_fontSpacing;
 public:
+    RectButton() = delete;
+    ~RectButton();
+
     template<typename T>
     RectButton(
         float cornerX,
@@ -66,7 +64,7 @@ public:
         0);
 
     if (!IsFontValid(m_buttonFont)) {
-        logErr("Error loading button font: RectButton(Args...)");
+        logFatal("Error loading button font: RectButton(Args...)");
         return;
     }
 
@@ -84,10 +82,11 @@ public:
         m_textPos,
         {g_buttonPosXScaleFactor, g_buttonPosYScaleFactor}) / 2.0f;
 
+    #ifdef DEBUG
+        logDbg("RectButton constructed at address: ", this);
+    #endif
 }
 
-    RectButton() = delete;
-    ~RectButton();
     RectButton(const RectButton& other) = delete;
     RectButton& operator=(const RectButton& other) = delete;
 
@@ -99,7 +98,7 @@ public:
     const Color color) noexcept
     {
         if (!IsFontValid(font)) {
-            logErr("Font invalid: RectButton::setCustomFont(Args...)");
+            logFatal("Font invalid: RectButton::setCustomFont(Args...)");
             return;
         }
 
@@ -125,6 +124,8 @@ class TextAlert final : public Layer {
     float m_fontSize;
     float m_fontSpacing;
 public:
+    ~TextAlert() override;
+
     template<typename T>
     TextAlert(T&& text, const float duration) :
         m_message(std::string(std::forward<T>(text))),
@@ -144,14 +145,14 @@ public:
         0);
 
     if (!IsFontValid(m_font)) {
-        logErr("Error loading font: TextAlert(Args...)");
+        logFatal("Error loading font: TextAlert(Args...)");
         return;
     }
 }
     TextAlert(const TextAlert&) = delete;
     TextAlert(const TextAlert&&) = delete;
 
-    ~TextAlert() override;
+
 
     void update() override;
     void draw()  override;

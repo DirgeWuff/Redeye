@@ -5,6 +5,13 @@
 #include "raylib.h"
 #include "raymath.h"
 #include "Camera.h"
+#include "../Utility/Logging.h"
+
+SceneCamera::SceneCamera() {
+    #ifdef DEBUG
+        logDbg("Default SceneCamera constructed at address: ", this);
+    #endif
+}
 
 SceneCamera::SceneCamera(const MapData& map, const float zoomLevel) {
     m_camera = Camera2D();
@@ -35,10 +42,16 @@ SceneCamera::SceneCamera(const MapData& map, const float zoomLevel) {
         m_mapSize.y - m_cameraRect.height / 2.0f
     };
 
-    TraceLog(LOG_INFO, "SceneCamera created successfully.");
+    #ifdef DEBUG
+        logDbg("SceneCamera constructed at address: ", this);
+    #endif
 }
 
-SceneCamera::~SceneCamera() = default;
+SceneCamera::~SceneCamera() {
+    #ifdef DEBUG
+        logDbg("SceneCamera destroyed at address: ", this);
+    #endif
+};
 
 void SceneCamera::setTarget(const Player& player) {
     const Vector2 targetEntityCenter = Vector2Add(player.getPositionCornerPx(), player.getSizePx() / 2.0f);

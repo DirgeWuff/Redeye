@@ -9,6 +9,10 @@
 // =====================================================================================================================
 RectButton::~RectButton() {
     UnloadFont(m_buttonFont);
+
+    #ifdef DEBUG
+        logDbg("RectButton destroyed at address: ", this);
+    #endif
 }
 
 void RectButton::setClickEvent(std::function<void()> event) noexcept {
@@ -73,6 +77,10 @@ void RectButton::draw() const {
 
 TextAlert::~TextAlert() {
     UnloadFont(m_font);
+
+    #ifdef DEBUG
+        logDbg("TextAlert destroyed at address: ", this);
+    #endif
 }
 
 // Text

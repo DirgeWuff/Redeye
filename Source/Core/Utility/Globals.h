@@ -13,12 +13,16 @@
 static constexpr uint16_t g_windowWidth = 1500;
 static constexpr uint16_t g_windowHeight = 800;
 // Replace this with a serialized config later...
-inline std::string g_playerSpritePath = "../assets/Player assets/Walksprites_v4.png";
+inline std::string g_playerSpritePath = "../assets/Player assets/Walksprites_v5.png";
 
 constexpr double g_pi = 3.14159265359;
 
 constexpr float g_worldStep = 1.0f / 60.0f;
 constexpr std::uint8_t g_subStep = 4;
+
+constexpr float g_playerWalkMultiplier = 0.50f;
+constexpr float g_playerJumpMultiplier = 16.0f;
+constexpr float g_slopeForceMultiplier = 2.50f;
 
 constexpr std::uint64_t g_universalMaskBits = 0xFFFF;
 constexpr std::uint64_t g_playerCategoryBits = 0x0001;
@@ -39,11 +43,17 @@ inline bool g_drawCameraCrosshair = false;
 inline bool g_drawCameraRect = false;
 inline bool g_drawEventColliders = false;
 inline bool g_drawShaderEffects = true;
+inline bool g_drawPlayerAnimId = false;
+inline bool g_drawPlayerActionState = false;
 
 constexpr Color g_debugBodyColor{0, 0, 255, 255};
 constexpr Color g_debugCollisionColor{255, 0, 0, 255};
 constexpr Color g_debugColliderColor{5, 237, 16, 255};
 constexpr Color g_debugVertColor{181, 2, 157, 255};
+
+constexpr int g_debugTextSize = 20;
+constexpr int g_totalDebugTextHeight = 40; // total text row height including spacing
+constexpr Vector2 g_debugTextPos = {10.0f, 10.0f};
 
 constexpr uint8_t g_ppm = 100; // 100 px/meter
 

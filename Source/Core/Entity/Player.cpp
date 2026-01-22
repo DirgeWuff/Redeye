@@ -10,7 +10,7 @@
 #include <iostream>
 #include "box2d/box2d.h"
 #include "Player.h"
-#include "../../Core/Utility/Error.h"
+#include "../../Core/Utility/Logging.h"
 #include "../../Core/UI/UI.h"
 #include "../../Core/Audio/Audio.h"
 #include "../../Core/Utility/Utils.h"
@@ -19,62 +19,95 @@
 #include "../../Core/Utility/Globals.h"
 
 Player::~Player() {
-#ifdef DEBUG
-    std::cout << "Player object destroyed at address: " << this << std::endl;
-#endif
+    #ifdef DEBUG
+        logDbg("Player destroyed at address: ", this);
+    #endif
 
     if (b2Body_IsValid(m_body))
         b2DestroyBody(m_body);
 
-    UnloadTexture(m_walkSprites);
     unloadSoundVector(m_footstepSounds);
     unloadSoundVector(m_landingSounds);
 }
 
-void Player::update() {
+void Player::pollEvents() {
+    if (IsKeyDown(KEY_D))
+        m_movementIntent = 1;
+    else if (IsKeyDown(KEY_A))
+        m_movementIntent = -1;
+    else
+        m_movementIntent = 0;
+
+    if (IsKeyDown(KEY_SPACE))
+        m_jumpIntent = true;
+}
+
+void Player::update(const b2WorldId& world) {
     assert(b2Body_IsValid(m_body));
+
+    const float velocityY = b2Body_GetLinearVelocity(m_body).y;
+
+    if (isOnGround() && m_jumpIntent)
+        jump();
+
+    m_jumpIntent = false;
+
+    if (m_movementIntent > 0) {
+        m_currentDirection = direction::RIGHT;
+        moveRight(world);
+    }
+    else if (m_movementIntent < 0) {
+        m_currentDirection = direction::LEFT;
+        moveLeft(world);
+    }
+
+    if (!isOnGround()) {
+        m_currentState = velocityY < 0.0f ?
+            entityActionState::JUMPING :
+            entityActionState::FALLING;
+    }
+    else {
+        m_currentState = m_movementIntent != 0 ?
+            entityActionState::WALKING :
+            entityActionState::IDLE;
+    }
+
+    m_movementIntent = 0;
 
     m_centerPosition = b2Body_GetPosition(m_body);
     m_cornerPosition = {
         metersToPixels(m_centerPosition.x) - m_sizePx.x / 2,
         metersToPixels(m_centerPosition.y) - m_sizePx.y / 2
     };
-    if (m_activeGroundContacts > 0) {
-        if (m_currentState != playerStates::ON_GROUND) {
-            m_currentState = playerStates::ON_GROUND;
-            playRandomSound(m_landingSounds);
-        }
-    }
-    else {
-         m_currentState = playerStates::IN_AIR;
-    }
+
+    m_animationManager.updateAnimation(m_currentState, m_currentDirection);
+    m_currentAnimId = m_animationManager.getCurrentAnimId();
 }
 
 void Player::draw() const {
-    DrawTextureRec(m_walkSprites, m_spriteRect, m_cornerPosition, WHITE);
+    m_animationManager.drawAnimation(m_cornerPosition);
 }
 
-void Player::moveRight(const b2WorldId& world) {
+void Player::moveRight(const b2WorldId& world) const {
     assert(b2Body_IsValid(m_body));
     assert(b2World_IsValid(world));
 
     // Calculate ground normals, adjust direction of force applied and amount of force applied based on ground angle
+    // Maybe consolidate the following into a function since I use it twice?
     const float mass = b2Body_GetMass(m_body);
-    float movementForce = mass * 0.30f;
+    float movementForce = mass * g_playerWalkMultiplier;
     b2Vec2 impulseNormals = {movementForce, 0.0f};
 
-    if (m_currentState == playerStates::ON_GROUND) {
+    if (isOnGround()) {
         const b2Vec2 groundNormals = getGroundNormals(world);
 
         b2Vec2 tangent = {groundNormals.y, -groundNormals.x};
         tangent = b2Normalize(tangent);
         const float slopeMagnitude = std::fabs(tangent.y);
-        movementForce += slopeMagnitude;
+        movementForce += slopeMagnitude * g_slopeForceMultiplier;
 
         impulseNormals = b2MulSV(-movementForce, tangent);
     }
-
-    m_lastDirection = directions::RIGHT;
 
     // Physically move player
     b2Body_ApplyLinearImpulse(
@@ -82,110 +115,42 @@ void Player::moveRight(const b2WorldId& world) {
         impulseNormals,
         b2Body_GetWorldCenterOfMass(m_body),
         true);
-
-    // Switch sprites and play footstep sounds
-    if (m_currentState == playerStates::ON_GROUND) {
-        if (m_frameDelayClock >= m_frameDelayAmount) {
-            m_frameIndex++;
-            m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
-            m_spriteRect.x = m_sizePx.x * static_cast<float>(m_frameIndex);
-            m_frameDelayClock = 0;
-        }
-        else {
-            m_frameDelayClock++;
-        }
-
-        if (m_soundDelayClock >= m_soundDelayAmount) {
-            playRandomSound(m_footstepSounds);
-            m_soundDelayClock = 0;
-        }
-        else {
-            m_soundDelayClock++;
-        }
-    }
-    else {
-        m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
-        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
-    }
 }
 
-void Player::moveLeft(const b2WorldId& world) {
+void Player::moveLeft(const b2WorldId& world) const {
     assert(b2Body_IsValid(m_body));
     assert(b2World_IsValid(world));
 
     const float mass = b2Body_GetMass(m_body);
-    float movementForce = mass * 0.30f;
+    float movementForce = mass * g_playerWalkMultiplier;
     b2Vec2 impulseNormals = {-movementForce, 0.0f};
 
-    if (m_currentState == playerStates::ON_GROUND) {
+    if (isOnGround()) {
         const b2Vec2 groundNormals = getGroundNormals(world);
 
         b2Vec2 tangent = {groundNormals.y, -groundNormals.x};
         tangent = b2Normalize(tangent);
         const float slopeMagnitude = std::fabs(tangent.y);
-        movementForce += slopeMagnitude;
+        movementForce += slopeMagnitude * g_slopeForceMultiplier;
 
         impulseNormals = b2MulSV(movementForce, tangent);
     }
-
-    m_lastDirection = directions::LEFT;
 
     b2Body_ApplyLinearImpulse(
         m_body,
         impulseNormals,
         b2Body_GetWorldCenterOfMass(m_body),
         true);
-
-    if (m_currentState == playerStates::ON_GROUND) {
-        if (m_frameDelayClock >= m_frameDelayAmount) {
-            m_frameIndex++;
-            m_spriteRect.y = 0.0f;
-            m_spriteRect.x = m_sizePx.x * static_cast<float>(m_frameIndex);
-            m_frameDelayClock = 0;
-        }
-        else {
-            m_frameDelayClock++;
-        }
-
-        if (m_soundDelayClock >= m_soundDelayAmount) {
-            playRandomSound(m_footstepSounds);
-            m_soundDelayClock = 0;
-        }
-        else {
-            m_soundDelayClock++;
-        }
-    }
-    else {
-        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
-    }
 }
 
 void Player::jump() const {
-    if (!b2Body_IsValid(m_body)) {
-        logErr("m_body invalid: Player::jump()");
-        return;
-    }
+    const float mass = b2Body_GetMass(m_body);
 
-    if (m_currentState == playerStates::ON_GROUND) {
-        const float mass = b2Body_GetMass(m_body);
-
-        b2Body_ApplyLinearImpulse(
-        m_body,
-        {0.0f, -(mass * 8.0f)},
-        b2Body_GetWorldCenterOfMass(m_body),
-        true);
-    }
-}
-
-// Control player idle sprite
-void Player::moveNowhere() {
-    if (m_lastDirection == directions::RIGHT) {
-        m_spriteRect.y = static_cast<float>(m_walkSprites.height) / 2;
-        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
-    }
-    else {
-        m_spriteRect.x = static_cast<float>(m_walkSprites.width) / 3;
-    }
+    b2Body_ApplyLinearImpulse(
+    m_body,
+    {0.0f, -(mass * g_playerJumpMultiplier)},
+    b2Body_GetWorldCenterOfMass(m_body),
+    true);
 }
 
 void Player::murder() {
@@ -206,17 +171,17 @@ void Player::murder() {
         }
     }
     catch (std::bad_weak_ptr& e) {
-        logErr(std::string("Error using shared from this: ") +
+        logFatal(std::string("Error using shared from this: ") +
             std::string(e.what()) + std::string(". Player::murder()"));
 
         return;
     }
     catch (...) {
-        logErr("Unknown error occurred using shared_from_this(). Player::murder()");
+        logFatal("Unknown error occurred using shared_from_this(). Player::murder()");
         return;
     }
 
-    m_currentState = playerStates::DEAD;
+    m_dead = true;
 }
 
 void Player::reform(const saveData& save) {
@@ -231,7 +196,7 @@ void Player::reform(const saveData& save) {
         save.centerPosition,
         b2MakeRot(0.0f));
 
-    m_currentState = playerStates::ON_GROUND;
+    m_dead = false;
 }
 
 [[nodiscard]] b2ShapeId Player::getFootpawSenorId() const noexcept {
@@ -239,15 +204,23 @@ void Player::reform(const saveData& save) {
 }
 
 [[nodiscard]] bool Player::isOnGround() const noexcept {
-    return m_currentState == playerStates::ON_GROUND;
+    return m_activeGroundContacts > 0;
 }
 
 [[nodiscard]] bool Player::isDead() const noexcept {
-    return m_currentState == playerStates::DEAD;
+    return m_dead;
 }
 
-[[nodiscard]] directions Player::getPlayerDirection() const noexcept {
-    return m_lastDirection;
+[[nodiscard]] direction Player::getPlayerDirection() const noexcept {
+    return m_currentDirection;
+}
+
+[[nodiscard]] animationId Player::getCurrentAnimId() const noexcept {
+    return m_currentAnimId;
+}
+
+[[nodiscard]] entityActionState Player::getCurrentActionState() const noexcept {
+    return m_currentState;
 }
 
 void Player::addContactEvent() noexcept {
@@ -259,7 +232,7 @@ void Player::removeContactEvent() noexcept {
 }
 
 // Consider returning the full result if other raycast info is needed down the line...
-b2Vec2 Player::getGroundNormals(const b2WorldId& world) const {
+[[nodiscard]] b2Vec2 Player::getGroundNormals(const b2WorldId& world) const {
     assert(b2Body_IsValid(m_body));
 
     const b2Vec2 origin = b2Body_GetPosition(m_body);

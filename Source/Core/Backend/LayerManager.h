@@ -8,8 +8,8 @@
 #include <unordered_map>
 #include <memory>
 #include "Layer.h"
-#include "LayerTypes.h"
-#include "../Utility/Error.h"
+#include "../Utility/Enum.h"
+#include "../Utility/Logging.h"
 
 class LayerManager final {
     static LayerManager m_managerInstance;

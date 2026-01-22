@@ -7,6 +7,7 @@
 
 #include "../Camera/Camera.h"
 #include "../../Core/Entity/Player.h"
+#include "./Enum.h"
 
 // Draw all the shapes bound to a Player object for debugging
 void drawDebugBodyShapes(const Player& player);
@@ -36,6 +37,14 @@ void drawDebugCollisionVerts(const MapData& map);
 
 // Draw event colliders in the world
 void drawDebugEventColliders(const MapData& map);
+
+// Draw the current animation ID of the player
+// Must be called AFTER SceneCamera->cameraEnd()
+void drawDebugPlayerAnimId(const animationId& id);
+
+// Draw the current player animation state
+// Must be called AFTER SceneCamera->cameraEnd()
+void drawDebugPlayerAnimState(const entityActionState& state);
 
 // Draw controls window for debugging features
 // Must be called AFTER SceneCamera->cameraEnd()

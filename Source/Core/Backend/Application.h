@@ -10,11 +10,12 @@ class Application {
     bool m_gameRunning;
 
     Application();
+    ~Application() = default;
+
     Application(Application&) = delete;
     Application(Application&&) = delete;
     Application& operator=(Application&) = delete;
     Application&& operator=(Application&&) = delete;
-    ~Application() = default;
 public:
     void init();
     void run() const;

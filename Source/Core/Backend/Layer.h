@@ -5,16 +5,26 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include "LayerTypes.h"
+#include "../Utility/Enum.h"
+#include "../Utility/Logging.h"
 
 // Base layer class. Any type of object that can be placed into layer stack for use.
 class Layer {
 protected:
-    layerType m_type;
-    bool m_isEnabled;
+    layerType m_type{};
+    bool m_isEnabled{};
 public:
-    Layer() = default;
-    virtual ~Layer() = default;
+    Layer() {
+        #ifdef DEBUG
+            logDbg("Default Layer constructed at address: ", this);
+        #endif
+    };
+
+    virtual ~Layer() {
+        #ifdef DEBUG
+                logDbg("Default Layer destroyed at address: ", this);
+        #endif
+    };
 
     virtual void pollEvents() {}
     virtual void update() {}

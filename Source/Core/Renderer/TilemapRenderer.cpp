@@ -59,7 +59,7 @@ void renderLayer(
             const std::string imagePath = map.baseDir.string() + layer.getImage();
 
             if (!map.renderDataPtr->textures.contains(imagePath)) {
-                logErr("Unable to load texture: " + layer.getImage() + ": renderMap(Args...)");
+                logFatal("Unable to load texture: " + layer.getImage() + ": renderMap(Args...)");
                 return;
             }
 
@@ -99,7 +99,7 @@ void renderLayer(
             break;
         }
         default: {
-            logErr("Map contains unsupported layer type: renderMap(Args...)");
+            logFatal("Map contains unsupported layer type: renderMap(Args...)");
             break;
         }
     }

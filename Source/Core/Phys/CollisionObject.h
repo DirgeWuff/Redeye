@@ -17,11 +17,11 @@ class CollisionObject {
     b2BodyId m_bodyId{};
     b2ChainId m_chainId{};
 public:
+    CollisionObject();
     CollisionObject(
         b2WorldId world,
         const std::vector<b2Vec2>& points);
 
-    CollisionObject() = default;
     CollisionObject(const CollisionObject& other);
     CollisionObject(CollisionObject&& other) noexcept;
     CollisionObject& operator=(const CollisionObject& other);

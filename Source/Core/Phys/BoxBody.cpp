@@ -6,6 +6,12 @@
 #include "BoxBody.h"
 #include "../Utility/Utils.h"
 
+BoxBody::BoxBody() {
+    #ifdef DEBUG
+        logDbg("Default BoxBody constructed at address: ", this);
+    #endif
+}
+
 BoxBody::BoxBody(
     const float centerX,
     const float centerY,
@@ -31,6 +37,16 @@ BoxBody::BoxBody(
     m_shapeDef.material.friction = config.friction;
     m_shapeDef.enableSensorEvents = true;
     b2CreatePolygonShape(m_body, &m_shapeDef, &boundingBox);
+
+    #ifdef DEBUG
+        logDbg("BoxBody constructed at address: ", this);
+    #endif
+}
+
+BoxBody::~BoxBody() {
+    #ifdef DEBUG
+        logDbg("BoxBody destroyed at address: ", this);
+    #endif
 }
 
 void BoxBody::update() {

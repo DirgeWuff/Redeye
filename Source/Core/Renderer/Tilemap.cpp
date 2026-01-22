@@ -70,7 +70,7 @@ void loadCollisionMesh(
             mapData.collisionObjects.emplace_back(world, points);
         }
         else {
-            logErr("Collision layer contains incompatible type: loadMap(Args...)");
+            logFatal("Collision layer contains incompatible type: loadMap(Args...)");
             return;
         }
     }
@@ -122,7 +122,7 @@ void loadEventColliders(
              checkpointCnt++;
          }
          else {
-             logErr(std::string("Incompatible object layer: " + object.getName() + "loadMap(Args...)"));
+             logFatal(std::string("Incompatible object layer: " + object.getName() + "loadMap(Args...)"));
              return;
          }
      }
@@ -140,7 +140,7 @@ void loadTileLayer(
 
         auto it = renderData->texturePtrs.find(tileset);
         if (it == renderData->texturePtrs.end()) {
-            logErr("Texture missing: loadMap(Args...)");
+            logFatal("Texture missing: loadMap(Args...)");
             break;
         }
 

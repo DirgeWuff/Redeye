@@ -7,9 +7,17 @@
 #include "box2D/box2d.h"
 #include "CollisionObject.h"
 #include "../Utility/Globals.h"
+#include "../Utility/Logging.h"
 
 // Base class for a CollisionObject, generated from vertices in a tiled map's object layer.
 // These are used to generate collision geometry for the terrain in a world.
+
+CollisionObject::CollisionObject() {
+    #ifdef DEBUG
+        logDbg("Default CollisionObject constructed at address: ", this);
+    #endif
+}
+
 CollisionObject::CollisionObject(
     const b2WorldId world,
     const std::vector<b2Vec2>& points) :
@@ -37,6 +45,10 @@ CollisionObject::CollisionObject(
     m_chainDef.filter.categoryBits = g_groundCategoryBits;
     m_chainDef.filter.maskBits = g_universalMaskBits;
     m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
+
+    #ifdef DEBUG
+        logDbg("CollisionObjected constructed at address: ", this);
+    #endif
 }
 
 CollisionObject::CollisionObject(const CollisionObject& other) :
@@ -138,6 +150,10 @@ CollisionObject & CollisionObject::operator=(CollisionObject&& other) noexcept {
 CollisionObject::~CollisionObject() {
     delete[] m_verts;
     m_verts = nullptr;
+
+    #ifdef DEBUG
+        logDbg("Collision object destroyed at address: ", this);
+    #endif
 }
 
 [[nodiscard]] b2Vec2* CollisionObject::getObjectVerts() const noexcept {

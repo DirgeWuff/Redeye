@@ -5,7 +5,7 @@
 #ifndef EVENTCOLLIDER_H
 #define EVENTCOLLIDER_H
 
-#include "../Utility/Error.h"
+#include "../Utility/Logging.h"
 #include "../Utility/Utils.h"
 
 struct playerContactEvent {
@@ -32,7 +32,7 @@ protected:
     Vector2 m_cornerPosition{};
     std::unique_ptr<sensorInfo> m_sensorInfo{};
 public:
-    EventCollider() = default;
+    EventCollider();
 
     template<typename T>
     EventCollider (
@@ -64,21 +64,19 @@ public:
             m_sensorInfo = std::make_unique<sensorInfo>(std::string(std::forward<T>(id)));
             m_shapeDef.userData = static_cast<void*>(m_sensorInfo.get());
         }
-        catch (const std::bad_alloc& e) {
-            logErr(
-                std::string("EventCollider::EventCollider() failed, std::bad_alloc thrown: " +
-                    std::string(e.what())));
-
+        catch (const std::exception& e) {
+            logFatal(std::string("EventCollider::EventCollider() failed: " + std::string(e.what())));
             return;
         }
         catch (...) {
-            logErr("EventCollider::EventCollider() failed, an unknown error has occurred.");
+            logFatal("EventCollider::EventCollider() failed, an unknown error has occurred.");
             return;
         }
 
         m_shapeId = b2CreatePolygonShape(m_body, &m_shapeDef, &boundingBox);
     }
-    ~EventCollider() = default;
+
+    ~EventCollider();
 
     void disableCollider() const noexcept;
     [[nodiscard]] Vector2 getSizePx() const noexcept;

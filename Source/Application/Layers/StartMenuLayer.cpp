@@ -27,7 +27,7 @@ StartMenuLayer::StartMenuLayer() :
         0))
 {
     if (!IsFontValid(m_headerFont)) {
-        logErr("Cannot load header font: StartMenuLayer::StartMenuLayer()");
+        logFatal("Cannot load header font: StartMenuLayer::StartMenuLayer()");
         return;
     }
 
@@ -49,10 +49,18 @@ StartMenuLayer::StartMenuLayer() :
     m_quitButton.setClickEvent([] {
             Application::getInstance().shutdown();
         });
+
+    #ifdef DEBUG
+        logDbg("StartMenuLayer constructed at address: ", this);
+    #endif
 }
 
 StartMenuLayer::~StartMenuLayer() {
     UnloadFont(m_headerFont);
+
+    #ifdef DEBUG
+        logDbg("StartMenuLayer destroyed at address: ", this);
+    #endif;
 }
 
 void StartMenuLayer::update() {

@@ -2,17 +2,16 @@
 // Created by DirgeWuff on 10/1/25.
 //
 
-#include <iostream>
 #include <memory>
 #include <filesystem>
 #include "raylib.h"
 #include "Application.h"
 #include "LayerManager.h"
-#include "LayerTypes.h"
+#include "../Utility/Enum.h"
 #include "../../Application/Layers/GameLayer.h"
 #include "../../Application/Layers/StartMenuLayer.h"
 #include "../Utility/Globals.h"
-#include "../Utility/Error.h"
+#include "../Utility/Logging.h"
 #include "../Serialization/Save.h"
 
 namespace fs = std::filesystem;
@@ -23,7 +22,7 @@ Application::Application() :
 m_gameRunning(true)
 {
     #ifdef DEBUG
-        std::cout << "Application object created at address: " << this << std::endl;
+        logDbg("Application created at address: ", this);
     #endif
 }
 
@@ -33,9 +32,12 @@ void Application::init() {
     InitAudioDevice();
     SetTargetFPS(60);
 
+    logDbg("Render API successfully initialized.");
+
+    createNewSessionLog();
     saveData initSave{};
 
-    if (fs::exists("../Savegame/save.toml")) {
+    if (fs::exists(g_saveFilePath)) {
         initSave = loadGame();
     }
     else {
@@ -52,22 +54,26 @@ void Application::init() {
              layerKey::GAME_LAYER,
              std::make_unique<GameLayer>(g_playerSpritePath, initSave));
     }
-    catch (std::bad_alloc& e) {
-        logErr(std::string("Application::init() failed: " + std::string(e.what())));
+    catch (const std::exception& e) {
+        logFatal(std::string("Application::init() failed: " + std::string(e.what())));
         m_gameRunning = false;
         return;
     }
     catch (...) {
-        logErr("Application::init() failed: An unknown error has occurred.");
+        logFatal("Application::init() failed: An unknown error has occurred.");
         m_gameRunning = false;
         return;
     }
 
     LayerManager::getInstance().suspendLayer(layerKey::GAME_LAYER);
+
+    logDbg("Application successfully initialized.");
 }
 
 // Main game loop
 void Application::run() const {
+    logDbg("Starting main loop...");
+
     while (m_gameRunning && !WindowShouldClose()) {
         // Poll input
         LayerManager::getInstance().pollEvents();
@@ -85,6 +91,8 @@ void Application::run() const {
     }
 
     CloseWindow();
+
+    logDbg("Main loop ended.");
 }
 
 [[nodiscard]] Application& Application::getInstance() noexcept {
@@ -93,4 +101,6 @@ void Application::run() const {
 
 void Application::shutdown() noexcept {
     m_gameRunning = false;
+
+    logDbg("Game shutdown requested.");
 }

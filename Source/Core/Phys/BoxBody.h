@@ -32,7 +32,7 @@ protected:
     Vector2 m_sizePx{};
     Vector2 m_cornerPosition{};
 public:
-    BoxBody() = default;
+    BoxBody();
 
     BoxBody(
         float centerX,
@@ -47,7 +47,7 @@ public:
     BoxBody& operator=(const BoxBody&) = default;
     BoxBody& operator=(BoxBody&&) noexcept = delete;
 
-    virtual ~BoxBody() = default;
+    virtual ~BoxBody();
 
     virtual void update();
     virtual void draw() const;

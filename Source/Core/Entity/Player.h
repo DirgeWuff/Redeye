@@ -14,40 +14,107 @@
 #include "../../Core/Utility/Utils.h"
 #include "../../Core/Serialization/Save.h"
 #include "../../Core/Utility/Globals.h"
+#include "../../Core/Renderer/Animation.h"
+#include "../../Core/Renderer/AnimationManager.h"
 
 class SceneCamera;
 
-// Keeping these separate because it's easier
-enum class directions : std::uint8_t {
-    RIGHT,
-    LEFT
-};
+// TODO: Load all this from TOML cfg file instead of hard coding
+static constexpr std::array<animationDescriptor, 8> playerAnimations =  {{
+    {
+        {2, 1},
+        {8, 1},
+        {108.0f, 144.0f},
+        0.1f,
+        playbackType::LOOP,
+        animationId::PLAYER_WALK_LEFT
+    },
 
-enum class playerStates : std::uint8_t {
-    ON_GROUND,
-    IN_AIR,
-    DEAD
-};
+    {
+        {2, 2},
+        {8, 2},
+        {108.0f, 144.0f},
+        0.1f,
+        playbackType::LOOP,
+        animationId::PLAYER_WALK_RIGHT
+    },
+
+    {
+        {1, 1},
+        {1, 1},
+        {108.0f, 144.0f},
+        0.1f,
+        playbackType::SINGLE_FRAME,
+        animationId::PLAYER_IDLE_LEFT
+    },
+
+    {
+        {1, 2},
+        {1, 2},
+        {108.0f, 144.0f},
+        0.1f,
+        playbackType::SINGLE_FRAME,
+        animationId::PLAYER_IDLE_RIGHT
+    },
+
+    {
+        {1, 3},
+        {2, 3},
+        {108.0f, 144.0f},
+        0.1f,
+        playbackType::NON_LOOPING,
+        animationId::PLAYER_JUMP_LEFT
+    },
+
+    {
+        {3, 3},
+        {4, 3},
+        {108.0f, 144.0f},
+        0.1f,
+        playbackType::NON_LOOPING,
+        animationId::PLAYER_FALL_LEFT
+    },
+
+    {
+        {5, 3},
+        {6, 3},
+        {108.0f, 144.0f},
+        0.1f,
+        playbackType::NON_LOOPING,
+        animationId::PLAYER_JUMP_RIGHT
+    },
+
+    {
+        {7, 3},
+        {8, 3},
+        {108.0f, 144.0f},
+        0.1f,
+        playbackType::NON_LOOPING,
+        animationId::PLAYER_FALL_RIGHT
+    }
+}};
 
 class Player final : public BoxBody, public std::enable_shared_from_this<Player> {
     b2Polygon m_footpawSensorBox{};
+    AnimationManager m_animationManager{};
     b2ShapeDef m_footpawSensorShape{};
     std::string m_playerSpritePath{};
     std::vector<Sound> m_footstepSounds{};
     std::vector<Sound> m_landingSounds{};
-    Texture2D m_walkSprites{};
-    Rectangle m_spriteRect{};
     b2ShapeId m_footpawSensorId{};
     std::unique_ptr<sensorInfo> m_footpawSensorInfo{};
-    uint16_t m_activeGroundContacts{};
-    uint8_t m_numFrames{};
-    uint8_t m_frameDelayAmount{};
-    uint8_t m_soundDelayAmount{};
-    uint8_t m_frameIndex{};
-    uint8_t m_frameDelayClock{};
-    uint8_t m_soundDelayClock{};
-    directions m_lastDirection{};
-    playerStates m_currentState{};
+    std::uint16_t m_activeGroundContacts{};
+    std::uint8_t m_soundDelayClock{};
+    std::int8_t m_movementIntent{};
+    direction m_currentDirection{};
+    entityActionState m_currentState{};
+    animationId m_currentAnimId{};
+    bool m_jumpIntent{};
+    bool m_dead{};
+
+    void moveRight(const b2WorldId& world) const;
+    void moveLeft(const b2WorldId& world) const;
+    void jump() const;
 public:
     Player() = default;
 
@@ -57,31 +124,15 @@ public:
         const float centerY,
         const b2WorldId world,
         T&& spritePath) :
+            m_animationManager(
+                spritePath,
+                playerAnimations,
+                animationId::PLAYER_IDLE_RIGHT),
             m_playerSpritePath(std::string(std::forward<T>(spritePath))),
-            m_numFrames(3),
-            m_frameDelayAmount(20),
-            m_soundDelayAmount(m_frameDelayAmount * 3),
-            m_lastDirection(directions::RIGHT),
-            m_currentState(playerStates::ON_GROUND)
+            m_currentDirection(direction::RIGHT),
+            m_currentState(entityActionState::IDLE)
 {
-        // Raylib/general stuff
-        m_walkSprites = LoadTexture(m_playerSpritePath.c_str());
-        if (!IsTextureValid(m_walkSprites)) {
-            logErr(
-                std::string("Cannot load player sprites: ") + std::string(spritePath) +
-                std::string(". Player::Player()"));
-
-            return;
-        }
-
-        m_spriteRect = {
-            0.0f,
-            static_cast<float>(m_walkSprites.height) / 2,
-            static_cast<float>(m_walkSprites.width) / 3,
-            static_cast<float>(m_walkSprites.height) / 2
-        };
-
-        m_sizePx = {m_walkSprites.width / 3.0f, m_walkSprites.height / 2.0f};
+        m_sizePx = m_animationManager.getSpriteSize();
         m_sizeMeters = pixelsToMetersVec(m_sizePx);
         m_centerPosition = {pixelsToMeters(centerX), pixelsToMeters(centerY)};
         m_cornerPosition ={centerX - m_sizePx.x / 2, centerY - m_sizePx.y / 2};
@@ -129,14 +180,14 @@ public:
             m_footpawSensorInfo = std::make_unique<sensorInfo>("pawbs");
             m_footpawSensorShape.userData = static_cast<void*>(m_footpawSensorInfo.get());
         }
-        catch (const std::bad_alloc& e) {
-            logErr("Failed to allocate for m_footpawSensorInfo: " + std::string(e.what()) +
+        catch (const std::exception& e) {
+            logFatal("Failed to allocate for m_footpawSensorInfo: " + std::string(e.what()) +
                 std::string(". Player::Player(Args...)"));
 
             return;
         }
         catch (...) {
-            logErr("An unknown error occurred. Player::Player(Args...)");
+            logFatal("An unknown error occurred. Player::Player(Args...)");
             return;
         }
 
@@ -145,8 +196,10 @@ public:
             &m_footpawSensorShape,
             &m_footpawSensorBox);
 
+        m_currentAnimId = m_animationManager.getCurrentAnimId();
+
         #ifdef DEBUG
-            std::cout << "Player object created object at address: " << this << std::endl;
+            logDbg("Class player constructed at address: ", this);
         #endif
 }
     Player(const Player&) = delete;
@@ -156,21 +209,21 @@ public:
 
     ~Player() override;
 
-    void update() override;
+    void pollEvents();
+    void update(const b2WorldId& world);
     void draw() const override;
-    void moveRight(const b2WorldId& world);
-    void moveLeft(const b2WorldId& world);
-    void jump() const;
-    void moveNowhere();
     void murder();
     void reform(const saveData& save);
+    void addContactEvent() noexcept;
+    void removeContactEvent() noexcept;
+    [[nodiscard]] b2Vec2 getGroundNormals(const b2WorldId& world) const;
+
     [[nodiscard]] b2ShapeId getFootpawSenorId() const noexcept;
     [[nodiscard]] bool isOnGround() const noexcept;
     [[nodiscard]] bool isDead() const noexcept;
-    [[nodiscard]] directions getPlayerDirection() const noexcept;
-    void addContactEvent() noexcept;
-    void removeContactEvent() noexcept;
-    b2Vec2 getGroundNormals(const b2WorldId& world) const;
+    [[nodiscard]] direction getPlayerDirection() const noexcept;
+    [[nodiscard]] animationId getCurrentAnimId() const noexcept;
+    [[nodiscard]] entityActionState getCurrentActionState() const noexcept;
 };
 
 #endif //PLAYER_H

@@ -7,7 +7,7 @@
 
 #include <chrono>
 #include <type_traits>
-#include "Error.h"
+#include "Logging.h"
 #include "box2d/box2d.h"
 #include "raylib.h"
 #include "Tson/tileson.hpp"
@@ -89,11 +89,11 @@ public:
 
 // This all is a bit of an abomination, but it works...
 template<typename H, typename K>
-std::string getNestedStringFromToml(const toml::table& tbl,H& headerKey, K& key ) {
+std::string getNestedStringFromToml(const toml::table& tbl, H& headerKey, K& key ) {
     const std::optional<std::string> str = tbl[std::string(headerKey)][std::string(key)].value<std::string>();
 
     if (!str.has_value()) {
-        logErr(std::string("Table contains no value \"" + std::string(key) +
+        logFatal(std::string("Table contains no value \"" + std::string(key) +
             std::string("\" matching type std::string under specified header. Utils::getNestedStringFromToml(Args...)")));
         return {};
     }
@@ -106,12 +106,11 @@ float getNestedFloatFromToml(const toml::table& tbl, H& headerKey, K& key) {
     const std::optional<float> fl = tbl[std::string(headerKey)][std::string(key)].value<float>();
 
     if (!fl.has_value()) {
-        logErr(std::string("Table contains no value \"" + std::string(key) +
+        logFatal(std::string("Table contains no value \"" + std::string(key) +
             std::string("\", matching type float under specified header. Utils::getNestedFloatFromToml(Args...)")));
         return {};
     }
 
     return fl.value();
 }
-
 #endif //UTILS_H

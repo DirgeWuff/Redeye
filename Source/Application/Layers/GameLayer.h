@@ -57,7 +57,8 @@ public:
         m_fragShader = LoadShader(NULL, "../assets/Shaders/lighting.fsh");
 
         if (!IsShaderValid(m_fragShader)) {
-            logErr("Unable to load shader. GameLayer::GameLayer()");
+            logFatal("Unable to load shader. GameLayer::GameLayer()");
+            return;
         }
 
         m_flashlightPosLoc = GetShaderLocation(m_fragShader, "lightPos");
@@ -80,12 +81,12 @@ public:
                 m_worldId,
                 std::forward<P>(playerSpritePath));
         }
-        catch (std::bad_alloc& e) {
-            logErr(std::string("GameLayer::GameLayer(Args...) failed: ") + e.what());
+        catch (const std::exception& e) {
+            logFatal(std::string("GameLayer::GameLayer(Args...) failed: ") + std::string(e.what()));
             return;
         }
         catch (...) {
-            logErr("GameLayer::GameLayer(Args...) failed: An unknown error has occurred.");
+            logFatal("GameLayer::GameLayer(Args...) failed: An unknown error has occurred.");
             return;
         }
 
@@ -138,12 +139,12 @@ public:
                         layerKey::CHECKPOINT_ALERT,
                         std::make_unique<TextAlert>("checkpoint reached", 5.0f));
                     }
-                    catch (const std::bad_alloc& e) {
-                        logErr(std::string("Checkpoint collider failed: ") + std::string(e.what()));
+                    catch (const std::exception& e) {
+                        logFatal(std::string("Checkpoint collider failed: ") + std::string(e.what()));
                         return;
                     }
                     catch (...) {
-                        logErr("Checkpoint collider failed due to an unknown error.");
+                        logFatal("Checkpoint collider failed due to an unknown error.");
                         return;
                     }
                 }
@@ -157,18 +158,17 @@ public:
     m_camera.setTarget(*m_playerCharacter);
     m_backgroundNoise = LoadMusicStream(m_map.bgNoisePath.string().c_str());
     if (!IsMusicValid(m_backgroundNoise)) {
-        logErr(std::string("Cannot load background noise: " + m_map.bgNoisePath.string()));
+        logFatal(std::string("Cannot load background noise: " + m_map.bgNoisePath.string()));
         return;
     }
 
     SetMusicVolume(m_backgroundNoise, 0.30f);
     PlayMusicStream(m_backgroundNoise);
 }
-
     ~GameLayer() override;
 
     void updateBeam();
-    void pollEvents() override;
+    void processSensorEvents() const;
     void update() override;
     void draw() override;
 

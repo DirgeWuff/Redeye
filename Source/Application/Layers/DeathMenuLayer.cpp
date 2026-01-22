@@ -27,7 +27,7 @@ DeathMenuLayer::DeathMenuLayer(const std::shared_ptr<Player>& player) :
     m_backgroundOpacity(0)
 {
     if (!IsFontValid(m_headerFont)) {
-        logErr("Error loading font: DeathMenuLayer(Args...)");
+        logFatal("Error loading font: DeathMenuLayer(Args...)");
         return;
     }
 

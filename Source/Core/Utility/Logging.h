@@ -2,17 +2,25 @@
 // Created by DirgeWuff on 6/5/25.
 //
 
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef LOGGING_H
+#define LOGGING_H
 
 #include <string>
 #include <fstream>
 #include <sstream>
 #include <chrono>
 #include <filesystem>
+#include <iostream>
 #include "raylib.h"
 
+#include "Globals.h"
+
+namespace fs = std::filesystem;
+
+inline std::string g_logFilePath;
+
 // Get current system time and return it as a string
+// Wanted to move this but putting it in Utils.h makes a circular dependency I don't feel like fixing rn
 inline std::string getTime() {
     const auto currentTime = std::chrono::system_clock::now();
     const std::time_t currentTimeType = std::chrono::system_clock::to_time_t(currentTime);
@@ -24,9 +32,35 @@ inline std::string getTime() {
     return stream.str();
 }
 
+// Remove illegal characters from getTime for filename purposes...
+inline std::string getTimeFilename() {
+    std::string fn = getTime();
+
+    std::replace(fn.begin(), fn.end(), ' ' , '_');
+    std::replace(fn.begin(), fn.end(), ':', '-');
+
+    return fn;
+}
+
+// Create a new log for this session, runs once per launch of game
+inline void createNewSessionLog() {
+    if (!fs::exists("Logs") && !fs::is_directory("Logs"))
+        fs::create_directory("Logs");
+
+    const std::string logPath = "Logs/Debug Log " + getTimeFilename() + ".txt";
+
+    if (!fs::exists(logPath)) { // Should always be true...
+        std::ofstream f(logPath);
+        if (f.is_open())
+            f.close();
+    }
+
+    g_logFilePath = logPath;
+}
+
 // Halt game and log an error to the screen and an error log. Should be used for fatal errors.
 template<typename T>
-void logErr(const T& errorMessage) {
+void logFatal(const T& errorMessage) {
     SetExitKey(KEY_ESCAPE);
 
     std::string msg = "FATAL ERROR: " + std::string(errorMessage);
@@ -97,7 +131,7 @@ void logErr(const T& errorMessage) {
     }
 
     // Write error message to a text log
-    if (!std::filesystem::exists("ErrorLog.txt")) {
+    if (!fs::exists("ErrorLog.txt")) {
         std::ofstream f("ErrorLog.txt");
 
         if (f.is_open()) {
@@ -116,4 +150,22 @@ void logErr(const T& errorMessage) {
     CloseWindow();
 }
 
-#endif //ERROR_H
+template<typename... Args>
+void logDbg(Args&&... args) {
+    std::ofstream f(g_logFilePath, std::ios::app);
+    if (!f.is_open()) return;
+
+    const std::string time = getTime();
+
+    std::cout << time << " DEBUG: ";
+    f << time << " DEBUG: ";
+
+    ((std::cout << std::forward<Args>(args)), ...);
+    std::cout << std::endl;
+    ((f << std::forward<Args>(args)), ...);
+    f << std::endl;
+
+    f.close();
+}
+
+#endif //LOGGING_H

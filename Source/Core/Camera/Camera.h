@@ -17,7 +17,7 @@ class SceneCamera final : public Camera2D {
    Vector2 m_mapSize{};
    Vector2 m_maxCameraPos{};
 public:
-   SceneCamera() = default;
+   SceneCamera();
    SceneCamera(const MapData& map, float zoomLevel);
 
    SceneCamera(SceneCamera&) = delete;

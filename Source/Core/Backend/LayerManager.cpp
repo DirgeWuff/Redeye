@@ -22,8 +22,8 @@ void LayerManager::popLayer(const layerKey& id) {
         m_layers.erase(id);
     }
     else {
-        logErr(
-            std::string("Cannot pop layer, no such key found: " + keyToStr(id) +
+        logFatal(
+            std::string("Cannot pop layer, no such key found: " + layerKeyToStr(id) +
                 std::string("LayerManger::popLayer()")));
     }
 }
@@ -51,7 +51,7 @@ void LayerManager::resumeLayer(const layerKey& id) {
         it->second->resume();
     }
     else {
-        logErr(std::string("Cannot enable layer, no such key found: " + keyToStr(id)));
+        logFatal(std::string("Cannot enable layer, no such key found: " + layerKeyToStr(id)));
     }
 }
 
@@ -63,7 +63,7 @@ void LayerManager::suspendLayer(const layerKey& id) {
         it->second->suspend();
     }
     else {
-        logErr(std::string("Cannot suspend layer, no such key found: " + keyToStr(id)));
+        logFatal(std::string("Cannot suspend layer, no such key found: " + layerKeyToStr(id)));
     }
 }
 

@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <string>
 #include "../external_libs/Toml/toml.hpp"
-#include "../Utility/Error.h"
+#include "../Utility/Logging.h"
 #include "../Utility/Utils.h"
 #include "../Utility/Globals.h"
 #include "Save.h"
@@ -36,11 +36,11 @@ void createDefaultSave() {
             f.close();
         }
         else {
-            logErr("Error creating default save, cannot create file: Save::createDefaultSave().");
+            logFatal("Error creating default save, cannot create file: Save::createDefaultSave().");
         }
     }
     catch (const toml::parse_error& e) {
-        logErr(std::string("Error creating default save: ") + std::string(e.what()) +
+        logFatal(std::string("Error creating default save: ") + std::string(e.what()) +
             std::string(". Save::createDefaultSave"));
     }
 }
@@ -66,7 +66,7 @@ void saveGame(const saveData& data) {
         f.close();
     }
     else {
-        logErr("Cannot save game, error opening file handle: Save::saveGame(Args...)");
+        logFatal("Cannot save game, error opening file handle: Save::saveGame(Args...)");
     }
 }
 
@@ -86,7 +86,7 @@ saveData loadGame() {
         return data;
     }
     catch (const toml::parse_error& e) {
-        logErr(std::string("Cannot parse save data: ") + std::string(e.what()) +
+        logFatal(std::string("Cannot parse save data: ") + std::string(e.what()) +
             std::string(". Save::loadGame()"));
         return {};
     }

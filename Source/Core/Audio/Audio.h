@@ -9,7 +9,7 @@
 #include <filesystem>
 #include <string>
 #include "raylib.h"
-#include "../Utility/Error.h"
+#include "../Utility/Logging.h"
 
 template<typename T>
 [[nodiscard]] std::vector<Sound> loadSoundVector(const T& dirPath, const float volume) {
@@ -21,7 +21,7 @@ template<typename T>
 
             Sound sound = LoadSound(soundPath.c_str());
             if (!IsSoundValid(sound))
-                logErr(
+                logFatal(
                     std::string("Error loading sound: ") + soundPath +
                     std::string(": loadSoundVector(Args...)"));
 
@@ -31,12 +31,12 @@ template<typename T>
         }
     }
     catch (std::filesystem::filesystem_error& e) {
-        logErr(std::string("Unable to parse sounds: ") + dirPath +
+        logFatal(std::string("Unable to parse sounds: ") + dirPath +
             std::string(e.what()) + std::string("loadSoundVector(Args...)"));
         return {};
     }
     catch (...) {
-        logErr(
+        logFatal(
             std::string("An unknown error has occurred while loading sounds: ") + dirPath +
             std::string(": loadSoundVector(Args...)"));
         return{};

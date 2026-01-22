@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+// TODO: Totally rework and simplify this. It's way too fucking confusing and complex.
+
 // Underlying framework used to dispatch events within the game.
 template<typename EventType>
 class EventDispatcher {

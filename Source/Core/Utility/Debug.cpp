@@ -169,13 +169,13 @@ void drawDebugPlayerPosition(const Player& player) {
         TextFormat("Position X: %f", player.getPositionCornerPx().x),
         10,
         10,
-        20,
+        g_debugTextSize,
         RED);
     DrawText(
         TextFormat("Position Y: %f", player.getPositionCornerPx().y),
         10,
         30,
-        20,
+        g_debugTextSize,
         RED);
 }
 
@@ -186,16 +186,16 @@ void drawDebugFootpawSensorStatus(const Player& player) {
         DrawText(
             "Footpaw sensor in contact with object",
             10,
-            g_drawPlayerPos ? 50 : 10,
-            20,
+            g_drawPlayerPos ? g_totalDebugTextHeight : 10,
+            g_debugTextSize,
             RED);
     }
     else {
         DrawText(
             "Footpaw sensor not in contact with object",
             10,
-            g_drawPlayerPos ? 50 : 10,
-            20,
+            g_drawPlayerPos ? 40 : 10,
+            g_debugTextSize,
             RED);
     }
 }
@@ -269,22 +269,58 @@ void drawDebugEventColliders(const MapData& map) {
     }
 }
 
+void drawDebugPlayerAnimId(const animationId& id) {
+    if (!g_drawPlayerAnimId) return;
+
+    // Goofy way to adjust text pos
+    Vector2 adjustedPos = g_debugTextPos;
+    adjustedPos.y += g_totalDebugTextHeight * (g_drawPlayerPos + g_drawPlayerSensorStatus);
+
+    const char* idStr = animIdToStr(id).c_str();
+
+    DrawText(
+        TextFormat("Current animation: %s", idStr),
+        static_cast<int>(adjustedPos.x),
+        static_cast<int>(adjustedPos.y),
+        g_debugTextSize,
+        RED);
+}
+
+
+void drawDebugPlayerAnimState(const entityActionState& state) {
+    if (!g_drawPlayerActionState) return;
+
+    Vector2 adjustedPos = g_debugTextPos;
+    adjustedPos.y += g_totalDebugTextHeight * (g_drawPlayerPos + g_drawPlayerSensorStatus + g_drawPlayerAnimId);
+
+    const char* stateStr = stateToStr(state).c_str();
+
+    DrawText(TextFormat("Current player action: %s", stateStr),
+        static_cast<int>(adjustedPos.x),
+        static_cast<int>(adjustedPos.y),
+        g_debugTextSize,
+        RED);
+}
+
 void drawControlsWindow() {
         g_debugWindowBoxActive = IsKeyDown(KEY_M);
 
     if (g_debugWindowBoxActive) {
 
-        g_debugWindowBoxActive = !GuiWindowBox(Rectangle{ 8, 496, 240, 280 }, "Debug drawing controls");
+        g_debugWindowBoxActive = !GuiWindowBox(Rectangle{ 8, 432, 240, 320 }, "Debug drawing controls");
 
-        GuiCheckBox(Rectangle{ 16, 528, 12, 12 }, "Draw player shapes", &g_drawPlayerShapes);
-        GuiCheckBox(Rectangle{ 16, 552, 12, 12 }, "Draw player sensor status", &g_drawPlayerSensorStatus);
-        GuiCheckBox(Rectangle{ 16, 576, 12, 12 }, "Draw player position", &g_drawPlayerPos);
-        GuiCheckBox(Rectangle{16, 600, 12, 12}, "Draw player body center", &g_drawPlayerCenter);
-        GuiCheckBox(Rectangle{ 16, 624, 12, 12 }, "Draw terrain shapes", &g_drawTerrainShapes);
-        GuiCheckBox(Rectangle{ 16, 648, 12, 12 }, "Draw terrain vertices", &g_drawTerrainVerts);
-        GuiCheckBox(Rectangle{ 16, 672, 12, 12 }, "Draw camera center crosshair", &g_drawCameraCrosshair);
-        GuiCheckBox(Rectangle{ 16, 696, 12, 12}, "Draw camera edge rectangle", &g_drawCameraRect);
-        GuiCheckBox(Rectangle{16, 720, 12,12}, "Draw event colliders", &g_drawEventColliders);
-        GuiCheckBox(Rectangle{16, 744, 12, 12}, "Enable shader effects", &g_drawShaderEffects);
+        // Each button adds 24px in height for future reference
+        GuiCheckBox(Rectangle{ 16, 464, 12, 12 }, "Draw player shapes", &g_drawPlayerShapes);
+        GuiCheckBox(Rectangle{ 16, 488, 12, 12 }, "Draw player sensor status", &g_drawPlayerSensorStatus);
+        GuiCheckBox(Rectangle{ 16, 512, 12, 12 }, "Draw player position", &g_drawPlayerPos);
+        GuiCheckBox(Rectangle{16, 536, 12, 12}, "Draw player body center", &g_drawPlayerCenter);
+        GuiCheckBox(Rectangle{ 16, 560, 12, 12 }, "Draw terrain shapes", &g_drawTerrainShapes);
+        GuiCheckBox(Rectangle{ 16, 584, 12, 12 }, "Draw terrain vertices", &g_drawTerrainVerts);
+        GuiCheckBox(Rectangle{ 16, 608, 12, 12 }, "Draw camera center crosshair", &g_drawCameraCrosshair);
+        GuiCheckBox(Rectangle{ 16, 632, 12, 12}, "Draw camera edge rectangle", &g_drawCameraRect);
+        GuiCheckBox(Rectangle{16, 656, 12,12}, "Draw event colliders", &g_drawEventColliders);
+        GuiCheckBox(Rectangle{16, 680, 12, 12}, "Enable shader effects", &g_drawShaderEffects);
+        GuiCheckBox(Rectangle{16, 704, 12, 12}, "Draw Player animationId", &g_drawPlayerAnimId);
+        GuiCheckBox(Rectangle{16, 728, 12, 12}, "Draw Player actionState", &g_drawPlayerActionState);
     }
 }
