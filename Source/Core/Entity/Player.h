@@ -7,6 +7,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 #include "raylib.h"
 #include "../../Core/Phys/BoxBody.h"
 #include "../../Core/Audio/Audio.h"
@@ -16,86 +17,15 @@
 #include "../../Core/Utility/Globals.h"
 #include "../../Core/Renderer/Animation.h"
 #include "../../Core/Renderer/AnimationManager.h"
+#include "../Serialization/AnimationLoader.h"
 
 class SceneCamera;
 
-// TODO: Load all this from TOML cfg file instead of hard coding
-static constexpr std::array<animationDescriptor, 8> playerAnimations =  {{
-    {
-        {2, 1},
-        {8, 1},
-        {108.0f, 144.0f},
-        0.1f,
-        playbackType::LOOP,
-        animationId::PLAYER_WALK_LEFT
-    },
 
-    {
-        {2, 2},
-        {8, 2},
-        {108.0f, 144.0f},
-        0.1f,
-        playbackType::LOOP,
-        animationId::PLAYER_WALK_RIGHT
-    },
-
-    {
-        {1, 1},
-        {1, 1},
-        {108.0f, 144.0f},
-        0.1f,
-        playbackType::SINGLE_FRAME,
-        animationId::PLAYER_IDLE_LEFT
-    },
-
-    {
-        {1, 2},
-        {1, 2},
-        {108.0f, 144.0f},
-        0.1f,
-        playbackType::SINGLE_FRAME,
-        animationId::PLAYER_IDLE_RIGHT
-    },
-
-    {
-        {1, 3},
-        {2, 3},
-        {108.0f, 144.0f},
-        0.1f,
-        playbackType::NON_LOOPING,
-        animationId::PLAYER_JUMP_LEFT
-    },
-
-    {
-        {3, 3},
-        {4, 3},
-        {108.0f, 144.0f},
-        0.1f,
-        playbackType::NON_LOOPING,
-        animationId::PLAYER_FALL_LEFT
-    },
-
-    {
-        {5, 3},
-        {6, 3},
-        {108.0f, 144.0f},
-        0.1f,
-        playbackType::NON_LOOPING,
-        animationId::PLAYER_JUMP_RIGHT
-    },
-
-    {
-        {7, 3},
-        {8, 3},
-        {108.0f, 144.0f},
-        0.1f,
-        playbackType::NON_LOOPING,
-        animationId::PLAYER_FALL_RIGHT
-    }
-}};
 
 class Player final : public BoxBody, public std::enable_shared_from_this<Player> {
     b2Polygon m_footpawSensorBox{};
+    std::vector<animationDescriptor> m_playerAnimations{};
     AnimationManager m_animationManager{};
     b2ShapeDef m_footpawSensorShape{};
     std::string m_playerSpritePath{};
@@ -124,9 +54,10 @@ public:
         const float centerY,
         const b2WorldId world,
         T&& spritePath) :
+            m_playerAnimations(loadAnimations(g_playerAnimPath)),
             m_animationManager(
                 spritePath,
-                playerAnimations,
+                m_playerAnimations,
                 animationId::PLAYER_IDLE_RIGHT),
             m_playerSpritePath(std::string(std::forward<T>(spritePath))),
             m_currentDirection(direction::RIGHT),
@@ -135,7 +66,7 @@ public:
         m_sizePx = m_animationManager.getSpriteSize();
         m_sizeMeters = pixelsToMetersVec(m_sizePx);
         m_centerPosition = {pixelsToMeters(centerX), pixelsToMeters(centerY)};
-        m_cornerPosition ={centerX - m_sizePx.x / 2, centerY - m_sizePx.y / 2};
+        m_cornerPosition = {centerX - m_sizePx.x / 2.0f, centerY - m_sizePx.y / 2.0f};
 
         m_footstepSounds = loadSoundVector("../assets/Player assets/Sounds/Walk", 0.2f);
         m_landingSounds = loadSoundVector("../assets/Player assets/Sounds/Jump", 0.2f);

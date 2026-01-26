@@ -79,9 +79,9 @@ saveData loadGame() {
         const toml::table tbl = toml::parse_file(g_saveFilePath);
         saveData data{};
 
-        data.currentMapPath = getNestedStringFromToml(tbl, "save", "currentMapPath");
-        data.centerPosition.x = pixelsToMeters(getNestedFloatFromToml(tbl, "save", "playerPosX"));
-        data.centerPosition.y = pixelsToMeters(getNestedFloatFromToml(tbl, "save", "playerPosY"));
+        data.currentMapPath = getNestedValFromToml<std::string>(tbl, "save", "currentMapPath");
+        data.centerPosition.x = pixelsToMeters(getNestedValFromToml<float>(tbl, "save", "playerPosX"));
+        data.centerPosition.y = pixelsToMeters(getNestedValFromToml<float>(tbl, "save", "playerPosY"));
 
         return data;
     }

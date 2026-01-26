@@ -14,6 +14,7 @@ static constexpr uint16_t g_windowWidth = 1500;
 static constexpr uint16_t g_windowHeight = 800;
 // Replace this with a serialized config later...
 inline std::string g_playerSpritePath = "../assets/Player assets/Walksprites_v5.png";
+inline std::string g_playerAnimPath = "../assets/Player assets/player_anims.toml";
 
 constexpr double g_pi = 3.14159265359;
 

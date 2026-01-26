@@ -157,7 +157,7 @@ void Player::murder() {
     LayerManager::getInstance().suspendLayer(layerKey::GAME_LAYER);
     LayerManager::getInstance().suspendOverlays();
 
-    // Pretty bad creating unique_ptr<T> with shared_ptr<T> as argument, but it works better than anything else...
+    // "How the fuck does this shit even compile?!" -Some loser on Reddit, 2025
     try {
         const auto p = shared_from_this();
 

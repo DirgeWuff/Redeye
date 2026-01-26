@@ -87,30 +87,74 @@ public:
 // Toml helpers
 // =====================================================================================================================
 
+template<typename T, typename K>
+T getValFromToml(const toml::table& tbl, const K& key) {
+    const std::optional<T> val = tbl[std::string(key)].value<T>();
+
+    if (!val.has_value()) {
+        logDbg("Failed to get value from TOML key: ", key);
+        return{};
+    }
+
+    return val.value();
+}
+
 // This all is a bit of an abomination, but it works...
-template<typename H, typename K>
-std::string getNestedStringFromToml(const toml::table& tbl, H& headerKey, K& key ) {
-    const std::optional<std::string> str = tbl[std::string(headerKey)][std::string(key)].value<std::string>();
+template<typename T, typename H, typename K>
+T getNestedValFromToml(const toml::table& tbl, const H& header, const K& key) {
+    const std::optional<T> val = tbl[std::string(header)][std::string(key)].value<T>();
 
-    if (!str.has_value()) {
-        logFatal(std::string("Table contains no value \"" + std::string(key) +
-            std::string("\" matching type std::string under specified header. Utils::getNestedStringFromToml(Args...)")));
-        return {};
+    if (!val.has_value()) {
+        logDbg("Failed to retrieve TOML key: ", key, " from header ", header);
+        return{};
     }
 
-    return str.value();
+    return val.value();
+}
+
+// Not really possible to safely return type T here, since Vector2 is already defined as {float x, float y}
+template<typename K>
+Vector2 getVecFromToml(const toml::table& tbl, const K& key) {
+    const auto* arr = tbl[std::string(key)].as_array();
+    assert(arr);
+
+    if (arr->size() != 2) {
+        logDbg("Array at key ", key, " is not of size 2. getVecFromToml(Args...)");
+        return{};
+    }
+
+    const std::optional<float> x = arr->at(0).value<float>();
+    const std::optional<float> y = arr->at(1).value<float>();
+
+    if (!x.has_value() || !y.has_value()) {
+        logDbg("Unable to retrieve one or more values from key ", key, "getVecFromToml(Args...)");
+        return{};
+    }
+
+    return {x.value(), y.value()};
 }
 
 template<typename H, typename K>
-float getNestedFloatFromToml(const toml::table& tbl, H& headerKey, K& key) {
-    const std::optional<float> fl = tbl[std::string(headerKey)][std::string(key)].value<float>();
+Vector2 getNestedVecFromToml(const toml::table& tbl, const H& header, const K& key) {
+    const auto* arr = tbl[std::string(header)][std::string(key)].as_array();
+    assert(arr);
 
-    if (!fl.has_value()) {
-        logFatal(std::string("Table contains no value \"" + std::string(key) +
-            std::string("\", matching type float under specified header. Utils::getNestedFloatFromToml(Args...)")));
-        return {};
+    if (arr->size() != 2) {
+        logDbg("Array at header ", std::string(header), " and key ", std::string(key),
+            "is not of size 2. getNestedVecFromToml(Args...)");
+        return{};
     }
 
-    return fl.value();
+    const std::optional<float> x = arr->at(0).value<float>();
+    const std::optional<float> y = arr->at(1).value<float>();
+
+    if (!x.has_value() || !y.has_value()) {
+        logDbg("Unable to retrieve one or more values from header ",
+            std::string(header), " and key ", std::string(key));
+        return{};
+    }
+
+    return{x.value(), y.value()};
 }
+
 #endif //UTILS_H

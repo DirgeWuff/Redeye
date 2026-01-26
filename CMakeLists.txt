@@ -103,6 +103,8 @@ add_executable(Redeye
         Source/Core/Renderer/AnimationManager.h
         Source/Core/Utility/Enum.cpp
         Source/Core/Utility/Enum.h
+        Source/Core/Serialization/AnimationLoader.h
+        Source/Core/Serialization/AnimationLoader.cpp
 )
 
 # Compile definitions

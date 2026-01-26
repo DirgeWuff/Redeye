@@ -42,7 +42,7 @@ inline std::string getTimeFilename() {
     return fn;
 }
 
-// Create a new log for this session, runs once per launch of game
+// Create a new debug log for this session, runs once per launch of game
 inline void createNewSessionLog() {
     if (!fs::exists("Logs") && !fs::is_directory("Logs"))
         fs::create_directory("Logs");
@@ -64,6 +64,7 @@ void logFatal(const T& errorMessage) {
     SetExitKey(KEY_ESCAPE);
 
     std::string msg = "FATAL ERROR: " + std::string(errorMessage);
+
     const char* exitMsg = "Press Esc to exit.";
     const int exitMsgPosX = (1500 - MeasureText(exitMsg, 20)) / 2;
     int messageLen = MeasureText(msg.c_str(), 20);
