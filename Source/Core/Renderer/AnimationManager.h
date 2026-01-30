@@ -1,6 +1,18 @@
 //
-// Created by DirgeWuff on 1/19/2026.
+// Author: DirgeWuff
+// Created on: 1/19/26
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Animation object manager class declaration. Defines a structure/interface
+// for the loading, switching, and drawing of animation objects. Responsible
+// for determining an animation's current state/frame based on states passed
+// to it.
 
 #ifndef ANIMATIONMANAGER_H
 #define ANIMATIONMANAGER_H
@@ -8,9 +20,7 @@
 #include <map>
 #include <string>
 #include <memory>
-
 #include "raylib.h"
-
 #include "Animation.h"
 #include "../Utility/Logging.h"
 
@@ -36,7 +46,6 @@ public:
     const animationId& startingAnim);
 
     ~AnimationManager();
-
 
     AnimationManager(const AnimationManager&) = delete;
     AnimationManager(AnimationManager&&) = delete;

@@ -1,6 +1,15 @@
 //
-// Created by DirgeWuff on 5/26/25.
+// Author: DirgeWuff
+// Created on: 9/26/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Class definition for SceneCamera.h and its member functions
 
 #include "raylib.h"
 #include "raymath.h"

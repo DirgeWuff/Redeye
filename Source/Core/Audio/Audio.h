@@ -1,6 +1,17 @@
 //
-// Created by DirgeWuff on 8/28/2025.
+// Author: DirgeWuff
+// Created on: 8/28/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Utility functions used to load, manage and play audio files used
+// by various other objects. Includes the ability to load and unload
+// an std::vector<Sound> and play a random sound from the vector.
 
 #ifndef AUDIO_H
 #define AUDIO_H

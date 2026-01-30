@@ -1,6 +1,15 @@
 //
-// Created by DirgeWuff on 1/23/2026.
+// Author: DirgeWuff
+// Created on: 1/23/26
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Function definition of the animation loader.
 
 #include <filesystem>
 #include "../external_libs/Toml/toml.hpp"

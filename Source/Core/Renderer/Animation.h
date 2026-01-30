@@ -1,16 +1,23 @@
 //
-// Created by DirgeWuff on 1/5/2026.
+// Author: DirgeWuff
+// Created on: 1/5/26
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Animation class declaration, defines a data structure and functions to create an
+// animated sprite, which is loaded from a sprite sheet.
 
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
 #include <vector>
 #include <cstdint>
-
 #include "raylib.h"
-
-#include "../Utility/Logging.h"
 #include "../Utility/Enum.h"
 
 class AnimationManager;
@@ -18,6 +25,7 @@ class AnimationManager;
 struct spriteIndex {std::size_t x; std::size_t y;};
 
 struct animationDescriptor {
+    std::optional<std::vector<uint8_t>> soundFrames;
     spriteIndex start;
     spriteIndex end;
     Vector2 spriteRes;

@@ -1,6 +1,16 @@
 //
-// Created by DirgeWuff on 6/5/25.
+// Author: DirgeWuff
+// Created on: 6/5/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// A logging functions for both fatal and non-fatal errors and events.
+// Meant to aid in debugging.
 
 #ifndef LOGGING_H
 #define LOGGING_H
@@ -12,7 +22,6 @@
 #include <filesystem>
 #include <iostream>
 #include "raylib.h"
-
 #include "Globals.h"
 
 namespace fs = std::filesystem;
@@ -151,6 +160,7 @@ void logFatal(const T& errorMessage) {
     CloseWindow();
 }
 
+// Passively log debug info to the console and a log file
 template<typename... Args>
 void logDbg(Args&&... args) {
     std::ofstream f(g_logFilePath, std::ios::app);

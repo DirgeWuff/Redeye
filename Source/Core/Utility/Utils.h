@@ -1,6 +1,16 @@
 //
-// Created by DirgeWuff on 6/27/25.
+// Author: DirgeWuff
+// Created on: 6/27/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Collection of declarations of various generic utility functions, as well
+// as definitions of templated utility functions.
 
 #ifndef UTILS_H
 #define UTILS_H
@@ -116,7 +126,11 @@ T getNestedValFromToml(const toml::table& tbl, const H& header, const K& key) {
 template<typename K>
 Vector2 getVecFromToml(const toml::table& tbl, const K& key) {
     const auto* arr = tbl[std::string(key)].as_array();
-    assert(arr);
+
+    if (!arr) {
+        logDbg("arr == nullptr. getVecFromToml(Args...)");
+        return{};
+    }
 
     if (arr->size() != 2) {
         logDbg("Array at key ", key, " is not of size 2. getVecFromToml(Args...)");
@@ -137,11 +151,15 @@ Vector2 getVecFromToml(const toml::table& tbl, const K& key) {
 template<typename H, typename K>
 Vector2 getNestedVecFromToml(const toml::table& tbl, const H& header, const K& key) {
     const auto* arr = tbl[std::string(header)][std::string(key)].as_array();
-    assert(arr);
+
+    if (!arr) {
+        logDbg("arr == nullptr. getNestedVecFromToml(Args...)");
+        return{};
+    }
 
     if (arr->size() != 2) {
         logDbg("Array at header ", std::string(header), " and key ", std::string(key),
-            "is not of size 2. getNestedVecFromToml(Args...)");
+            " is not of size 2. getNestedVecFromToml(Args...)");
         return{};
     }
 
@@ -156,5 +174,51 @@ Vector2 getNestedVecFromToml(const toml::table& tbl, const H& header, const K& k
 
     return{x.value(), y.value()};
 }
+
+template<typename T, typename K>
+std::vector<T> getArrFromToml(const toml::table& tbl, const K& key) {
+    const auto* arr = tbl[std::string(key)].as_array();
+
+    if (!arr) {
+        logDbg("arr == nullptr. getArrFromToml(Args...)");
+        return{};
+    }
+
+    if (arr->empty()) {
+        logDbg("Array at key ", key, " is empty.");
+        return{};
+    }
+
+    std::vector<T> vec{};
+    vec.reserve(arr->size());
+
+    for (const auto& elem : *arr) {
+        if (auto val = elem.value<T>())
+            vec.push_back(*val);
+        else
+            logDbg("Invalid type stored in array at key: ", key, ". getArrFromToml(Args...)");
+    }
+
+    return vec;
+}
+
+// Identification
+// =====================================================================================================================
+
+struct guid {
+    std::uint64_t val{};
+
+    bool operator==(const guid& other) const { return this->val == other.val; }
+    bool operator!=(const guid& other) const { return this->val != other.val; }
+};
+
+template<>
+struct std::hash<guid> {
+    std::size_t operator()(const guid& id) const noexcept {
+        return std::hash<uint64_t>{}(id.val);
+    }
+};
+
+guid generateGuid();
 
 #endif //UTILS_H

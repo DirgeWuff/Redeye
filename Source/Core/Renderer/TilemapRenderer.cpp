@@ -1,6 +1,16 @@
 //
-// Created by DirgeWuff on 9/5/2025.
+// Author: DirgeWuff
+// Created on: 9/5/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Function definitions for TilemapRenderer.h. Includes the primary map rendering
+// function, renderLayer(Args...).
 
 #include "raylib.h"
 #include "raymath.h"
@@ -10,7 +20,7 @@
 // Tried to do this using groups, however there seems to be a bug in tson that causes tiled layers not to load properly
 // this seems like the second-best option.
 
-void renderLayer(
+static void renderLayer(
     const SceneCamera& cam,
     const MapData& map,
     const tson::Layer& layer,
@@ -71,14 +81,13 @@ void renderLayer(
                 const float totalParallaxShift = camTravelX * (1.0f - parallaxFactor.x);
 
                 const std::size_t maxRepetitions = std::ceil((camWidth + totalParallaxShift) / imageWidth);
-                const int yPos = adjustedOffset.y;
-                int xPos = adjustedOffset.x;
+                int xPos = static_cast<int>(adjustedOffset.x);
 
                 for (std::size_t i = 0; i < maxRepetitions; i++) {
                     DrawTexture(
                         map.renderDataPtr->textures[imagePath],
                         xPos,
-                        yPos,
+                        static_cast<int>(adjustedOffset.y),
                         color);
 
                     xPos += imageWidth;
@@ -87,8 +96,8 @@ void renderLayer(
             else {
                 DrawTexture(
                     map.renderDataPtr->textures[imagePath],
-                    adjustedOffset.x,
-                    adjustedOffset.y,
+                    static_cast<int>(adjustedOffset.x),
+                    static_cast<int>(adjustedOffset.y),
                     color);
             }
 
@@ -105,7 +114,7 @@ void renderLayer(
     }
 }
 
-void renderLayerGroup(
+static void renderLayerGroup(
     const SceneCamera& cam,
     const MapData& map,
     const Vector2 offset,

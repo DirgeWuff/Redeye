@@ -1,6 +1,15 @@
 //
-// Created by DirgeWuff on 6/27/25.
+// Author: DirgeWuff
+// Created on: 6/27/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Definitions of non-templated utility functions from Utils.H
 
 #include <cstdint>
 #include <random>
@@ -70,7 +79,7 @@ CodeClock::~CodeClock() {
     }
 
     const std::chrono::duration<float> averageTime = totalTime / m_durations.size();
-    double seconds = averageTime.count();
+    const double seconds = averageTime.count();
 
     // Format to be more readable in case the time is REALLY fast.
     // Using scientific notation here
@@ -93,4 +102,12 @@ void CodeClock::end() {
     m_endingTime = std::chrono::high_resolution_clock::now();
     const std::chrono::duration<float> duration = m_endingTime - m_startingTime;
     m_durations.push_back(duration);
+}
+
+// identification
+// =====================================================================================================================
+guid generateGuid() {
+    std::uniform_int_distribution<std::uint64_t> distribution;
+
+    return guid{distribution(g_randomGenerator)};
 }

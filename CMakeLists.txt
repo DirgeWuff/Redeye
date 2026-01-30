@@ -73,8 +73,8 @@ add_executable(Redeye
         Source/Core/Utility/Debug.h
         Source/Core/Phys/BoxBody.cpp
         Source/Core/Phys/BoxBody.h
-        Source/Core/Phys/CollisionObject.cpp
-        Source/Core/Phys/CollisionObject.h
+        Source/Core/Phys/CollisionSpline.cpp
+        Source/Core/Phys/CollisionSpline.h
         Source/Core/Event/EventDispatcher.h
         Source/Core/Event/EventCollider.cpp
         Source/Core/Event/EventCollider.h
@@ -105,6 +105,8 @@ add_executable(Redeye
         Source/Core/Utility/Enum.h
         Source/Core/Serialization/AnimationLoader.h
         Source/Core/Serialization/AnimationLoader.cpp
+        Source/Core/Event/Event.h
+        Source/Core/Event/EventBus.h
 )
 
 # Compile definitions

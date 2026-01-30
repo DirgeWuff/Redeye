@@ -1,6 +1,15 @@
 //
-// Created by DirgeWuff on 8/28/2025.
+// Author: DirgeWuff
+// Created on: 8/28/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Function definitions for non-templated functions for Audio.h
 
 #include "Audio.h"
 #include "../Utility/Utils.h"

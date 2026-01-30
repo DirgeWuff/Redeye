@@ -1,6 +1,15 @@
 //
-// Created by DirgeWuff on 5/14/25.
+// Author: DirgeWuff
+// Created on: 5/14/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Class definition for GameLayer.h and its member functions
 
 #include <cstdint>
 #include "raylib.h"
@@ -75,7 +84,7 @@ void GameLayer::updateBeam() {
     SetShaderValue(m_fragShader, m_flashlightDirLoc, &m_beamAngle, SHADER_UNIFORM_VEC2);
 }
 
-void GameLayer::processSensorEvents() const {
+void GameLayer::processSensorEvents() {
     const b2SensorEvents sensorContactEvents = b2World_GetSensorEvents(m_worldId);
 
     // Process all b2SensorBeginTouch events for the current step.
@@ -83,9 +92,11 @@ void GameLayer::processSensorEvents() const {
         const auto& [sensorShapeId, visitorShapeId] = sensorContactEvents.beginEvents[i];
         const auto* userData = static_cast<sensorInfo*>(b2Shape_GetUserData(sensorShapeId));
         if (userData) {
-            m_collisionEventDispatcher.dispatch(
-                userData->typeId,
-                playerContactEvent{true, sensorShapeId});
+            m_eventBus.get<playerCollisionEvent>().dispatch(
+                playerCollisionEvent{
+                    true,
+                    visitorShapeId,
+                    *userData});
         }
         else {
             logFatal("Unhandled b2BeginContactEvent. sensorShapeId.userData blank. GameLayer::update()");
@@ -98,9 +109,11 @@ void GameLayer::processSensorEvents() const {
         const auto& [sensorShapeId, visitorShapeId] = sensorContactEvents.endEvents[i];
         const auto* userData = static_cast<sensorInfo*>(b2Shape_GetUserData(sensorShapeId));
         if (userData) {
-            m_collisionEventDispatcher.dispatch(
-                userData->typeId,
-                playerContactEvent{false, sensorShapeId});
+            m_eventBus.get<playerCollisionEvent>().dispatch(
+                playerCollisionEvent{
+                    false,
+                    visitorShapeId,
+                    *userData});
         }
         else {
             logFatal("Unhandled b2EndContactEvent. senorShapeId.userData blank. GameLayer::update()");

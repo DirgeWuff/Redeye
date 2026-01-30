@@ -1,8 +1,17 @@
 //
-// Created by DirgeWuff on 7/8/25.
+// Author: DirgeWuff
+// Created on: 7/8/25
 //
-
-// Base class for any box2d 'box object'
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Virtual/base class of box/rectangle-shaped Box2D collision objects.
+// Player's bounding box is a child class of this object. Provides
+// an interface for creating and querying these collision objects.
 
 #ifndef BOXBODY_H
 #define BOXBODY_H

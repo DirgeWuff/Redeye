@@ -1,6 +1,16 @@
 //
-// Created by DirgeWuff on 7/8/25.
+// Author: DirgeWuff
+// Created on: 7/8/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Class definition for BoxBody.h and its member functions
+
 
 #include "box2d/box2d.h"
 #include "BoxBody.h"

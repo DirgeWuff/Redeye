@@ -1,6 +1,17 @@
 //
-// Created by DirgeWuff on 5/15/25.
+// Author: DirgeWuff
+// Created on: 5/15/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Contains basic data structures and functions used to load and store
+// a tiled map for use by the renderer and physics engine. Loosely based
+// off of raylib-tileson written by Rob Loach: https://github.com/RobLoach/raylib-tileson
 
 #ifndef TILEMAP_H
 #define TILEMAP_H
@@ -9,10 +20,10 @@
 #include <map>
 #include <filesystem>
 #include <cstdint>
-#include "ranges"
 #include "raylib.h"
+#include "../Event/EventCollider.h"
 #include "../external_libs/Tson/tileson.hpp"
-#include "../Phys/CollisionObject.h"
+#include "../Phys/CollisionSpline.h"
 #include "../Utility/Logging.h"
 #include "../Utility/Utils.h"
 
@@ -37,11 +48,11 @@ struct RenderData {
 
 // Structured data used to load a map. Used on a per-map basis.
 struct MapData {
-    std::unordered_map<std::string, EventCollider> eventColliders;
+    std::vector<EventCollider> eventColliders;
     fs::path baseDir;
     fs::path fullMapPath;
     fs::path bgNoisePath;
-    std::vector<CollisionObject> collisionObjects;
+    std::vector<CollisionSpline> collisionObjects;
     std::shared_ptr<RenderData> renderDataPtr;
     std::shared_ptr<tson::Map> tsonMapPtr;
 
@@ -186,27 +197,7 @@ MapData loadMap(T&& filepath, const b2WorldId world) {
     return mapData;
 }
 
-// Unload or destroy map.
-inline void unloadMap(const MapData& map) {
-    for (const auto& texture : std::views::values(map.renderDataPtr->textures)) {
-        UnloadTexture(texture);
-    }
-
-    #ifdef DEBUG
-        logDbg("Tilemap unloaded successfully.");
-    #endif
-}
-
-// Disable an event collider within the map so player contact is no longer registered.
-template<typename T>
-void disableEventCollider(const MapData& map, const T& id) {
-    const auto it = map.eventColliders.find(id);
-    if (it != map.eventColliders.end()) {
-        it->second.disableCollider();
-    }
-    else {
-        logFatal("No matching collider found in world.");
-    }
-}
+void unloadMap(const MapData& map);
+void disableEventCollider(const MapData& map, const guid& colliderGuid);
 
 #endif //TILEMAP_H

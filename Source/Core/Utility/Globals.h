@@ -1,6 +1,16 @@
 //
-// Created by DirgeWuff on 11/10/2025.
+// Author: DirgeWuff
+// Created on: 11/10/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// A collection of global constants used by a number of functions and
+// objects throughout the game
 
 #ifndef GLOBALS_H
 #define GLOBALS_H

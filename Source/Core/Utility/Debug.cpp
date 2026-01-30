@@ -1,9 +1,18 @@
 //
-// Created by DirgeWuff on 6/27/25.
+// Author: DirgeWuff
+// Created on: 6/27/25
 //
-
-// Note: A bunch of these functions have a bit of visual 'jitter' to them due to the
-// loss of precision from doing a static_cast from float to int.
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Function definitions for Debug.h
+//
+// NOTE: A bunch of these functions have a bit of visual 'jitter' to them
+// due to the loss of precision from doing a static_cast from float to int.
 
 #define RAYGUI_IMPLEMENTATION
 
@@ -203,7 +212,7 @@ void drawDebugFootpawSensorStatus(const Player& player) {
 void drawDebugCollisionShapes(const MapData& map) {
     if (!g_drawTerrainShapes) return;
 
-    const std::vector<CollisionObject>& shapes = map.collisionObjects;
+    const std::vector<CollisionSpline>& shapes = map.collisionObjects;
 
     for (const auto& shape : shapes) {
         const b2Vec2* points = shape.getObjectVerts();
@@ -229,7 +238,7 @@ void drawDebugCollisionShapes(const MapData& map) {
 void drawDebugCollisionVerts(const MapData& map) {
     if (!g_drawTerrainVerts) return;
 
-    const std::vector<CollisionObject>& shapes = map.collisionObjects;
+    const std::vector<CollisionSpline>& shapes = map.collisionObjects;
 
     for (const auto& shape : shapes) {
         const b2Vec2* points = shape.getObjectVerts();
@@ -248,9 +257,9 @@ void drawDebugCollisionVerts(const MapData& map) {
 void drawDebugEventColliders(const MapData& map) {
     if (!g_drawEventColliders) return;
 
-    const std::unordered_map<std::string, EventCollider>& colliders = map.eventColliders;
+    const std::vector<EventCollider>& colliders = map.eventColliders;
 
-    for (const auto& [id, collider] : colliders) {
+    for (const auto& collider : colliders) {
         const Vector2 pos = collider.getPosPixels();
         const Vector2 size = collider.getSizePx();
 
@@ -259,13 +268,24 @@ void drawDebugEventColliders(const MapData& map) {
             1.0f,
             g_debugColliderColor);
 
-        const Vector2 idLen = MeasureTextEx(g_debugFont, id.c_str(), 6.0f, 0.50f);
+        const Vector2 idLen = MeasureTextEx(
+            g_debugFont,
+            sensorToStr(collider.getSensorInfo().type).c_str(),
+            6.0f,
+            0.50f);
+
         const Vector2 textPos = {
             pos.x + idLen.x / 2.0f,
             pos.y - 6.0f};
 
         // Still draws default font and I've spent way too much time trying to figure out why...
-        DrawTextEx(g_debugFont, id.c_str(), textPos, 6.0f, 0.50f, g_debugColliderColor);
+        DrawTextEx(
+            g_debugFont,
+            sensorToStr(collider.getSensorInfo().type).c_str(),
+            textPos,
+            6.0f,
+            0.50f,
+            g_debugColliderColor);
     }
 }
 

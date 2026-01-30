@@ -1,6 +1,17 @@
 //
-// Created by DirgeWuff on 1/20/2026.
+// Author: DirgeWuff
+// Created on: 1/5/26
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Enums defining multiple aspects of the game, with related functions for
+// translating enums into strings and safely converting an enum's underlying type
+// back into it's original type.
 
 #ifndef ENUM_H
 #define ENUM_H
@@ -12,7 +23,7 @@
 #include "Logging.h"
 
 // State of a button as it relates to interaction from user
-enum class buttonStates {
+enum class buttonStates : std::uint8_t {
     BUTTON_IDLE,
     BUTTON_HOVERED,
     BUTTON_CLICKED,
@@ -20,7 +31,7 @@ enum class buttonStates {
 };
 
 // First vs second render pass
-enum class renderPassType {
+enum class renderPassType : std::uint8_t {
     PRIMARY_PASS,
     DIFFERED_PASS,
     COUNT
@@ -57,6 +68,24 @@ enum class playbackType : std::uint8_t {
     COUNT
 };
 
+// IDs of subscription objects, used by EventDispatcher<T>
+enum class subId : std::uint8_t {
+    PLAYER_FOOTPAW_GROUND_CONTACT,
+    PLAYER_DEATH_COLLIDER_CONTACT,
+    PLAYER_CHECKPOINT_COLLIDER_CONTACT,
+    COUNT
+};
+
+// Types of event colliders/sensor objects
+enum class sensorType : std::uint8_t {
+    PLAYER_FOOTPAW_SENSOR,
+    MURDER_BOX,
+    CHECKPOINT,
+    COUNT
+};
+
+// Explicitly defining these for my own sanity since they appear in the animation toml...
+
 // Entity state, can dictate correct animation along with direction
 enum class entityActionState : std::uint8_t {
     IDLE = 0,
@@ -79,11 +108,14 @@ enum class animationId : std::uint8_t {
     COUNT = 8
 };
 
+
 std::string layerKeyToStr(const layerKey& key);
 std::string dirToStr(const direction& dir);
 std::string stateToStr(const entityActionState& state);
 std::string animIdToStr(const animationId& id);
+std::string sensorToStr(const sensorType& type);
 animationId strToAnimId(const std::string& str);
+
 
 template<typename E>
 constexpr std::optional<E> toEnum(std::underlying_type_t<E> v) {
@@ -94,7 +126,6 @@ constexpr std::optional<E> toEnum(std::underlying_type_t<E> v) {
     using UT = std::underlying_type_t<E>;
     if (v < static_cast<UT>(E::COUNT))
         return static_cast<E>(v);
-
 
     logDbg("v > E::COUNT. toEnum(Args...)");
     return std::nullopt;

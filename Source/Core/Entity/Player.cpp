@@ -1,11 +1,15 @@
 //
-// Created by DirgeWuff on 4/29/25.
+// Author: DirgeWuff
+// Created on: 4/29/25
 //
-
-// NOTE: m_frameDelayAmount, and linear impulse forces reduced by
-// around half with new layer system because player was suddenly
-// moving too fast. Hopefully this isn't covering up a deeper bug
-// that I am unaware of...
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Class definition for Player.h and definitions of its functions.
 
 #include <iostream>
 #include "box2d/box2d.h"
@@ -197,6 +201,12 @@ void Player::reform(const saveData& save) {
         b2MakeRot(0.0f));
 
     m_dead = false;
+}
+
+[[nodiscard]] sensorInfo Player::getFootpawSensorInfo() const noexcept {
+    assert(m_footpawSensorInfo);
+
+    return *m_footpawSensorInfo;
 }
 
 [[nodiscard]] b2ShapeId Player::getFootpawSenorId() const noexcept {

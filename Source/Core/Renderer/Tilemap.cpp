@@ -1,7 +1,18 @@
 //
-// Created by DirgeWuff on 11/11/2025.
+// Author: DirgeWuff
+// Created on: 11/11/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Function definitions for Tilemap.h. Various internal functions used to load a
+// tiled map and construct physics objects.
 
+#include "ranges"
 #include "Tilemap.h"
 #include "../../Core/Event/EventCollider.h"
 
@@ -88,38 +99,22 @@ void loadEventColliders(
          const tson::Vector2i size = object.getSize();
 
          if (object.getName() == "MurderBox") {
-             // NOTE: Just sorta blindly assuming that there's never gonna be more than 255
-             // colliders of a given type here...
-             static uint8_t murderBoxCnt{};
-
-             mapData.eventColliders.emplace(
-                 std::piecewise_construct,
-                 std::forward_as_tuple("MurderBox" + std::to_string(murderBoxCnt)),
-                 std::forward_as_tuple(
-                     static_cast<float>(pos.x),
-                     static_cast<float>(pos.y),
-                     static_cast<float>(size.x),
-                     static_cast<float>(size.y),
-                     "MurderBox" + std::to_string(murderBoxCnt),
-                     world));
-
-             murderBoxCnt++;
+             mapData.eventColliders.emplace_back(
+                static_cast<float>(pos.x),
+                static_cast<float>(pos.y),
+                static_cast<float>(size.x),
+                static_cast<float>(size.y),
+                sensorType::MURDER_BOX,
+                world);
          }
          else if (object.getName() == "Checkpoint") {
-             static uint8_t checkpointCnt{};
-
-             mapData.eventColliders.emplace(
-                 std::piecewise_construct,
-                 std::forward_as_tuple("Checkpoint" + std::to_string(checkpointCnt)),
-                 std::forward_as_tuple(
-                     static_cast<float>(pos.x),
-                     static_cast<float>(pos.y),
-                     static_cast<float>(size.x),
-                     static_cast<float>(size.y),
-                     "Checkpoint" + std::to_string(checkpointCnt),
-                     world));
-
-             checkpointCnt++;
+             mapData.eventColliders.emplace_back(
+                 static_cast<float>(pos.x),
+                 static_cast<float>(pos.y),
+                 static_cast<float>(size.x),
+                 static_cast<float>(size.y),
+                 sensorType::CHECKPOINT,
+                 world);
          }
          else {
              logFatal(std::string("Incompatible object layer: " + object.getName() + "loadMap(Args...)"));
@@ -153,4 +148,22 @@ void loadTileLayer(
     }
 
     renderData->layerRenderData[&layer] = std::move(layerData);
+}
+
+void disableEventCollider(const MapData& map, const guid& colliderGuid) {
+    for (const auto& collider : map.eventColliders) {
+        if (collider.getSensorInfo().id == colliderGuid) {
+            collider.disableCollider();
+        }
+    }
+}
+
+void unloadMap(const MapData& map) {
+    for (const auto& texture : std::views::values(map.renderDataPtr->textures)) {
+        UnloadTexture(texture);
+    }
+
+    #ifdef DEBUG
+        logDbg("Tilemap unloaded successfully.");
+    #endif
 }

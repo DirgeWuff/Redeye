@@ -1,8 +1,19 @@
 //
-// Created by DirgeWuff on 1/20/2026.
+// Author: DirgeWuff
+// Created on: 1/5/26
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Function definitions for Enum.h
 
 #include "Enum.h"
+
+#include "../Event/EventCollider.h"
 
 std::string layerKeyToStr(const layerKey& key) {
     switch (key) {
@@ -30,6 +41,16 @@ std::string stateToStr(const entityActionState& state) {
         default: return "No such animation state exists";
     }
 }
+
+std::string sensorToStr(const sensorType& type) {
+    switch (type) {
+        case sensorType::PLAYER_FOOTPAW_SENSOR: return "PLAYER_FOOTPAW_SENSOR";
+        case sensorType::MURDER_BOX: return "MURDER_BOX";
+        case sensorType::CHECKPOINT: return "CHECKPOINT";
+        default: return "No such sensor type exists";
+    }
+}
+
 
 std::string animIdToStr(const animationId& id) {
     switch (id) {

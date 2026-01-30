@@ -1,6 +1,16 @@
 //
-// Created by DirgeWuff on 10/19/2025.
+// Author: DirgeWuff
+// Created on: 10/19/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Function definitions for Save.h. Comprises the code used to read/write
+// a save file to disk.
 
 #include <filesystem>
 #include <string>

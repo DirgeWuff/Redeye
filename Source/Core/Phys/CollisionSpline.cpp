@@ -1,24 +1,33 @@
 //
-// Created by DirgeWuff on 7/15/25.
+// Author: DirgeWuff
+// Created on: 7/15/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Class definition for CollisionSpline and all of its member functions, as well
+// as move/copy constructors, and move/copy assignment constructors, required
+// due to the nature of the vertex array.
 
 #include <cstring>
 #include "box2d/types.h"
 #include "box2D/box2d.h"
-#include "CollisionObject.h"
+#include "CollisionSpline.h"
 #include "../Utility/Globals.h"
 #include "../Utility/Logging.h"
 
-// Base class for a CollisionObject, generated from vertices in a tiled map's object layer.
-// These are used to generate collision geometry for the terrain in a world.
 
-CollisionObject::CollisionObject() {
+CollisionSpline::CollisionSpline() {
     #ifdef DEBUG
-        logDbg("Default CollisionObject constructed at address: ", this);
+        logDbg("Default CollisionSpline constructed at address: ", this);
     #endif
 }
 
-CollisionObject::CollisionObject(
+CollisionSpline::CollisionSpline(
     const b2WorldId world,
     const std::vector<b2Vec2>& points) :
         m_bodyDef(b2DefaultBodyDef()),
@@ -51,7 +60,7 @@ CollisionObject::CollisionObject(
     #endif
 }
 
-CollisionObject::CollisionObject(const CollisionObject& other) :
+CollisionSpline::CollisionSpline(const CollisionSpline& other) :
     m_bodyDef(other.m_bodyDef),
     m_chainDef(b2DefaultChainDef()),
     m_numVerts(other.m_numVerts),
@@ -75,7 +84,7 @@ CollisionObject::CollisionObject(const CollisionObject& other) :
     m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
 }
 
-CollisionObject::CollisionObject(CollisionObject&& other) noexcept :
+CollisionSpline::CollisionSpline(CollisionSpline&& other) noexcept :
     m_bodyDef(std::move(other.m_bodyDef)),
     m_chainDef(b2DefaultChainDef()),
     m_chainMaterial(std::move(other.m_chainMaterial)),
@@ -95,7 +104,7 @@ CollisionObject::CollisionObject(CollisionObject&& other) noexcept :
     m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
 }
 
-CollisionObject& CollisionObject::operator=(const CollisionObject& other) {
+CollisionSpline& CollisionSpline::operator=(const CollisionSpline& other) {
     if (this != &other) {
         delete[] m_verts;
         m_verts = nullptr;
@@ -122,7 +131,7 @@ CollisionObject& CollisionObject::operator=(const CollisionObject& other) {
     return *this;
 }
 
-CollisionObject & CollisionObject::operator=(CollisionObject&& other) noexcept {
+CollisionSpline & CollisionSpline::operator=(CollisionSpline&& other) noexcept {
     if (this != &other) {
         delete[] m_verts;
 
@@ -147,7 +156,7 @@ CollisionObject & CollisionObject::operator=(CollisionObject&& other) noexcept {
     return *this;
 }
 
-CollisionObject::~CollisionObject() {
+CollisionSpline::~CollisionSpline() {
     delete[] m_verts;
     m_verts = nullptr;
 
@@ -156,10 +165,10 @@ CollisionObject::~CollisionObject() {
     #endif
 }
 
-[[nodiscard]] b2Vec2* CollisionObject::getObjectVerts() const noexcept {
+[[nodiscard]] b2Vec2* CollisionSpline::getObjectVerts() const noexcept {
     return m_verts;
 }
 
-[[nodiscard]] std::size_t CollisionObject::getVertCount() const noexcept {
+[[nodiscard]] std::size_t CollisionSpline::getVertCount() const noexcept {
     return m_numVerts;
 }

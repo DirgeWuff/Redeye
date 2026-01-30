@@ -1,6 +1,15 @@
 //
-// Created by DirgeWuff on 10/1/25.
+// Author: DirgeWuff
+// Created on: 10/1/25
 //
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Module purpose/description:
+//
+// Class definition for Application.h, includes main game loop.
 
 #include <memory>
 #include <filesystem>
@@ -75,18 +84,15 @@ void Application::run() const {
     logDbg("Starting main loop...");
 
     while (m_gameRunning && !WindowShouldClose()) {
-        // Poll input
         LayerManager::getInstance().pollEvents();
 
-        // Update
         LayerManager::getInstance().update();
 
-        // Draw
+
         BeginDrawing();
         LayerManager::getInstance().draw();
         EndDrawing();
 
-        // Update layer stack
         LayerManager::getInstance().updateLayerStack();
     }
 
