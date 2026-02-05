@@ -20,30 +20,32 @@
 #include <vector>
 #include "box2d/types.h"
 
-class CollisionSpline {
-    b2BodyDef m_bodyDef{};
-    b2ChainDef m_chainDef{};
-    b2SurfaceMaterial m_chainMaterial{};
-    b2Vec2* m_verts;
-    std::size_t m_numVerts{};
-    b2BodyId m_bodyId{};
-    b2ChainId m_chainId{};
-public:
-    CollisionSpline();
-    CollisionSpline(
-        b2WorldId world,
-        const std::vector<b2Vec2>& points);
+namespace RE::Core {
+    class CollisionSpline {
+        b2BodyDef m_bodyDef{};
+        b2ChainDef m_chainDef{};
+        b2SurfaceMaterial m_chainMaterial{};
+        b2Vec2* m_verts;
+        std::size_t m_numVerts{};
+        b2BodyId m_bodyId{};
+        b2ChainId m_chainId{};
+    public:
+        CollisionSpline();
+        CollisionSpline(
+            b2WorldId world,
+            const std::vector<b2Vec2>& points);
 
-    CollisionSpline(const CollisionSpline& other);
-    CollisionSpline(CollisionSpline&& other) noexcept;
-    CollisionSpline& operator=(const CollisionSpline& other);
-    CollisionSpline& operator=(CollisionSpline&& other) noexcept;
+        CollisionSpline(const CollisionSpline& other);
+        CollisionSpline(CollisionSpline&& other) noexcept;
+        CollisionSpline& operator=(const CollisionSpline& other);
+        CollisionSpline& operator=(CollisionSpline&& other) noexcept;
 
-    ~CollisionSpline();
+        ~CollisionSpline();
 
-    // TODO: Look into using std::span with C++ 20
-    [[nodiscard]] b2Vec2* getObjectVerts() const noexcept;
-    [[nodiscard]] std::size_t getVertCount() const noexcept;
-};
+        // TODO: Look into using std::span with C++ 20
+        [[nodiscard]] b2Vec2* getObjectVerts() const noexcept;
+        [[nodiscard]] std::size_t getVertCount() const noexcept;
+    };
+}
 
 #endif //COLLISIONOBJECT_H

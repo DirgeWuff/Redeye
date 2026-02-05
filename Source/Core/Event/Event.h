@@ -16,10 +16,12 @@
 #ifndef EVENT_H
 #define EVENT_H
 
-struct playerCollisionEvent  {
-    bool contactBegan;
-    b2ShapeId visitorShape;
-    sensorInfo info;
-};
+namespace RE::Core {
+    struct playerCollisionEvent  {
+        bool contactBegan;
+        b2ShapeId visitorShape;
+        sensorInfo info;
+    };
+}
 
 #endif //EVENT_H

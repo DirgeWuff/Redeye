@@ -21,13 +21,15 @@
 
 namespace fs = std::filesystem;
 
-struct saveData {
-    fs::path currentMapPath;
-    b2Vec2 centerPosition;
-};
+namespace RE::Core {
+    struct saveData {
+        fs::path currentMapPath;
+        b2Vec2 centerPosition;
+    };
 
-void createDefaultSave();
-void saveGame(const saveData& data);
-saveData loadGame();
+    void createDefaultSave();
+    void saveGame(const saveData& data);
+    saveData loadGame();
+}
 
 #endif //SAVE_H

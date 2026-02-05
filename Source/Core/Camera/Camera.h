@@ -20,36 +20,38 @@
 #include "../Entity/Player.h"
 #include "../Renderer/Tilemap.h"
 
-class SceneCamera final : public Camera2D {
-   Camera2D m_camera{};
-   Rectangle m_cameraRect{};
-   Vector2 m_cameraCenter{};
-   Vector2 m_targetCenter{};
-   Vector2 m_mapSize{};
-   Vector2 m_maxCameraPos{};
-public:
-   SceneCamera();
-   SceneCamera(const MapData& map, float zoomLevel);
+namespace RE::Core {
+    class SceneCamera final : public Camera2D {
+        Camera2D m_camera{};
+        Rectangle m_cameraRect{};
+        Vector2 m_cameraCenter{};
+        Vector2 m_targetCenter{};
+        Vector2 m_mapSize{};
+        Vector2 m_maxCameraPos{};
+    public:
+        SceneCamera();
+        SceneCamera(const MapData& map, float zoomLevel);
 
-   SceneCamera(SceneCamera&) = delete;
-   SceneCamera(SceneCamera&&) = default;
-   SceneCamera& operator=(SceneCamera&) = delete;
-   SceneCamera& operator=(SceneCamera&&) = default;
+        SceneCamera(SceneCamera&) = delete;
+        SceneCamera(SceneCamera&&) = default;
+        SceneCamera& operator=(SceneCamera&) = delete;
+        SceneCamera& operator=(SceneCamera&&) = default;
 
-   ~SceneCamera();
+        ~SceneCamera();
 
-   void setTarget(const Player& player);
-   void update(const Player& player);
-   void cameraBegin() const;
-   void cameraEnd() const;
-   [[nodiscard]] Rectangle getCameraRect() const noexcept;
-   [[nodiscard]] float getCameraRectWidth() const noexcept;
-   [[nodiscard]] float getCameraRectHeight() const noexcept;
-   [[nodiscard]] float getCameraZoom() const noexcept;
-   [[nodiscard]] Vector2 getCameraCenter() const noexcept;
-   [[nodiscard]] Vector2 getCameraTarget() const noexcept;
-   [[nodiscard]] Vector2 getCameraOffset() const noexcept;
-   [[nodiscard]] Vector2 getToWorldCam(const Vector2& position) const;
-};
+        void setTarget(const Player& player);
+        void update(const Player& player);
+        void cameraBegin() const;
+        void cameraEnd() const;
+        [[nodiscard]] Rectangle getCameraRect() const noexcept;
+        [[nodiscard]] float getCameraRectWidth() const noexcept;
+        [[nodiscard]] float getCameraRectHeight() const noexcept;
+        [[nodiscard]] float getCameraZoom() const noexcept;
+        [[nodiscard]] Vector2 getCameraCenter() const noexcept;
+        [[nodiscard]] Vector2 getCameraTarget() const noexcept;
+        [[nodiscard]] Vector2 getCameraOffset() const noexcept;
+        [[nodiscard]] Vector2 getToWorldCam(const Vector2& position) const;
+    };
+}
 
 #endif //CAMERA_H

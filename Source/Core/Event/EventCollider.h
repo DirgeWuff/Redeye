@@ -19,56 +19,58 @@
 #include "../Utility/Utils.h"
 #include "../Utility/Enum.h"
 
-struct sensorInfo {
-    sensorType type{};
-    guid id{};
+namespace RE::Core {
+    struct sensorInfo {
+        sensorType type{};
+        guid id{};
 
-    explicit sensorInfo(const sensorType t) :
-        type(t),
-        id(generateGuid())
-    {
+        explicit sensorInfo(const sensorType t) :
+            type(t),
+            id(generateGuid())
+        {
 
-    }
+        }
 
-    sensorInfo() = default;
-    ~sensorInfo() = default;
-};
+        sensorInfo() = default;
+        ~sensorInfo() = default;
+    };
 
-// An invisible collider for use in triggering events in game, such as a cutscene or death
-class EventCollider {
-protected:
-    b2BodyDef m_bodyDef{};
-    b2ShapeDef m_shapeDef{};
-    std::string m_typeId{};
-    sensorInfo* m_sensorInfo{};
-    b2BodyId m_body{};
-    b2ShapeId m_shapeId{};
-    b2Vec2 m_sizeMeters{};
-    b2Vec2 m_centerPosition{};
-    Vector2 m_sizePx{};
-    Vector2 m_cornerPosition{};
-public:
-    EventCollider();
-    EventCollider (
-        float cornerX,
-        float cornerY,
-        float fullWidthPx,
-        float fullHeightPx,
-        sensorType type,
-        b2WorldId world);
+    class EventCollider {
+    protected:
+        b2BodyDef m_bodyDef{};
+        b2ShapeDef m_shapeDef{};
+        std::string m_typeId{};
+        sensorInfo* m_sensorInfo{};
+        b2BodyId m_body{};
+        b2ShapeId m_shapeId{};
+        b2Vec2 m_sizeMeters{};
+        b2Vec2 m_centerPosition{};
+        Vector2 m_sizePx{};
+        Vector2 m_cornerPosition{};
+    public:
+        EventCollider();
+        EventCollider (
+            float cornerX,
+            float cornerY,
+            float fullWidthPx,
+            float fullHeightPx,
+            sensorType type,
+            b2WorldId world);
 
-    ~EventCollider();
+        ~EventCollider();
 
-    EventCollider(const EventCollider&) = default;
-    EventCollider(const EventCollider&&) = default;
-    EventCollider& operator=(const EventCollider&) = delete;
-    EventCollider& operator=(const EventCollider&&) = delete;
+        EventCollider(const EventCollider&) = default;
+        EventCollider(EventCollider&&) = default;
+        EventCollider& operator=(const EventCollider&) = delete;
+        EventCollider& operator=(EventCollider&&) = delete;
 
 
-    void disableCollider() const noexcept;
-    [[nodiscard]] Vector2 getSizePx() const noexcept;
-    [[nodiscard]] Vector2 getPosPixels() const noexcept;
-    [[nodiscard]] sensorInfo getSensorInfo() const noexcept;
-};
+        void disableCollider() const noexcept;
+        [[nodiscard]] Vector2 getSizePx() const noexcept;
+        [[nodiscard]] Vector2 getPosPixels() const noexcept;
+        [[nodiscard]] sensorInfo getSensorInfo() const noexcept;
+    };
+
+}
 
 #endif //EVENTCOLLIDER_H

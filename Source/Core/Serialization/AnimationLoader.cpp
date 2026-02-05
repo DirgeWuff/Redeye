@@ -18,51 +18,62 @@
 
 namespace fs = std::filesystem;
 
-[[nodiscard]] std::vector<animationDescriptor> loadAnimations(const std::string& dirPath) {
-    if (!fs::exists(dirPath)) {
-        logFatal(std::string("Cannot load animation file: " + dirPath));
-        return{};
-    }
-
-    try {
-        const toml::table root = toml::parse_file(dirPath);
-        const auto* arr = root["animation_descriptor"].as_array();
-        std::vector<animationDescriptor> animations{};
-
-        if (!arr) {
-            logFatal("arr == nullptr. loadAnimations(Args...)");
+namespace RE::Core {
+    [[nodiscard]] std::vector<animationDescriptor> loadAnimations(const std::string& dirPath) {
+        if (!fs::exists(dirPath)) {
+            logFatal(std::string("Cannot load animation file: " + dirPath));
             return{};
         }
 
-        for (const toml::node& desc : *arr) {
-            const auto* tbl = desc.as_table();
+        try {
+            const toml::table root = toml::parse_file(dirPath);
+            const auto* arr = root["animation_descriptor"].as_array();
+            std::vector<animationDescriptor> animations{};
 
-            if (!tbl) {
-                logFatal("tbl == nullptr. loadAnimations(Args...)");
+            if (!arr) {
+                logFatal("arr == nullptr. loadAnimations(Args...)");
                 return{};
             }
 
-            animationDescriptor d{};
+            for (const auto& desc : *arr) {
+                const auto* tbl = desc.as_table();
 
-            const Vector2 s = getVecFromToml(*tbl, "start");
-            d.start = {static_cast<std::size_t>(s.x), static_cast<std::size_t>(s.y)};
+                if (!tbl) {
+                    logFatal("tbl == nullptr. loadAnimations(Args...)");
+                    return{};
+                }
 
-            const Vector2 e = getVecFromToml(*tbl, "end");
-            d.end = {static_cast<std::size_t>(e.x), static_cast<std::size_t>(e.y)};
+                animationDescriptor d{};
 
-            d.frameDuration = getValFromToml<float>(*tbl, "duration");
-            d.spriteRes = getVecFromToml(*tbl, "spriteRes");
+                const Vector2 s = getVecFromToml(*tbl, "start");
+                d.start = {static_cast<std::size_t>(s.x), static_cast<std::size_t>(s.y)};
 
-            d.type = toEnum<playbackType>(getValFromToml<std::uint8_t>(*tbl, "playbackMode")).value();
-            d.id = toEnum<animationId>(getValFromToml<std::uint8_t>(*tbl, "id")).value();
+                const Vector2 e = getVecFromToml(*tbl, "end");
+                d.end = {static_cast<std::size_t>(e.x), static_cast<std::size_t>(e.y)};
 
-            animations.push_back(d);
+                d.frameDuration = getValFromToml<float>(*tbl, "duration");
+                d.spriteRes = getVecFromToml(*tbl, "spriteRes");
+
+                d.type = toEnum<animPlaybackType>(getValFromToml<std::uint8_t>(*tbl, "playbackMode")).value();
+                d.id = toEnum<animationId>(getValFromToml<std::uint8_t>(*tbl, "id")).value();
+
+                if (tbl->contains("soundFrames")) {
+                    d.soundFrames = getArrFromToml<uint8_t>(*tbl, "soundFrames");
+                    d.soundId = getValFromToml<std::uint8_t>(*tbl, "soundId");
+                }
+                else {
+                    d.soundFrames = std::nullopt;
+                    d.soundId = std::nullopt;
+                }
+
+                animations.push_back(d);
+            }
+
+            return animations;
         }
-
-        return animations;
-    }
-    catch (const toml::parse_error& e) {
-        logFatal(std::string("Cannot parse animation file: ") + std::string(e.what()));
-        return{};
+        catch (const toml::parse_error& e) {
+            logFatal(std::string("Cannot parse animation file: ") + std::string(e.what()));
+            return{};
+        }
     }
 }

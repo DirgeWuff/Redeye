@@ -29,318 +29,319 @@
 #include "../../Application/Layers/GameLayer.h"
 #include "../Utility/Globals.h"
 
-// TODO: Create functions to disable camera lock and move camera on demand
-void drawDebugBodyShapes(const Player& player) {
-    if (!g_drawPlayerShapes) return;
+namespace RE::Core {
+    // TODO: Create functions to disable camera lock and move camera on demand
+    void drawDebugBodyShapes(const Player& player) {
+        if (!g_drawPlayerShapes) return;
 
-    assert(b2Body_GetShapeCount(player.getBodyID()) != 0);
+        assert(b2Body_GetShapeCount(player.getBodyID()) != 0);
 
-    const uint8_t maxShapes = b2Body_GetShapeCount(player.getBodyID());
+        const uint8_t maxShapes = b2Body_GetShapeCount(player.getBodyID());
 
-    b2ShapeId shapes[maxShapes];
-    b2Body_GetShapes(player.getBodyID(), shapes, maxShapes);
+        b2ShapeId shapes[maxShapes];
+        b2Body_GetShapes(player.getBodyID(), shapes, maxShapes);
 
-    b2Transform tf;
-    tf.q = b2Body_GetRotation(player.getBodyID());
-    tf.p = b2Body_GetPosition(player.getBodyID());
+        b2Transform tf;
+        tf.q = b2Body_GetRotation(player.getBodyID());
+        tf.p = b2Body_GetPosition(player.getBodyID());
 
-    // Probably really slow, but fuck it, this is a debug function
-    for (const auto& shape : shapes) {
-        const b2ShapeType st = b2Shape_GetType(shape); // Leaving this outside switch for debugging
-        switch (st) {
-            case b2_polygonShape: {
-                const b2Polygon polygon = b2Shape_GetPolygon(shape);
-                const std::size_t numVerts = polygon.count;
+        // Probably really slow, but fuck it, this is a debug function
+        for (const auto& shape : shapes) {
+            const b2ShapeType st = b2Shape_GetType(shape); // Leaving this outside switch for debugging
+            switch (st) {
+                case b2_polygonShape: {
+                    const b2Polygon polygon = b2Shape_GetPolygon(shape);
+                    const std::size_t numVerts = polygon.count;
 
-                b2Vec2 tfdVerts[numVerts];
-                for (std::size_t i = 0; i < numVerts; i++) {
-                    tfdVerts[i] = b2TransformPoint(tf, polygon.vertices[i]);
-                }
-
-                for (std::size_t i = 0; i < numVerts; i++) {
-                    if (i + 1 == numVerts) {
-                        DrawLineEx(
-                     metersToPixelsVec(tfdVerts[i]),
-                      metersToPixelsVec(tfdVerts[0]),
-                     1.0f,
-                     g_debugBodyColor);
+                    b2Vec2 tfdVerts[numVerts];
+                    for (std::size_t i = 0; i < numVerts; i++) {
+                        tfdVerts[i] = b2TransformPoint(tf, polygon.vertices[i]);
                     }
-                    else {
-                        DrawLineEx(
+
+                    for (std::size_t i = 0; i < numVerts; i++) {
+                        if (i + 1 == numVerts) {
+                            DrawLineEx(
                          metersToPixelsVec(tfdVerts[i]),
-                          metersToPixelsVec(tfdVerts[i + 1]),
-                          1.0f,
-                          g_debugBodyColor);
+                          metersToPixelsVec(tfdVerts[0]),
+                         1.0f,
+                         g_debugBodyColor);
+                        }
+                        else {
+                            DrawLineEx(
+                             metersToPixelsVec(tfdVerts[i]),
+                              metersToPixelsVec(tfdVerts[i + 1]),
+                              1.0f,
+                              g_debugBodyColor);
+                        }
                     }
+
+                    break;
                 }
+                case b2_capsuleShape: {
+                    const auto [center1, center2, radius] = b2Shape_GetCapsule(shape);
 
-                break;
-            }
-            case b2_capsuleShape: {
-                const auto [center1, center2, radius] = b2Shape_GetCapsule(shape);
+                    const b2Vec2 tfedP1 = b2TransformPoint(tf, center1);
+                    const b2Vec2 tfedP2 = b2TransformPoint(tf, center2);
+                    const float rad = radius;
 
-                const b2Vec2 tfedP1 = b2TransformPoint(tf, center1);
-                const b2Vec2 tfedP2 = b2TransformPoint(tf, center2);
-                const float rad = radius;
+                    const b2Vec2 axis = tfedP2 - tfedP1;
+                    const auto [x, y] = b2Normalize(axis);
+                    const b2Vec2 normals = {-y, x};
 
-                const b2Vec2 axis = tfedP2 - tfedP1;
-                const auto [x, y] = b2Normalize(axis);
-                const b2Vec2 normals = {-y, x};
+                    const b2Vec2 quads[4] = {
+                        tfedP1 + rad * normals,
+                        tfedP2 + rad * normals,
+                        tfedP2 - rad * normals,
+                        tfedP1 - rad * normals
+                    };
 
-                const b2Vec2 quads[4] = {
-                    tfedP1 + rad * normals,
-                    tfedP2 + rad * normals,
-                    tfedP2 - rad * normals,
-                    tfedP1 - rad * normals
-                };
+                    DrawLineEx(metersToPixelsVec(quads[0]), metersToPixelsVec(quads[1]), 0.5f, g_debugBodyColor);
+                    DrawLineEx(metersToPixelsVec(quads[1]), metersToPixelsVec(quads[2]), 0.5f, g_debugBodyColor);
+                    DrawLineEx(metersToPixelsVec(quads[2]), metersToPixelsVec(quads[3]), 0.5f, g_debugBodyColor);
+                    DrawLineEx(metersToPixelsVec(quads[3]), metersToPixelsVec(quads[0]), 0.5f, g_debugBodyColor);
 
-                DrawLineEx(metersToPixelsVec(quads[0]), metersToPixelsVec(quads[1]), 0.5f, g_debugBodyColor);
-                DrawLineEx(metersToPixelsVec(quads[1]), metersToPixelsVec(quads[2]), 0.5f, g_debugBodyColor);
-                DrawLineEx(metersToPixelsVec(quads[2]), metersToPixelsVec(quads[3]), 0.5f, g_debugBodyColor);
-                DrawLineEx(metersToPixelsVec(quads[3]), metersToPixelsVec(quads[0]), 0.5f, g_debugBodyColor);
+                    const float capRadius = atan2f(y, x) * RAD2DEG;
 
-                const float capRadius = atan2f(y, x) * RAD2DEG;
-
-                DrawCircleSectorLines(
-                    metersToPixelsVec(tfedP2),
-                     metersToPixels(rad),
-                    capRadius - 90.0f,
-                    capRadius + 90.0f,
-                    20, g_debugBodyColor);
-                DrawCircleSectorLines(
-                    metersToPixelsVec(tfedP1),
-                    metersToPixels(rad),
-                    capRadius + 90.0f,
-                    capRadius - 90.0f + 360.0f,
-                    20,
-                    g_debugBodyColor);
-                break;
-            }
-            default: {
-                std::cout << "Unsupported shape type." << std::endl;
-                break;
+                    DrawCircleSectorLines(
+                        metersToPixelsVec(tfedP2),
+                         metersToPixels(rad),
+                        capRadius - 90.0f,
+                        capRadius + 90.0f,
+                        20, g_debugBodyColor);
+                    DrawCircleSectorLines(
+                        metersToPixelsVec(tfedP1),
+                        metersToPixels(rad),
+                        capRadius + 90.0f,
+                        capRadius - 90.0f + 360.0f,
+                        20,
+                        g_debugBodyColor);
+                    break;
+                }
+                default: {
+                    std::cout << "Unsupported shape type." << std::endl;
+                    break;
+                }
             }
         }
     }
-}
 
-void drawDebugBodyCenter(const Player& player) {
-    if (!g_drawPlayerCenter) return;
+    void drawDebugBodyCenter(const Player& player) {
+        if (!g_drawPlayerCenter) return;
 
-    const auto [x, y] = b2Body_GetPosition(player.getBodyID());
+        const auto [x, y] = b2Body_GetPosition(player.getBodyID());
 
-    DrawCircleLines(
-        static_cast<int>(metersToPixels(x)),
-        static_cast<int>(metersToPixels(y)),
-        5.0f,
-        g_debugBodyColor
-    );
-}
+        DrawCircleLines(
+            static_cast<int>(metersToPixels(x)),
+            static_cast<int>(metersToPixels(y)),
+            5.0f,
+            g_debugBodyColor
+        );
+    }
 
-void drawDebugCameraCrosshair(const SceneCamera& camera) {
-    if (!g_drawCameraCrosshair) return;
+    void drawDebugCameraCrosshair(const SceneCamera& camera) {
+        if (!g_drawCameraCrosshair) return;
 
-    const Rectangle cameraRect = camera.getCameraRect();
+        const Rectangle cameraRect = camera.getCameraRect();
 
-    DrawLine(
-        static_cast<int>(cameraRect.x) + static_cast<int>(cameraRect.width) / 2,
-        static_cast<int>(cameraRect.y),
-        static_cast<int>(cameraRect.x) + static_cast<int>(cameraRect.width) / 2,
-        static_cast<int>(cameraRect.y) + static_cast<int>(cameraRect.height),
-        RED);
-
-    DrawLine(
-        static_cast<int>(cameraRect.x),
-        static_cast<int>(cameraRect.y) + static_cast<int>(cameraRect.height) / 2,
-        static_cast<int>(cameraRect.x) + static_cast<int>(cameraRect.width),
-        static_cast<int>(cameraRect.y) + static_cast<int>(cameraRect.height) / 2,
-        RED);
-}
-
-void drawDebugCameraRect(const SceneCamera& camera) {
-    if (!g_drawCameraRect) return;
-
-    const Rectangle rect = camera.getCameraRect();
-
-    // Add offset of 2px/edge so we can see the rectangle around the edges of camera
-    DrawRectangleLines(
-            static_cast<int>(rect.x) + 2,
-            static_cast<int>(rect.y) + 2,
-            static_cast<int>(rect.width) - 4,
-            static_cast<int>(rect.height) - 4,
+        DrawLine(
+            static_cast<int>(cameraRect.x) + static_cast<int>(cameraRect.width) / 2,
+            static_cast<int>(cameraRect.y),
+            static_cast<int>(cameraRect.x) + static_cast<int>(cameraRect.width) / 2,
+            static_cast<int>(cameraRect.y) + static_cast<int>(cameraRect.height),
             RED);
-}
 
-void drawDebugPlayerPosition(const Player& player) {
-    if (!g_drawPlayerPos) return;
+        DrawLine(
+            static_cast<int>(cameraRect.x),
+            static_cast<int>(cameraRect.y) + static_cast<int>(cameraRect.height) / 2,
+            static_cast<int>(cameraRect.x) + static_cast<int>(cameraRect.width),
+            static_cast<int>(cameraRect.y) + static_cast<int>(cameraRect.height) / 2,
+            RED);
+    }
 
-    DrawText(
-        TextFormat("Position X: %f", player.getPositionCornerPx().x),
-        10,
-        10,
-        g_debugTextSize,
-        RED);
-    DrawText(
-        TextFormat("Position Y: %f", player.getPositionCornerPx().y),
-        10,
-        30,
-        g_debugTextSize,
-        RED);
-}
+    void drawDebugCameraRect(const SceneCamera& camera) {
+        if (!g_drawCameraRect) return;
 
-void drawDebugFootpawSensorStatus(const Player& player) {
-    if (!g_drawPlayerSensorStatus) return;
+        const Rectangle rect = camera.getCameraRect();
 
-    if (player.isOnGround()) {
+        // Add offset of 2px/edge so we can see the rectangle around the edges of camera
+        DrawRectangleLines(
+                static_cast<int>(rect.x) + 2,
+                static_cast<int>(rect.y) + 2,
+                static_cast<int>(rect.width) - 4,
+                static_cast<int>(rect.height) - 4,
+                RED);
+    }
+
+    void drawDebugPlayerPosition(const Player& player) {
+        if (!g_drawPlayerPos) return;
+
         DrawText(
-            "Footpaw sensor in contact with object",
+            TextFormat("Position X: %f", player.getPositionCornerPx().x),
             10,
-            g_drawPlayerPos ? g_totalDebugTextHeight : 10,
+            10,
+            g_debugTextSize,
+            RED);
+        DrawText(
+            TextFormat("Position Y: %f", player.getPositionCornerPx().y),
+            10,
+            30,
             g_debugTextSize,
             RED);
     }
-    else {
+
+    void drawDebugFootpawSensorStatus(const Player& player) {
+        if (!g_drawPlayerSensorStatus) return;
+
+        if (player.isOnGround()) {
+            DrawText(
+                "Footpaw sensor in contact with object",
+                10,
+                g_drawPlayerPos ? g_totalDebugTextHeight : 10,
+                g_debugTextSize,
+                RED);
+        }
+        else {
+            DrawText(
+                "Footpaw sensor not in contact with object",
+                10,
+                g_drawPlayerPos ? 40 : 10,
+                g_debugTextSize,
+                RED);
+        }
+    }
+
+    void drawDebugCollisionShapes(const MapData& map) {
+        if (!g_drawTerrainShapes) return;
+
+        const std::vector<CollisionSpline>& shapes = map.collisionObjects;
+
+        for (const auto& shape : shapes) {
+            const b2Vec2* points = shape.getObjectVerts();
+            const std::size_t numVerts = shape.getVertCount();
+
+            std::vector<Vector2> tfedVerts;
+
+            for (std::size_t i = 0; i < numVerts; i++) {
+                tfedVerts.push_back(metersToPixelsVec(points[i]));
+            }
+
+            for (std::size_t i = 0; i < numVerts - 1; i++) {
+                DrawLineEx(
+                    tfedVerts[i],
+                    tfedVerts[i + 1],
+                    1.0f,
+                    g_debugCollisionColor);
+            }
+        }
+    }
+
+    // TODO: Improve speed on this, will tank framerate when used
+    void drawDebugCollisionVerts(const MapData& map) {
+        if (!g_drawTerrainVerts) return;
+
+        const std::vector<CollisionSpline>& shapes = map.collisionObjects;
+
+        for (const auto& shape : shapes) {
+            const b2Vec2* points = shape.getObjectVerts();
+
+            for (std::size_t i = 0; i < shape.getVertCount(); i++) {
+                const Vector2 translatedPoint = metersToPixelsVec(points[i]);
+
+                DrawCircleV(
+                    translatedPoint,
+                    1.0f,
+                    g_debugVertColor);
+            }
+        }
+    }
+
+    void drawDebugEventColliders(const MapData& map) {
+        if (!g_drawEventColliders) return;
+
+        const std::vector<EventCollider>& colliders = map.eventColliders;
+
+        for (const auto& collider : colliders) {
+            const Vector2 pos = collider.getPosPixels();
+            const Vector2 size = collider.getSizePx();
+
+            DrawRectangleLinesEx(
+                {pos.x, pos.y, size.x, size.y},
+                1.0f,
+                g_debugColliderColor);
+
+            const Vector2 idLen = MeasureTextEx(
+                g_debugFont,
+                sensorToStr(collider.getSensorInfo().type).c_str(),
+                6.0f,
+                0.50f);
+
+            const Vector2 textPos = {
+                pos.x + idLen.x / 2.0f,
+                pos.y - 6.0f};
+
+            // Still draws default font and I've spent way too much time trying to figure out why...
+            DrawTextEx(
+                g_debugFont,
+                sensorToStr(collider.getSensorInfo().type).c_str(),
+                textPos,
+                6.0f,
+                0.50f,
+                g_debugColliderColor);
+        }
+    }
+
+    void drawDebugPlayerAnimId(const animationId& id) {
+        if (!g_drawPlayerAnimId) return;
+
+        // Goofy way to adjust text pos
+        Vector2 adjustedPos = g_debugTextPos;
+        adjustedPos.y += g_totalDebugTextHeight * (g_drawPlayerPos + g_drawPlayerSensorStatus);
+
+        const char* idStr = animIdToStr(id).c_str();
+
         DrawText(
-            "Footpaw sensor not in contact with object",
-            10,
-            g_drawPlayerPos ? 40 : 10,
+            TextFormat("Current animation: %s", idStr),
+            static_cast<int>(adjustedPos.x),
+            static_cast<int>(adjustedPos.y),
             g_debugTextSize,
             RED);
     }
-}
 
-void drawDebugCollisionShapes(const MapData& map) {
-    if (!g_drawTerrainShapes) return;
+    void drawDebugPlayerAnimState(const entityActionState& state) {
+        if (!g_drawPlayerActionState) return;
 
-    const std::vector<CollisionSpline>& shapes = map.collisionObjects;
+        Vector2 adjustedPos = g_debugTextPos;
+        adjustedPos.y += g_totalDebugTextHeight * (g_drawPlayerPos + g_drawPlayerSensorStatus + g_drawPlayerAnimId);
 
-    for (const auto& shape : shapes) {
-        const b2Vec2* points = shape.getObjectVerts();
-        const std::size_t numVerts = shape.getVertCount();
+        const char* stateStr = stateToStr(state).c_str();
 
-        std::vector<Vector2> tfedVerts;
-
-        for (std::size_t i = 0; i < numVerts; i++) {
-            tfedVerts.push_back(metersToPixelsVec(points[i]));
-        }
-
-        for (std::size_t i = 0; i < numVerts - 1; i++) {
-            DrawLineEx(
-                tfedVerts[i],
-                tfedVerts[i + 1],
-                1.0f,
-                g_debugCollisionColor);
-        }
+        DrawText(TextFormat("Current player action: %s", stateStr),
+            static_cast<int>(adjustedPos.x),
+            static_cast<int>(adjustedPos.y),
+            g_debugTextSize,
+            RED);
     }
-}
 
-// TODO: Improve speed on this, will tank framerate when used
-void drawDebugCollisionVerts(const MapData& map) {
-    if (!g_drawTerrainVerts) return;
+    void drawControlsWindow() {
+            g_debugWindowBoxActive = IsKeyDown(KEY_M);
 
-    const std::vector<CollisionSpline>& shapes = map.collisionObjects;
+        if (g_debugWindowBoxActive) {
 
-    for (const auto& shape : shapes) {
-        const b2Vec2* points = shape.getObjectVerts();
+            g_debugWindowBoxActive = !GuiWindowBox(Rectangle{ 8, 432, 240, 320 }, "Debug drawing controls");
 
-        for (std::size_t i = 0; i < shape.getVertCount(); i++) {
-            const Vector2 translatedPoint = metersToPixelsVec(points[i]);
-
-            DrawCircleV(
-                translatedPoint,
-                1.0f,
-                g_debugVertColor);
+            // Each button adds 24px in height for future reference
+            GuiCheckBox(Rectangle{ 16, 464, 12, 12 }, "Draw player shapes", &g_drawPlayerShapes);
+            GuiCheckBox(Rectangle{ 16, 488, 12, 12 }, "Draw player sensor status", &g_drawPlayerSensorStatus);
+            GuiCheckBox(Rectangle{ 16, 512, 12, 12 }, "Draw player position", &g_drawPlayerPos);
+            GuiCheckBox(Rectangle{16, 536, 12, 12}, "Draw player body center", &g_drawPlayerCenter);
+            GuiCheckBox(Rectangle{ 16, 560, 12, 12 }, "Draw terrain shapes", &g_drawTerrainShapes);
+            GuiCheckBox(Rectangle{ 16, 584, 12, 12 }, "Draw terrain vertices", &g_drawTerrainVerts);
+            GuiCheckBox(Rectangle{ 16, 608, 12, 12 }, "Draw camera center crosshair", &g_drawCameraCrosshair);
+            GuiCheckBox(Rectangle{ 16, 632, 12, 12}, "Draw camera edge rectangle", &g_drawCameraRect);
+            GuiCheckBox(Rectangle{16, 656, 12,12}, "Draw event colliders", &g_drawEventColliders);
+            GuiCheckBox(Rectangle{16, 680, 12, 12}, "Enable shader effects", &g_drawShaderEffects);
+            GuiCheckBox(Rectangle{16, 704, 12, 12}, "Draw Player animationId", &g_drawPlayerAnimId);
+            GuiCheckBox(Rectangle{16, 728, 12, 12}, "Draw Player actionState", &g_drawPlayerActionState);
         }
-    }
-}
-
-void drawDebugEventColliders(const MapData& map) {
-    if (!g_drawEventColliders) return;
-
-    const std::vector<EventCollider>& colliders = map.eventColliders;
-
-    for (const auto& collider : colliders) {
-        const Vector2 pos = collider.getPosPixels();
-        const Vector2 size = collider.getSizePx();
-
-        DrawRectangleLinesEx(
-            {pos.x, pos.y, size.x, size.y},
-            1.0f,
-            g_debugColliderColor);
-
-        const Vector2 idLen = MeasureTextEx(
-            g_debugFont,
-            sensorToStr(collider.getSensorInfo().type).c_str(),
-            6.0f,
-            0.50f);
-
-        const Vector2 textPos = {
-            pos.x + idLen.x / 2.0f,
-            pos.y - 6.0f};
-
-        // Still draws default font and I've spent way too much time trying to figure out why...
-        DrawTextEx(
-            g_debugFont,
-            sensorToStr(collider.getSensorInfo().type).c_str(),
-            textPos,
-            6.0f,
-            0.50f,
-            g_debugColliderColor);
-    }
-}
-
-void drawDebugPlayerAnimId(const animationId& id) {
-    if (!g_drawPlayerAnimId) return;
-
-    // Goofy way to adjust text pos
-    Vector2 adjustedPos = g_debugTextPos;
-    adjustedPos.y += g_totalDebugTextHeight * (g_drawPlayerPos + g_drawPlayerSensorStatus);
-
-    const char* idStr = animIdToStr(id).c_str();
-
-    DrawText(
-        TextFormat("Current animation: %s", idStr),
-        static_cast<int>(adjustedPos.x),
-        static_cast<int>(adjustedPos.y),
-        g_debugTextSize,
-        RED);
-}
-
-
-void drawDebugPlayerAnimState(const entityActionState& state) {
-    if (!g_drawPlayerActionState) return;
-
-    Vector2 adjustedPos = g_debugTextPos;
-    adjustedPos.y += g_totalDebugTextHeight * (g_drawPlayerPos + g_drawPlayerSensorStatus + g_drawPlayerAnimId);
-
-    const char* stateStr = stateToStr(state).c_str();
-
-    DrawText(TextFormat("Current player action: %s", stateStr),
-        static_cast<int>(adjustedPos.x),
-        static_cast<int>(adjustedPos.y),
-        g_debugTextSize,
-        RED);
-}
-
-void drawControlsWindow() {
-        g_debugWindowBoxActive = IsKeyDown(KEY_M);
-
-    if (g_debugWindowBoxActive) {
-
-        g_debugWindowBoxActive = !GuiWindowBox(Rectangle{ 8, 432, 240, 320 }, "Debug drawing controls");
-
-        // Each button adds 24px in height for future reference
-        GuiCheckBox(Rectangle{ 16, 464, 12, 12 }, "Draw player shapes", &g_drawPlayerShapes);
-        GuiCheckBox(Rectangle{ 16, 488, 12, 12 }, "Draw player sensor status", &g_drawPlayerSensorStatus);
-        GuiCheckBox(Rectangle{ 16, 512, 12, 12 }, "Draw player position", &g_drawPlayerPos);
-        GuiCheckBox(Rectangle{16, 536, 12, 12}, "Draw player body center", &g_drawPlayerCenter);
-        GuiCheckBox(Rectangle{ 16, 560, 12, 12 }, "Draw terrain shapes", &g_drawTerrainShapes);
-        GuiCheckBox(Rectangle{ 16, 584, 12, 12 }, "Draw terrain vertices", &g_drawTerrainVerts);
-        GuiCheckBox(Rectangle{ 16, 608, 12, 12 }, "Draw camera center crosshair", &g_drawCameraCrosshair);
-        GuiCheckBox(Rectangle{ 16, 632, 12, 12}, "Draw camera edge rectangle", &g_drawCameraRect);
-        GuiCheckBox(Rectangle{16, 656, 12,12}, "Draw event colliders", &g_drawEventColliders);
-        GuiCheckBox(Rectangle{16, 680, 12, 12}, "Enable shader effects", &g_drawShaderEffects);
-        GuiCheckBox(Rectangle{16, 704, 12, 12}, "Draw Player animationId", &g_drawPlayerAnimId);
-        GuiCheckBox(Rectangle{16, 728, 12, 12}, "Draw Player actionState", &g_drawPlayerActionState);
     }
 }

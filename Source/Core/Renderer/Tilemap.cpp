@@ -16,7 +16,8 @@
 #include "Tilemap.h"
 #include "../../Core/Event/EventCollider.h"
 
-class EventCollider;
+namespace RE::Core {
+    class EventCollider;
 
 void loadTilesets(
     const MapData& mapData,
@@ -166,4 +167,5 @@ void unloadMap(const MapData& map) {
     #ifdef DEBUG
         logDbg("Tilemap unloaded successfully.");
     #endif
+}
 }

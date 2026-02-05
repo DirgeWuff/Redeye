@@ -48,10 +48,12 @@ else()
     set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3 -fno-omit-frame-pointer")
 
     option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+
     if(ENABLE_ASAN)
-        message(STATUS "Enabling AddressSanitizer")
-        set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
-        set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
+        message(STATUS "Enabling AddressSanitizer for Debug build")
+
+        string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fsanitize=address -fno-omit-frame-pointer -O1 -g")
+        string(APPEND CMAKE_LINKER_FLAGS_DEBUG " -fsanitize=address")
     endif()
 endif()
 
@@ -80,15 +82,15 @@ add_executable(Redeye
         Source/Core/Event/EventCollider.h
         Source/Core/UI/UI.cpp
         Source/Core/UI/UI.h
-        Source/Core/Audio/Audio.cpp
-        Source/Core/Audio/Audio.h
+        Source/Core/Audio/Sound.cpp
+        Source/Core/Audio/Sound.h
         Source/Core/Renderer/TilemapRenderer.cpp
         Source/Core/Renderer/TilemapRenderer.h
         Source/Core/Backend/Layer.h
         Source/Core/Backend/LayerManager.cpp
         Source/Core/Backend/LayerManager.h
-        Source/Core/Backend/Application.cpp
-        Source/Core/Backend/Application.h
+        Source/Core/Backend/Program.cpp
+        Source/Core/Backend/Program.h
         Source/Application/Layers/StartMenuLayer.cpp
         Source/Application/Layers/StartMenuLayer.h
         Source/Application/Layers/DeathMenuLayer.cpp
@@ -107,6 +109,10 @@ add_executable(Redeye
         Source/Core/Serialization/AnimationLoader.cpp
         Source/Core/Event/Event.h
         Source/Core/Event/EventBus.h
+        Source/Core/Audio/AudioManager.cpp
+        Source/Core/Audio/AudioManager.h
+        Source/Core/Audio/Music.cpp
+        Source/Core/Audio/Music.h
 )
 
 # Compile definitions

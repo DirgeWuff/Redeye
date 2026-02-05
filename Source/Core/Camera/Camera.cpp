@@ -16,119 +16,121 @@
 #include "Camera.h"
 #include "../Utility/Logging.h"
 
-SceneCamera::SceneCamera() {
-    #ifdef DEBUG
-        logDbg("Default SceneCamera constructed at address: ", this);
-    #endif
-}
+namespace RE::Core {
+    SceneCamera::SceneCamera() {
+        #ifdef DEBUG
+            logDbg("Default SceneCamera constructed at address: ", this);
+        #endif
+    }
 
-SceneCamera::SceneCamera(const MapData& map, const float zoomLevel) {
-    m_camera = Camera2D();
+    SceneCamera::SceneCamera(const MapData& map, const float zoomLevel) {
+        m_camera = Camera2D();
 
-    m_camera.offset = {
-        static_cast<float>(GetScreenWidth()) / 2.0f,
-        static_cast<float>(GetScreenHeight()) / 2.0f};
-    m_camera.zoom = zoomLevel;
-    m_camera.rotation = 0.0f;
+        m_camera.offset = {
+            static_cast<float>(GetScreenWidth()) / 2.0f,
+            static_cast<float>(GetScreenHeight()) / 2.0f};
+        m_camera.zoom = zoomLevel;
+        m_camera.rotation = 0.0f;
 
-    m_cameraRect = {
-        (GetScreenWidth() - static_cast<float>(GetScreenWidth()) / m_camera.zoom) / 2.0f,
-        (GetScreenHeight() - static_cast<float>(GetScreenHeight()) / m_camera.zoom) / 2.0f,
-        GetScreenWidth() / m_camera.zoom,
-        GetScreenHeight() / m_camera.zoom
+        m_cameraRect = {
+            (GetScreenWidth() - static_cast<float>(GetScreenWidth()) / m_camera.zoom) / 2.0f,
+            (GetScreenHeight() - static_cast<float>(GetScreenHeight()) / m_camera.zoom) / 2.0f,
+            GetScreenWidth() / m_camera.zoom,
+            GetScreenHeight() / m_camera.zoom
+        };
+
+        m_cameraCenter = {
+            m_cameraRect.x + m_cameraRect.width / 2.0f,
+            m_cameraRect.y + m_cameraRect.height / 2.0f};
+        m_targetCenter = {0.0f, 0.0f}; // Init to zero might be bad???
+        m_mapSize = {
+            static_cast<float>(map.tileWidth) * static_cast<float>(map.mapWidth),
+            static_cast<float>(map.tileHeight) * static_cast<float>(map.mapHeight)
+        };
+        m_maxCameraPos = {
+            m_mapSize.x - m_cameraRect.width / 2.0f,
+            m_mapSize.y - m_cameraRect.height / 2.0f
+        };
+
+        #ifdef DEBUG
+            logDbg("SceneCamera constructed at address: ", this);
+        #endif
+    }
+
+    SceneCamera::~SceneCamera() {
+        #ifdef DEBUG
+            logDbg("SceneCamera destroyed at address: ", this);
+        #endif
     };
 
-    m_cameraCenter = {
-        m_cameraRect.x + m_cameraRect.width / 2.0f,
-        m_cameraRect.y + m_cameraRect.height / 2.0f};
-    m_targetCenter = {0.0f, 0.0f}; // Init to zero might be bad???
-    m_mapSize = {
-        static_cast<float>(map.tileWidth) * static_cast<float>(map.mapWidth),
-        static_cast<float>(map.tileHeight) * static_cast<float>(map.mapHeight)
-    };
-    m_maxCameraPos = {
-        m_mapSize.x - m_cameraRect.width / 2.0f,
-        m_mapSize.y - m_cameraRect.height / 2.0f
-    };
+    void SceneCamera::setTarget(const Player& player) {
+        const Vector2 targetEntityCenter = Vector2Add(player.getPositionCornerPx(), player.getSizePx() / 2.0f);
 
-    #ifdef DEBUG
-        logDbg("SceneCamera constructed at address: ", this);
-    #endif
-}
+        m_camera.target.y = roundf(targetEntityCenter.y);
+        m_camera.target.x = roundf(targetEntityCenter.x);
 
-SceneCamera::~SceneCamera() {
-    #ifdef DEBUG
-        logDbg("SceneCamera destroyed at address: ", this);
-    #endif
-};
+        m_camera.target = Vector2Clamp(
+            m_camera.target,
+            {m_cameraRect.width / 2.0f, m_cameraRect.height / 2.0f},
+            m_maxCameraPos);
+    }
 
-void SceneCamera::setTarget(const Player& player) {
-    const Vector2 targetEntityCenter = Vector2Add(player.getPositionCornerPx(), player.getSizePx() / 2.0f);
+    void SceneCamera::update(const Player& player) {
+        m_targetCenter = {
+            player.getPositionCornerPx().x + player.getSizePx().x / 2.0f,
+            player.getPositionCornerPx().y + player.getSizePx().y / 2.0f
+        };
 
-    m_camera.target.y = roundf(targetEntityCenter.y);
-    m_camera.target.x = roundf(targetEntityCenter.x);
+        m_camera.target = m_targetCenter;
+        m_camera.target = Vector2Clamp(
+            m_camera.target,
+            {m_cameraRect.width / 2.0f, m_cameraRect.height / 2.0f},
+            m_maxCameraPos);
 
-    m_camera.target = Vector2Clamp(
-        m_camera.target,
-        {m_cameraRect.width / 2.0f, m_cameraRect.height / 2.0f},
-        m_maxCameraPos);
-}
+        m_cameraRect.x = m_camera.target.x - m_cameraRect.width / 2.0f;
+        m_cameraRect.y = m_camera.target.y - m_cameraRect.height / 2.0f;
 
-void SceneCamera::update(const Player& player) {
-    m_targetCenter = {
-        player.getPositionCornerPx().x + player.getSizePx().x / 2.0f,
-        player.getPositionCornerPx().y + player.getSizePx().y / 2.0f
-    };
+        m_cameraCenter.x = m_cameraRect.x + m_cameraRect.width / 2.0f;
+        m_cameraCenter.y = m_cameraRect.y + m_cameraRect.height / 2.0f;
+    }
 
-    m_camera.target = m_targetCenter;
-    m_camera.target = Vector2Clamp(
-        m_camera.target,
-        {m_cameraRect.width / 2.0f, m_cameraRect.height / 2.0f},
-        m_maxCameraPos);
+    void SceneCamera::cameraBegin() const {
+        BeginMode2D(m_camera);
+    }
 
-    m_cameraRect.x = m_camera.target.x - m_cameraRect.width / 2.0f;
-    m_cameraRect.y = m_camera.target.y - m_cameraRect.height / 2.0f;
+    void SceneCamera::cameraEnd() const {
+        EndMode2D();
+    }
 
-    m_cameraCenter.x = m_cameraRect.x + m_cameraRect.width / 2.0f;
-    m_cameraCenter.y = m_cameraRect.y + m_cameraRect.height / 2.0f;
-}
+    [[nodiscard]] Rectangle SceneCamera::getCameraRect() const noexcept {
+        return m_cameraRect;
+    }
 
-void SceneCamera::cameraBegin() const {
-    BeginMode2D(m_camera);
-}
+    [[nodiscard]] float SceneCamera::getCameraRectWidth() const noexcept {
+        return m_cameraRect.width;
+    }
 
-void SceneCamera::cameraEnd() const {
-    EndMode2D();
-}
+    [[nodiscard]] float SceneCamera::getCameraRectHeight() const noexcept {
+        return m_cameraRect.height;
+    }
 
-[[nodiscard]] Rectangle SceneCamera::getCameraRect() const noexcept {
-    return m_cameraRect;
-}
+    [[nodiscard]] float SceneCamera::getCameraZoom() const noexcept {
+        return m_camera.zoom;
+    }
 
-[[nodiscard]] float SceneCamera::getCameraRectWidth() const noexcept {
-    return m_cameraRect.width;
-}
+    [[nodiscard]] Vector2 SceneCamera::getCameraCenter() const noexcept {
+        return m_cameraCenter;
+    }
 
-[[nodiscard]] float SceneCamera::getCameraRectHeight() const noexcept {
-    return m_cameraRect.height;
-}
+    [[nodiscard]] Vector2 SceneCamera::getCameraTarget() const noexcept {
+        return m_camera.target;
+    }
 
-[[nodiscard]] float SceneCamera::getCameraZoom() const noexcept {
-    return m_camera.zoom;
-}
+    [[nodiscard]] Vector2 SceneCamera::getCameraOffset() const noexcept {
+        return m_camera.offset;
+    }
 
-[[nodiscard]] Vector2 SceneCamera::getCameraCenter() const noexcept {
-    return m_cameraCenter;
-}
-
-[[nodiscard]] Vector2 SceneCamera::getCameraTarget() const noexcept {
-    return m_camera.target;
-}
-
-[[nodiscard]] Vector2 SceneCamera::getCameraOffset() const noexcept {
-    return m_camera.offset;
-}
-
-[[nodiscard]] Vector2 SceneCamera::getToWorldCam(const Vector2& position) const {
-    return GetWorldToScreen2D(position, m_camera);
+    [[nodiscard]] Vector2 SceneCamera::getToWorldCam(const Vector2& position) const {
+        return GetWorldToScreen2D(position, m_camera);
+    }
 }

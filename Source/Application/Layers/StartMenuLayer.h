@@ -13,7 +13,6 @@
 // the game is first started, giving the player the opportunity to start
 // the game or quit
 
-
 #ifndef STARTMENU_H
 #define STARTMENU_H
 
@@ -21,20 +20,22 @@
 #include "../../Core/Backend/Layer.h"
 #include "../../Core/UI/UI.h"
 
-class StartMenuLayer final : public Layer {
-    RectButton m_startButton;
-    RectButton m_quitButton;
-    Font m_headerFont{};
-public:
-    StartMenuLayer();
-    StartMenuLayer(const StartMenuLayer&) = delete;
-    StartMenuLayer(const StartMenuLayer&&) = delete;
-    StartMenuLayer& operator=(const StartMenuLayer&) = delete;
-    StartMenuLayer& operator=(const StartMenuLayer&&) = delete;
-    ~StartMenuLayer() override;
+namespace RE::Application {
+    class StartMenuLayer final : public Core::Layer {
+        Core::RectButton m_startButton;
+        Core::RectButton m_quitButton;
+        Font m_headerFont{};
+    public:
+        StartMenuLayer();
+        StartMenuLayer(const StartMenuLayer&) = delete;
+        StartMenuLayer(const StartMenuLayer&&) = delete;
+        StartMenuLayer& operator=(const StartMenuLayer&) = delete;
+        StartMenuLayer& operator=(const StartMenuLayer&&) = delete;
+        ~StartMenuLayer() override;
 
-    void update() override;
-    void draw() override;
-};
+        void update() override;
+        void draw() override;
+    };
+}
 
 #endif //STARTMENU_H

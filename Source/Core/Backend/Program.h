@@ -18,23 +18,26 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-class Application {
-    static Application m_appInstance;
-    bool m_gameRunning;
+namespace RE::Core {
+    class Program {
+        static Program m_appInstance;
+        bool m_gameRunning;
 
-    Application();
-    ~Application() = default;
+        Program();
+        ~Program() = default;
 
-    Application(Application&) = delete;
-    Application(Application&&) = delete;
-    Application& operator=(Application&) = delete;
-    Application&& operator=(Application&&) = delete;
-public:
-    void init();
-    void run() const;
+        Program(Program&) = delete;
+        Program(Program&&) = delete;
+        Program& operator=(Program&) = delete;
+        Program&& operator=(Program&&) = delete;
+    public:
+        void init();
+        void run() const;
 
-    static Application& getInstance() noexcept;
-    void shutdown() noexcept;
-};
+        static Program& getInstance() noexcept;
+        void shutdown() noexcept;
+    };
+}
+
 
 #endif //APPLICATION_H

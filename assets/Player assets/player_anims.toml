@@ -6,7 +6,7 @@ duration = 0.1
 spriteRes = [108.0, 144.0]
 playbackMode = 2
 id = 3
-soundFrames = [1, 6]
+soundFrames = [2, 6]
 soundId = 0
 
 [[animation_descriptor]]
@@ -17,7 +17,7 @@ duration = 0.1
 spriteRes = [108.0, 144.0]
 playbackMode = 2
 id = 2
-soundFrames = [1, 6]
+soundFrames = [2, 6]
 soundId = 0
 
 [[animation_descriptor]]
@@ -28,7 +28,6 @@ duration = 0.1
 spriteRes = [108.0, 144.0]
 playbackMode = 0
 id = 1
-
 
 [[animation_descriptor]]
 # Idle right

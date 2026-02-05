@@ -11,12 +11,12 @@
 //
 // Main entry point for the program
 
-#include "../Backend/Application.h"
+#include "../Backend/Program.h"
 
 int main() {
 
-    Application::getInstance().init();
-    Application::getInstance().run();
+    RE::Core::Program::getInstance().init();
+    RE::Core::Program::getInstance().run();
 
     return 0;
 }

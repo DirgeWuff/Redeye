@@ -19,6 +19,8 @@
 #include <string>
 #include "../Renderer/Animation.h"
 
-[[nodiscard]] std::vector<animationDescriptor> loadAnimations(const std::string& dirPath);
+namespace RE::Core {
+    [[nodiscard]] std::vector<animationDescriptor> loadAnimations(const std::string& dirPath);
+}
 
 #endif //ANIMATIONLOADER_H

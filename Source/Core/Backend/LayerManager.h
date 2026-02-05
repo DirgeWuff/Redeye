@@ -23,29 +23,31 @@
 #include "../Utility/Enum.h"
 #include "../Utility/Logging.h"
 
-class LayerManager final {
-    static LayerManager m_managerInstance;
-    std::unordered_map<layerKey, std::unique_ptr<Layer>> m_layers{};
-    std::vector<layerKey> m_popRequestQueue{};
+namespace RE::Core {
+    class LayerManager final {
+        static LayerManager m_managerInstance;
+        std::unordered_map<layerKey, std::unique_ptr<Layer>> m_layers{};
+        std::vector<layerKey> m_popRequestQueue{};
 
-    LayerManager() = default;
-    ~LayerManager() = default;
+        LayerManager() = default;
+        ~LayerManager() = default;
 
-    void popLayer(const layerKey& id);
-public:
-    static LayerManager& getInstance();
+        void popLayer(const layerKey& id);
+    public:
+        static LayerManager& getInstance();
 
-    void requestLayerPop(const layerKey& id);
-    void pushLayer(const layerKey& id, std::unique_ptr<Layer> layer);
-    void resumeLayer(const layerKey& id);
-    void suspendLayer(const layerKey& id);
-    void pollEvents() const;
-    void update() const;
-    void draw() const;
-    void updateLayerStack() noexcept;
-    void suspendOverlays() const noexcept;
-    void resumeOverlays() const noexcept;
-    [[nodiscard]] bool stackContains(const layerKey& id) const;
-};
+        void requestLayerPop(const layerKey& id);
+        void pushLayer(const layerKey& id, std::unique_ptr<Layer> layer);
+        void resumeLayer(const layerKey& id);
+        void suspendLayer(const layerKey& id);
+        void pollEvents() const;
+        void update() const;
+        void draw() const;
+        void updateLayerStack() noexcept;
+        void suspendOverlays() const noexcept;
+        void resumeOverlays() const noexcept;
+        [[nodiscard]] bool stackContains(const layerKey& id) const;
+    };
+}
 
 #endif //LAYERMANAGER_H

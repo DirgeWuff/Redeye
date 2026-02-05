@@ -21,18 +21,20 @@
 #include "../../Core/UI/UI.h"
 #include "../../Core/Entity/Player.h"
 
-class DeathMenuLayer final : public Layer {
-    RectButton m_continueBtn;
-    RectButton m_quitBtn;
-    Font m_headerFont;
-    unsigned char m_backgroundOpacity;
-public:
-    DeathMenuLayer() = delete;
-    explicit DeathMenuLayer(const std::shared_ptr<Player>& player);
-    ~DeathMenuLayer() override;
+namespace RE::Application {
+    class DeathMenuLayer final : public Core::Layer {
+        Core::RectButton m_continueBtn;
+        Core::RectButton m_quitBtn;
+        Font m_headerFont;
+        unsigned char m_backgroundOpacity;
+    public:
+        DeathMenuLayer() = delete;
+        explicit DeathMenuLayer(const std::shared_ptr<Core::Player>& player);
+        ~DeathMenuLayer() override;
 
-    void update() override;
-    void draw() override;
-};
+        void update() override;
+        void draw() override;
+    };
+}
 
 #endif //DEATHLAYER_H

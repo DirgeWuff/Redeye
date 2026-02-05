@@ -20,60 +20,62 @@
 #include <vector>
 #include "Event.h"
 
-// Underlying framework used to dispatch events within the game.
-template<typename T>
-class EventDispatcher {
-    using eventHandler = std::function<void(const T&)>;
-    using matcher = std::function<bool(const T&)>;
+namespace RE::Core {
+    // Underlying framework used to dispatch events within the game.
+    template<typename T>
+    class EventDispatcher {
+        using eventHandler = std::function<void(const T&)>;
+        using matcher = std::function<bool(const T&)>;
 
-    struct subscription {
-        subId id;
-        matcher matchFunction;
-        eventHandler handler;
+        struct subscription {
+            subId id;
+            matcher matchFunction;
+            eventHandler handler;
 
-        subscription(
-            const subId s,
-            matcher m,
-            eventHandler h) :
-                id(s),
-                matchFunction(std::move(m)),
-                handler(std::move(h))
-        {
+            subscription(
+                const subId s,
+                matcher m,
+                eventHandler h) :
+                    id(s),
+                    matchFunction(std::move(m)),
+                    handler(std::move(h))
+            {
 
-        }
+            }
+        };
+
+        std::vector<subscription> m_activeSubscriptions;
+    public:
+        void subscribe(subId id, matcher matchFunction, eventHandler handler);
+        void unsubscribe(const subId& id);
+        void dispatch(const T& e) const;
     };
 
-    std::vector<subscription> m_activeSubscriptions;
-public:
-    void subscribe(subId id, matcher matchFunction, eventHandler handler);
-    void unsubscribe(const subId& id);
-    void dispatch(const T& e) const;
-};
+    template<typename T>
+    void EventDispatcher<T>::subscribe(
+        const subId id,
+        matcher matchFunction,
+        eventHandler handler)
+    {
+        m_activeSubscriptions.emplace_back(id, std::move(matchFunction), std::move(handler));
+    }
 
-template<typename T>
-void EventDispatcher<T>::subscribe(
-    const subId id,
-    matcher matchFunction,
-    eventHandler handler)
-{
-    m_activeSubscriptions.emplace_back(id, std::move(matchFunction), std::move(handler));
-}
+    template<typename T>
+    void EventDispatcher<T>::unsubscribe(const subId& id) {
+        m_activeSubscriptions.erase(
+            std::remove_if(m_activeSubscriptions.begin(), m_activeSubscriptions.end(),
+                [&](const subscription& sub) { sub.type == id; }),
+                m_activeSubscriptions.end());
+    }
 
-template<typename T>
-void EventDispatcher<T>::unsubscribe(const subId& id) {
-    m_activeSubscriptions.erase(
-        std::remove_if(m_activeSubscriptions.begin(), m_activeSubscriptions.end(),
-            [&](const subscription& sub) { sub.type == id; }),
-            m_activeSubscriptions.end());
-}
-
-template<typename T>
-void EventDispatcher<T>::dispatch(const T& e) const {
-   for (const auto& sub : m_activeSubscriptions) {
-       if (sub.matchFunction(e)) {
-           sub.handler(e);
-       }
-   }
+    template<typename T>
+    void EventDispatcher<T>::dispatch(const T& e) const {
+        for (const auto& sub : m_activeSubscriptions) {
+            if (sub.matchFunction(e)) {
+                sub.handler(e);
+            }
+        }
+    }
 }
 
 #endif //EVENTDISPATCHER_H

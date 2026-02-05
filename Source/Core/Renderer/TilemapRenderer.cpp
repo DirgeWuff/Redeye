@@ -20,130 +20,132 @@
 // Tried to do this using groups, however there seems to be a bug in tson that causes tiled layers not to load properly
 // this seems like the second-best option.
 
-static void renderLayer(
-    const SceneCamera& cam,
-    const MapData& map,
-    const tson::Layer& layer,
-    const Vector2 offset,
-    const Color color)
-{
-    const Vector2 parallaxFactor = toRayVec2(layer.getParallax());
-    const Vector2 layerOffset = toRayVec2(layer.getOffset());
-    const Vector2 cameraTarget = cam.getCameraTarget();
-    const Vector2 parallaxOffset = cameraTarget * (Vector2{1.0f, 1.0f} - parallaxFactor);
-    const Vector2 adjustedOffset = offset + layerOffset + parallaxOffset;
+namespace RE::Core {
+    static void renderLayer(
+        const SceneCamera& cam,
+        const MapData& map,
+        const tson::Layer& layer,
+        const Vector2 offset,
+        const Color color)
+    {
+        const Vector2 parallaxFactor = toRayVec2(layer.getParallax());
+        const Vector2 layerOffset = toRayVec2(layer.getOffset());
+        const Vector2 cameraTarget = cam.getCameraTarget();
+        const Vector2 parallaxOffset = cameraTarget * (Vector2{1.0f, 1.0f} - parallaxFactor);
+        const Vector2 adjustedOffset = offset + layerOffset + parallaxOffset;
 
-    switch (layer.getType()) {
-        case tson::LayerType::TileLayer: {
-            const auto it = map.renderDataPtr->layerRenderData.find(&layer);
-            if (it == map.renderDataPtr->layerRenderData.end()) return;
+        switch (layer.getType()) {
+            case tson::LayerType::TileLayer: {
+                const auto it = map.renderDataPtr->layerRenderData.find(&layer);
+                if (it == map.renderDataPtr->layerRenderData.end()) return;
 
-            for (const auto& tile : it->second) {
-                const Vector2 drawingPos = {
-                    tile.position.x + adjustedOffset.x,
-                    tile.position.y + adjustedOffset.y
-                };
+                for (const auto& tile : it->second) {
+                    const Vector2 drawingPos = {
+                        tile.position.x + adjustedOffset.x,
+                        tile.position.y + adjustedOffset.y
+                    };
 
-                const Rectangle tileBounds = {
-                    drawingPos.x,
-                    drawingPos.y,
-                    tile.sourceRect.width,
-                    tile.sourceRect.height
-                };
+                    const Rectangle tileBounds = {
+                        drawingPos.x,
+                        drawingPos.y,
+                        tile.sourceRect.width,
+                        tile.sourceRect.height
+                    };
 
-                // Camera cull
-                if (!CheckCollisionRecs(tileBounds, cam.getCameraRect())) {
-                    continue;
+                    // Camera cull
+                    if (!CheckCollisionRecs(tileBounds, cam.getCameraRect())) {
+                        continue;
+                    }
+
+                    DrawTextureRec(
+                        *tile.texture,
+                        tile.sourceRect,
+                        drawingPos,
+                        color);
                 }
 
-                DrawTextureRec(
-                    *tile.texture,
-                    tile.sourceRect,
-                    drawingPos,
-                    color);
+                break;
             }
+            case tson::LayerType::ImageLayer: {
+                const std::string imagePath = map.baseDir.string() + layer.getImage();
 
-            break;
-        }
-        case tson::LayerType::ImageLayer: {
-            const std::string imagePath = map.baseDir.string() + layer.getImage();
+                if (!map.renderDataPtr->textures.contains(imagePath)) {
+                    logFatal("Unable to load texture: " + layer.getImage() + ": renderMap(Args...)");
+                    return;
+                }
 
-            if (!map.renderDataPtr->textures.contains(imagePath)) {
-                logFatal("Unable to load texture: " + layer.getImage() + ": renderMap(Args...)");
-                return;
-            }
+                if (layer.hasRepeatX()) {
+                    const float camWidth = cam.getCameraRectWidth();
+                    const float imageWidth = map.renderDataPtr->textures[imagePath].width;
+                    const int mapWidth = map.mapWidth * map.tileWidth;
+                    const float camTravelX = mapWidth - camWidth;
+                    const float totalParallaxShift = camTravelX * (1.0f - parallaxFactor.x);
 
-            if (layer.hasRepeatX()) {
-                const float camWidth = cam.getCameraRectWidth();
-                const float imageWidth = map.renderDataPtr->textures[imagePath].width;
-                const int mapWidth = map.mapWidth * map.tileWidth;
-                const float camTravelX = mapWidth - camWidth;
-                const float totalParallaxShift = camTravelX * (1.0f - parallaxFactor.x);
+                    const std::size_t maxRepetitions = std::ceil((camWidth + totalParallaxShift) / imageWidth);
+                    int xPos = static_cast<int>(adjustedOffset.x);
 
-                const std::size_t maxRepetitions = std::ceil((camWidth + totalParallaxShift) / imageWidth);
-                int xPos = static_cast<int>(adjustedOffset.x);
+                    for (std::size_t i = 0; i < maxRepetitions; i++) {
+                        DrawTexture(
+                            map.renderDataPtr->textures[imagePath],
+                            xPos,
+                            static_cast<int>(adjustedOffset.y),
+                            color);
 
-                for (std::size_t i = 0; i < maxRepetitions; i++) {
+                        xPos += imageWidth;
+                    }
+                }
+                else {
                     DrawTexture(
                         map.renderDataPtr->textures[imagePath],
-                        xPos,
+                        static_cast<int>(adjustedOffset.x),
                         static_cast<int>(adjustedOffset.y),
                         color);
-
-                    xPos += imageWidth;
                 }
-            }
-            else {
-                DrawTexture(
-                    map.renderDataPtr->textures[imagePath],
-                    static_cast<int>(adjustedOffset.x),
-                    static_cast<int>(adjustedOffset.y),
-                    color);
-            }
 
-            break;
-        }
-        // Need to handle this even though it's a NOP, otherwise default is hit
-        case tson::LayerType::ObjectGroup: {
-            break;
-        }
-        default: {
-            logFatal("Map contains unsupported layer type: renderMap(Args...)");
-            break;
+                break;
+            }
+            // Need to handle this even though it's a NOP, otherwise default is hit
+            case tson::LayerType::ObjectGroup: {
+                break;
+            }
+            default: {
+                logFatal("Map contains unsupported layer type: renderMap(Args...)");
+                break;
+            }
         }
     }
-}
 
-static void renderLayerGroup(
-    const SceneCamera& cam,
-    const MapData& map,
-    const Vector2 offset,
-    const Color color,
-    const renderPassType mode)
-{
-    for (auto& layer : map.tsonMapPtr->getLayers()) {
-        if (layer.getClassType() == "DifferedLayer" && mode == renderPassType::PRIMARY_PASS) continue;
-        if (layer.getClassType() == "PrimaryLayer" && mode == renderPassType::DIFFERED_PASS) continue;
+    static void renderLayerGroup(
+        const SceneCamera& cam,
+        const MapData& map,
+        const Vector2 offset,
+        const Color color,
+        const renderPassType mode)
+    {
+        for (auto& layer : map.tsonMapPtr->getLayers()) {
+            if (layer.getClassType() == "DifferedLayer" && mode == renderPassType::PRIMARY_PASS) continue;
+            if (layer.getClassType() == "PrimaryLayer" && mode == renderPassType::DIFFERED_PASS) continue;
 
-        renderLayer(cam, map, layer, offset, color);
+            renderLayer(cam, map, layer, offset, color);
+        }
     }
-}
 
-// Don't need these, but it makes intentions clearer IMO
-void renderBackgroundLayers(
-    const SceneCamera& cam,
-    const MapData& map,
-    const Vector2 offset,
-    const Color color)
-{
-    renderLayerGroup(cam, map, offset, color, renderPassType::PRIMARY_PASS);
-}
+    // Don't need these, but it makes intentions clearer IMO
+    void renderBackgroundLayers(
+        const SceneCamera& cam,
+        const MapData& map,
+        const Vector2 offset,
+        const Color color)
+    {
+        renderLayerGroup(cam, map, offset, color, renderPassType::PRIMARY_PASS);
+    }
 
-void renderForegroundLayers(
-    const SceneCamera& cam,
-    const MapData &map,
-    const Vector2 offset,
-    const Color color)
-{
-    renderLayerGroup(cam, map, offset, color, renderPassType::DIFFERED_PASS);
+    void renderForegroundLayers(
+        const SceneCamera& cam,
+        const MapData &map,
+        const Vector2 offset,
+        const Color color)
+    {
+        renderLayerGroup(cam, map, offset, color, renderPassType::DIFFERED_PASS);
+    }
 }

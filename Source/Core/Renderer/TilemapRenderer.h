@@ -20,30 +20,32 @@
 #include "../Camera/Camera.h"
 #include "../Renderer/Tilemap.h"
 
-static void renderLayer(
-    const SceneCamera& cam,
-    const MapData& map,
-    const tson::Layer& layer,
-    Vector2 offset,
-    Color color);
+namespace RE::Core {
+    static void renderLayer(
+        const SceneCamera& cam,
+        const MapData& map,
+        const tson::Layer& layer,
+        Vector2 offset,
+        Color color);
 
-static void renderLayerGroup(
-    const SceneCamera& cam,
-    const MapData& map,
-    Vector2 offset,
-    Color color,
-    renderPassType mode);
+    static void renderLayerGroup(
+        const SceneCamera& cam,
+        const MapData& map,
+        Vector2 offset,
+        Color color,
+        renderPassType mode);
 
-void renderBackgroundLayers(
-    const SceneCamera& cam,
-    const MapData& map,
-    Vector2 offset,
-    Color color);
+    void renderBackgroundLayers(
+        const SceneCamera& cam,
+        const MapData& map,
+        Vector2 offset,
+        Color color);
 
-void renderForegroundLayers(
-    const SceneCamera& cam,
-    const MapData& map,
-    Vector2 offset,
-    Color color);
+    void renderForegroundLayers(
+        const SceneCamera& cam,
+        const MapData& map,
+        Vector2 offset,
+        Color color);
+}
 
 #endif //TILEMAPRENDERER_H
