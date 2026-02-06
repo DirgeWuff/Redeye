@@ -22,48 +22,6 @@ namespace RE::Application {
         #endif
     }
 
-    TextAlertLayer::TextAlertLayer(TextAlertLayer&& other) noexcept :
-        m_font(std::move(other.m_font)),
-        m_message(std::move(other.m_message)),
-        m_position(other.m_position),
-        m_duration(other.m_duration),
-        m_elapsedTime(other.m_elapsedTime),
-        m_fontSize(other.m_fontSize),
-        m_fontSpacing(other.m_fontSpacing)
-    {
-        this->m_type = other.m_type;
-        this->m_isEnabled = other.m_isEnabled;
-
-        other.m_font = {};
-
-        #ifdef DEBUG
-            logDbg("Move called on Text alert, new address: ", this);
-        #endif
-    }
-
-    TextAlertLayer& TextAlertLayer::operator=(TextAlertLayer&& other) noexcept {
-        if (this != &other) {
-            this->m_type = other.m_type;
-            this->m_isEnabled = other.m_isEnabled;
-            this->m_font = std::move(other.m_font);
-            this->m_message = std::move(other.m_message);
-            this->m_position = other.m_position;
-            this->m_duration = other.m_duration;
-            this->m_elapsedTime = other.m_elapsedTime;
-            this->m_fontSize = other.m_fontSize;
-            this->m_fontSpacing = other.m_fontSpacing;
-
-            other.m_font = {};
-        }
-
-        #ifdef DEBUG
-                logDbg("Move assignment called on TextAlert, new address: ", this);
-        #endif
-
-        return *this;
-    }
-
-
     void TextAlertLayer::update() {
         const float deltaTime = GetFrameTime();
 

@@ -56,10 +56,11 @@ namespace RE::Application {
                 return;
             }
         }
+
         TextAlertLayer(const TextAlertLayer&) = delete;
-        TextAlertLayer(TextAlertLayer&& other) noexcept;
-        TextAlertLayer(const TextAlertLayer&&) = delete;
-        TextAlertLayer& operator=(TextAlertLayer&& other) noexcept;
+        TextAlertLayer(TextAlertLayer&&) noexcept = delete;
+        TextAlertLayer& operator=(const TextAlertLayer&) = delete;
+        TextAlertLayer& operator=(TextAlertLayer&&) noexcept = delete;
 
         void update() override;
         void draw()  override;

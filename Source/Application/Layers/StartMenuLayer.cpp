@@ -33,7 +33,7 @@ namespace RE::Application {
         m_headerFont(LoadFontEx(
             "../assets/Fonts/Jo_wrote_a_lovesong.ttf",
             400.0f,
-            NULL,
+            NULL, // NOLINT
             0))
     {
         if (!IsFontValid(m_headerFont)) {

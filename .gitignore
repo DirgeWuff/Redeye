@@ -18,3 +18,5 @@ Savegame
 /assets/Shaders/passthroughTest.fsh
 /assets/Map data/Version 3/TestLevel3.tiled-project
 /assets/Map data/Version 3/TestLevel3.tiled-session
+/cmake-build-debug-wsl-1/
+/cmake-build-debug-msys2/

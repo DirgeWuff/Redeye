@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include "raylib.h"
+#include "raymath.h"
 #include "box2d/box2d.h"
 #include "GameLayer.h"
 #include "../../Core/Utility/Logging.h"

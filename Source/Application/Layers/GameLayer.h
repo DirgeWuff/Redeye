@@ -70,6 +70,7 @@ namespace RE::Application {
         m_frameBuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
         m_camera = Core::SceneCamera(m_map, 1.5f);
         m_fragShader = LoadShader(NULL, "../assets/Shaders/lighting.fsh"); // NOLINT
+        m_beamAngle = Vector2{1.0f, 0.0f};
 
         if (!IsShaderValid(m_fragShader)) {
             Core::logFatal("Unable to load shader. GameLayer::GameLayer()");
