@@ -28,7 +28,7 @@
 namespace RE::Core {
     class RectButton {
         Font m_buttonFont;
-        std::function<void()> m_clickEvent{};
+        std::function<void()> m_clickEvent;
         std::string m_buttonText;
         Rectangle m_primaryRect;
         Rectangle m_clickRect;
@@ -40,7 +40,8 @@ namespace RE::Core {
         Color m_fontColor;
         int m_fontSize;
         float m_fontSpacing;
-        buttonStates m_state;
+        buttonStates m_currentState;
+        buttonStates m_previousState;
     public:
         RectButton() = delete;
         ~RectButton();
@@ -58,7 +59,7 @@ namespace RE::Core {
                 m_fontColor(BLACK),
                 m_fontSize(static_cast<int>(std::floor(height * g_buttonTextScaleFactor))),
                 m_fontSpacing(1.0f),
-                m_state(buttonStates::BUTTON_IDLE)
+                m_currentState(buttonStates::BUTTON_IDLE)
     {
         m_primaryRect = {cornerX, cornerY, width, height},
         m_clickRect = {

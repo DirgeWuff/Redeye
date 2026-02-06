@@ -37,7 +37,7 @@ namespace RE::Core {
         m_fontColor(other.m_fontColor),
         m_fontSize(other.m_fontSize),
         m_fontSpacing(other.m_fontSpacing),
-        m_state(other.m_state)
+        m_currentState(other.m_currentState)
     {
         #ifdef DEBUG
             logDbg("Move called on RectButton, new address: ", this);
@@ -59,7 +59,7 @@ namespace RE::Core {
             this->m_fontColor = other.m_fontColor;
             this->m_fontSize = other.m_fontSize;
             this->m_fontSpacing = other.m_fontSpacing;
-            this->m_state = other.m_state;
+            this->m_currentState = other.m_currentState;
         }
         #ifdef DEBUG
                 logDbg("Move assignment called on RectButton, new address: ", this);
@@ -78,16 +78,26 @@ namespace RE::Core {
     }
 
     void RectButton::update() {
-        const Vector2 mousePos = GetMousePosition();
+        const Vector2 mousePos = GetMousePosition(); // NOLINT
+        const bool isPrimaryHovered = CheckCollisionPointRec(mousePos, m_primaryRect);
+        const bool isSecondaryHovered = CheckCollisionPointRec(mousePos, m_clickRect);
+        const bool isMouseDown = IsMouseButtonDown(MOUSE_BUTTON_LEFT);
 
-        if (!CheckCollisionPointRec(mousePos, m_primaryRect)) {
-            m_state = buttonStates::BUTTON_IDLE;
+        if (!isPrimaryHovered) {
+            m_previousState = m_currentState;
+            m_currentState = buttonStates::BUTTON_IDLE;
         }
-        else if (CheckCollisionPointRec(mousePos, m_primaryRect) && !IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-            m_state = buttonStates::BUTTON_HOVERED;
+        else if (isPrimaryHovered && !isMouseDown && m_previousState != buttonStates::BUTTON_HELD) { // NOLINT
+            m_previousState = m_currentState;
+            m_currentState = buttonStates::BUTTON_HOVERED;
         }
-        else {
-            m_state = buttonStates::BUTTON_CLICKED;
+        else if (isSecondaryHovered && isMouseDown) {
+            m_previousState = m_currentState;
+            m_currentState = buttonStates::BUTTON_HELD;
+        }
+        else if (m_previousState == buttonStates::BUTTON_HELD) {
+            m_previousState = m_currentState;
+            m_currentState = buttonStates::BUTTON_RELEASED;
 
             if (m_clickEvent) {
                 m_clickEvent();
@@ -96,35 +106,56 @@ namespace RE::Core {
     }
 
     void RectButton::draw() const {
-        if (m_state == buttonStates::BUTTON_IDLE) {
-            DrawRectangleRec(m_primaryRect, m_primaryColor);
-            DrawTextEx(
-                m_buttonFont,
-                m_buttonText.c_str(),
-                m_textPos,
-                m_fontSize,
-                m_fontSpacing,
-                m_fontColor);
-        }
-        else if (m_state == buttonStates::BUTTON_HOVERED) {
-            DrawRectangleRec(m_primaryRect, m_hoverColor);
-            DrawTextEx(
-                m_buttonFont,
-                m_buttonText.c_str(),
-                m_textPos,
-                m_fontSize,
-                m_fontSpacing,
-                m_fontColor);
-        }
-        else if (m_state == buttonStates::BUTTON_CLICKED) {
-            DrawRectangleRec(m_clickRect, m_hoverColor);
-            DrawTextEx(
-                m_buttonFont,
-                m_buttonText.c_str(),
-                m_textPosClicked,
-                m_fontSize * g_buttonHeightScaleFactor,
-                m_fontSpacing,
-                m_fontColor);
+        switch (m_currentState) {
+            case buttonStates::BUTTON_IDLE: {
+                DrawRectangleRec(m_primaryRect, m_primaryColor);
+                DrawTextEx(
+                    m_buttonFont,
+                    m_buttonText.c_str(),
+                    m_textPos,
+                    m_fontSize,
+                    m_fontSpacing,
+                    m_fontColor);
+
+                break;
+            }
+            case buttonStates::BUTTON_HOVERED: {
+                DrawRectangleRec(m_primaryRect, m_hoverColor);
+                DrawTextEx(
+                    m_buttonFont,
+                    m_buttonText.c_str(),
+                    m_textPos,
+                    m_fontSize,
+                    m_fontSpacing,
+                    m_fontColor);
+
+                break;
+            }
+            case buttonStates::BUTTON_HELD: {
+                DrawRectangleRec(m_clickRect, m_hoverColor);
+                DrawTextEx(
+                    m_buttonFont,
+                    m_buttonText.c_str(),
+                    m_textPosClicked,
+                    m_fontSize * g_buttonHeightScaleFactor,
+                    m_fontSpacing,
+                    m_fontColor);
+
+                break;
+            }
+            case buttonStates::BUTTON_RELEASED: {
+                DrawRectangleRec(m_primaryRect, m_hoverColor);
+                DrawTextEx(
+                    m_buttonFont,
+                    m_buttonText.c_str(),
+                    m_textPos,
+                    m_fontSize,
+                    m_fontSpacing,
+                    m_fontColor);
+
+                break;
+            }
+            default: break;
         }
     }
 }

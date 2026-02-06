@@ -27,7 +27,8 @@ namespace RE::Core {
     enum class buttonStates : std::uint8_t {
         BUTTON_IDLE,
         BUTTON_HOVERED,
-        BUTTON_CLICKED,
+        BUTTON_HELD,
+        BUTTON_RELEASED,
         COUNT // Serves as marker for enum end
     };
 

@@ -80,13 +80,13 @@ namespace RE::Application {
             0,
             GetScreenWidth(),
             GetScreenHeight(),
-    {255, 0, 0, m_backgroundOpacity});
+            {255, 0, 0, m_backgroundOpacity});
         DrawTextEx(
             m_headerFont,
             "Dead.",
-        {575.0f, 50.0f},
-        200.0f,
-        3.0f,
+            {575.0f, 50.0f},
+            200.0f,
+            3.0f,
             BLACK);
 
         m_backgroundOpacity += 3;
