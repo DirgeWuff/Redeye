@@ -27,11 +27,12 @@ namespace RE::Application {
         Font m_headerFont{};
     public:
         StartMenuLayer();
+        ~StartMenuLayer() override;
+
         StartMenuLayer(const StartMenuLayer&) = delete;
         StartMenuLayer(const StartMenuLayer&&) = delete;
         StartMenuLayer& operator=(const StartMenuLayer&) = delete;
         StartMenuLayer& operator=(const StartMenuLayer&&) = delete;
-        ~StartMenuLayer() override;
 
         void update() override;
         void draw() override;

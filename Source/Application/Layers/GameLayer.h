@@ -69,7 +69,7 @@ namespace RE::Application {
         m_currentSave.centerPosition = save.centerPosition;
         m_frameBuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
         m_camera = Core::SceneCamera(m_map, 1.5f);
-        m_fragShader = LoadShader(NULL, "../assets/Shaders/lighting.fsh");
+        m_fragShader = LoadShader(NULL, "../assets/Shaders/lighting.fsh"); // NOLINT
 
         if (!IsShaderValid(m_fragShader)) {
             Core::logFatal("Unable to load shader. GameLayer::GameLayer()");
@@ -121,6 +121,11 @@ namespace RE::Application {
         m_camera.setTarget(*m_playerCharacter);
     }
         ~GameLayer() override;
+
+        GameLayer(const GameLayer&) = delete;
+        GameLayer(GameLayer&&) = delete;
+        GameLayer& operator=(const GameLayer&) noexcept = delete;
+        GameLayer& operator=(GameLayer&&) noexcept = delete;
 
         void updateBeam();
         void processSensorEvents();

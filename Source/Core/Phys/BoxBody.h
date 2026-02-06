@@ -42,7 +42,6 @@ namespace RE::Core {
         Vector2 m_cornerPosition{};
     public:
         BoxBody();
-
         BoxBody(
             float centerX,
             float centerY,
@@ -51,12 +50,12 @@ namespace RE::Core {
             bodyConfig config,
             b2WorldId world);
 
-        BoxBody(const BoxBody&) = default;
-        BoxBody(BoxBody&&) noexcept = delete;
-        BoxBody& operator=(const BoxBody&) = default;
-        BoxBody& operator=(BoxBody&&) noexcept = delete;
-
         virtual ~BoxBody();
+
+        BoxBody(const BoxBody&) = delete;
+        BoxBody(BoxBody&&) noexcept = delete;
+        BoxBody& operator=(const BoxBody&) = delete;
+        BoxBody& operator=(BoxBody&&) noexcept = delete;
 
         virtual void update();
         virtual void draw() const;

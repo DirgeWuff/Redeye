@@ -36,11 +36,38 @@ namespace RE::Core {
         std::unordered_map<std::type_index, std::unique_ptr<route>> m_routes;
 
     public:
+        EventBus() = default;
+        ~EventBus() = default;
+
+        EventBus(const EventBus&) = delete;
+
+        EventBus(EventBus&& other) noexcept :
+            m_routes(std::move(other.m_routes))
+        {
+            #ifdef DEBUG
+                logDbg("Move called on EventBus, new address: ", this);
+            #endif
+        };
+
+        EventBus& operator=(const EventBus&) = delete;\
+
+        EventBus& operator=(EventBus&& other) noexcept {
+            if (this != &other) {
+                this->m_routes = std::move(other.m_routes);
+            }
+
+            #ifdef DEBUG
+                logDbg("Move assignment called on EventBus, new address: ", this);
+            #endif
+
+            return *this;
+        };
+
         template<typename T>
         void addDispatcher(EventDispatcher<T> dispatcher) {
             const auto type = std::type_index(typeid(T));
 
-            const auto it = m_routes.find(type);
+            const auto it = m_routes.find(type); // NOLINT
 
             if (it != m_routes.end()) {
                 logDbg("Event route already exists: ", type.name(),  ". EventBus::addDispatcher(Args...)");

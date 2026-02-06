@@ -32,6 +32,11 @@ namespace RE::Core {
         LayerManager() = default;
         ~LayerManager() = default;
 
+        LayerManager(const LayerManager&) = delete;
+        LayerManager(LayerManager&&) noexcept = delete;
+        LayerManager& operator=(const LayerManager&) = delete;
+        LayerManager& operator=(LayerManager&&) noexcept = delete;
+
         void popLayer(const layerKey& id);
     public:
         static LayerManager& getInstance();

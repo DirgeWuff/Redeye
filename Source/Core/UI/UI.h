@@ -30,18 +30,18 @@ namespace RE::Core {
     class RectButton {
         Font m_buttonFont;
         std::function<void()> m_clickEvent{};
-        const std::string m_buttonText;
+        std::string m_buttonText;
         Rectangle m_primaryRect;
         Rectangle m_clickRect;
         Vector2 m_textSize;
         Vector2 m_textPos;
         Vector2 m_textPosClicked;
-        buttonStates m_state;
         Color m_primaryColor;
         Color m_hoverColor;
         Color m_fontColor;
         int m_fontSize;
         float m_fontSpacing;
+        buttonStates m_state;
     public:
         RectButton() = delete;
         ~RectButton();
@@ -54,12 +54,12 @@ namespace RE::Core {
             float height,
             T&& text) :
                 m_buttonText(std::string(std::forward<T>(text))),
-                m_state(buttonStates::BUTTON_IDLE),
                 m_primaryColor({95, 25, 25, 255}),
                 m_hoverColor({173, 28,28, 255}),
                 m_fontColor(BLACK),
                 m_fontSize(static_cast<int>(std::floor(height * g_buttonTextScaleFactor))),
-                m_fontSpacing(1.0f)
+                m_fontSpacing(1.0f),
+                m_state(buttonStates::BUTTON_IDLE)
     {
         m_primaryRect = {cornerX, cornerY, width, height},
         m_clickRect = {
@@ -71,7 +71,7 @@ namespace RE::Core {
         m_buttonFont = LoadFontEx(
             "../assets/Fonts/JetBrainsMono-Bold.ttf",
             m_fontSize * 2,
-            NULL,
+            NULL, // NOLINT
             0);
 
         if (!IsFontValid(m_buttonFont)) {
@@ -98,8 +98,10 @@ namespace RE::Core {
         #endif
     }
 
-        RectButton(const RectButton& other) = delete;
-        RectButton& operator=(const RectButton& other) = delete;
+        RectButton(const RectButton&) = delete;
+        RectButton(RectButton&& other) noexcept;
+        RectButton& operator=(const RectButton&) = delete;
+        RectButton& operator=(RectButton&& other) noexcept;
 
         template<typename F>
         void setCustomFont(
@@ -152,7 +154,7 @@ namespace RE::Core {
         m_font = LoadFontEx(
             "../assets/Fonts/penakut.ttf",
             static_cast<int>(m_fontSize),
-            NULL,
+            NULL, // NOLINT
             0);
 
         if (!IsFontValid(m_font)) {
@@ -161,7 +163,9 @@ namespace RE::Core {
         }
     }
         TextAlert(const TextAlert&) = delete;
+        TextAlert(TextAlert&& other) noexcept;
         TextAlert(const TextAlert&&) = delete;
+        TextAlert& operator=(TextAlert&& other) noexcept;
 
         void update() override;
         void draw()  override;

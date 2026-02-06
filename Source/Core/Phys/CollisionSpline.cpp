@@ -82,6 +82,10 @@ namespace RE::Core {
         m_chainDef.materialCount = 1;
         m_chainDef.isLoop = false;
         m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
+
+        #ifdef DEBUG
+            logDbg("Copy called on CollisionSpline, new object address: ", this);
+        #endif
     }
 
     CollisionSpline::CollisionSpline(CollisionSpline&& other) noexcept :
@@ -102,6 +106,10 @@ namespace RE::Core {
         m_chainDef.isLoop = false;
 
         m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
+
+        #ifdef DEBUG
+            logDbg("Move called on CollisionSpline, new address: ", this);
+        #endif
     }
 
     CollisionSpline& CollisionSpline::operator=(const CollisionSpline& other) {
@@ -128,10 +136,14 @@ namespace RE::Core {
             m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
         }
 
+        #ifdef DEBUG
+            logDbg("Copy assignment called on CollisionSpline, new object address: ", this);
+        #endif
+
         return *this;
     }
 
-    CollisionSpline & CollisionSpline::operator=(CollisionSpline&& other) noexcept {
+    CollisionSpline& CollisionSpline::operator=(CollisionSpline&& other) noexcept {
         if (this != &other) {
             delete[] m_verts;
 
@@ -153,6 +165,10 @@ namespace RE::Core {
             m_chainId = b2CreateChain(m_bodyId, &m_chainDef);
         }
 
+        #ifdef DEBUG
+            logDbg("Move assignment called on CollisionSpline, new object address: ", this);
+        #endif
+
         return *this;
     }
 
@@ -161,7 +177,7 @@ namespace RE::Core {
         m_verts = nullptr;
 
         #ifdef DEBUG
-            logDbg("Collision object destroyed at address: ", this);
+            logDbg("CollisionSpline destroyed at address: ", this);
         #endif
     }
 

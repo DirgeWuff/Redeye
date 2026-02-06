@@ -141,12 +141,12 @@ namespace RE::Core {
             logDbg("Class player constructed at address: ", this);
         #endif
     }
+        ~Player() override;
+
         Player(const Player&) = delete;
         Player(Player&&) noexcept = delete;
         Player& operator=(const Player&) = delete;
         Player& operator=(Player&&) noexcept = delete;
-
-        ~Player() override;
 
         void pollEvents();
         void update(const b2WorldId& world, AudioManager& audManager);

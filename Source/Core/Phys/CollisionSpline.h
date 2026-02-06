@@ -35,12 +35,12 @@ namespace RE::Core {
             b2WorldId world,
             const std::vector<b2Vec2>& points);
 
+        ~CollisionSpline();
+
         CollisionSpline(const CollisionSpline& other);
         CollisionSpline(CollisionSpline&& other) noexcept;
         CollisionSpline& operator=(const CollisionSpline& other);
         CollisionSpline& operator=(CollisionSpline&& other) noexcept;
-
-        ~CollisionSpline();
 
         // TODO: Look into using std::span with C++ 20
         [[nodiscard]] b2Vec2* getObjectVerts() const noexcept;

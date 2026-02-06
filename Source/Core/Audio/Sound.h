@@ -60,6 +60,11 @@ namespace RE::Core {
         explicit SingleSound(const std::string& soundFilePath);
         ~SingleSound() override;
 
+        SingleSound(const SingleSound&) = delete;
+        SingleSound(SingleSound&& other) noexcept;
+        SingleSound& operator=(const SingleSound&) = delete;
+        SingleSound& operator=(SingleSound&& other) noexcept;
+
         void play() const override;
         void setVolume(float volume) override;
         void setPan(float pan) override;
@@ -73,6 +78,11 @@ namespace RE::Core {
         SoundArray() = default;
         explicit SoundArray(const std::string& soundDirPath);
         ~SoundArray() override;
+
+        SoundArray(const SoundArray&) = delete;
+        SoundArray(SoundArray&& other) noexcept;
+        SoundArray& operator=(const SoundArray&) = delete;
+        SoundArray& operator=(SoundArray&& other) noexcept;
 
         void play() const override;
         void setVolume(float volume) override;

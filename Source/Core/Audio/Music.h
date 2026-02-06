@@ -44,8 +44,6 @@ namespace RE::Core {
         void setPan(float pan);
 
         [[nodiscard]] bool isPlaying() const;
-
-
     };
 }
 

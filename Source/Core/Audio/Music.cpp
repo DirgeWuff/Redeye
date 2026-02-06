@@ -46,18 +46,24 @@ namespace RE::Core {
         m_isActive(other.m_isActive)
     {
         other.m_music = {};
+
+        #ifdef DEBUG
+            logDbg("Move called on Music, new address: ", this);
+        #endif
     }
 
     Music& Music::operator=(Music&& other) noexcept {
         if (this != &other) {
-            UnloadMusicStream(this->m_music);
-
             this->m_music = other.m_music;
             this->m_volume = other.m_volume;
             this->m_pan = other.m_pan;
             this->m_isActive = other.m_isActive;
 
             other.m_music = {};
+
+            #ifdef DEBUG
+                        logDbg("Move assignment called on Music, new address: ", this);
+            #endif
         }
 
         return *this;

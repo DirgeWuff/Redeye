@@ -27,6 +27,11 @@ namespace RE::Core {
         AudioManager();
         ~AudioManager();
 
+        AudioManager(const AudioManager&) = delete;
+        AudioManager(AudioManager&& other) noexcept;
+        AudioManager& operator=(const AudioManager&) = delete;
+        AudioManager& operator=(AudioManager&& other) noexcept;
+
         void pushSound(soundId id, std::unique_ptr<Sound> newSound);
         void popSound(const soundId& id);
         void playSound(const soundId& id);

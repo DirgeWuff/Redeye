@@ -43,10 +43,10 @@ namespace RE::Core {
 
         std::optional<std::vector<std::uint8_t>> m_soundFrames{};
         std::vector<Vector2> m_frameIndices{};
-        std::shared_ptr<Texture2D> m_texture{}; // Probably should make this std::vector<std::shared_ptr<T>> or something
+        std::shared_ptr<Texture2D> m_texture{};
+        Rectangle m_sourceRect{};
         Vector2 m_spriteRes{};
         std::size_t m_frameCount{};
-        Rectangle m_sourceRect{};
         float m_frameDuration{};
         float m_elapsedFrameTime{};
         std::optional<soundId> m_soundId{};
@@ -56,17 +56,16 @@ namespace RE::Core {
         bool m_animationFinished{};
     public:
         Animation();
-        ~Animation();
-
-        // Bit of a mess of a constructor, but seems like the cleanest thing somehow...
         Animation(
             std::shared_ptr<Texture2D> tex,
             const animationDescriptor& desc);
 
+        ~Animation();
+
         Animation(const Animation&) = delete;
-        Animation(Animation&&) noexcept = default;
+        Animation(Animation&& other) noexcept;
         Animation& operator=(const Animation&) = delete;
-        Animation& operator=(Animation&&) noexcept = default;
+        Animation& operator=(Animation&& other) noexcept;
 
         void resetAnimation() noexcept;
         void update(AudioManager& audManager);

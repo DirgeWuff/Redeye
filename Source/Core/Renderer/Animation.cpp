@@ -24,12 +24,6 @@ namespace RE::Core {
         #endif
     }
 
-    Animation::~Animation() {
-        #ifdef DEBUG
-            logDbg("Animation destroyed at address: ", this);
-        #endif
-    }
-
     Animation::Animation(
         const std::shared_ptr<Texture2D> tex, // NOLINT
         const animationDescriptor& desc
@@ -88,6 +82,49 @@ namespace RE::Core {
         #ifdef DEBUG
             logDbg("Animation constructed at address: ", this);
         #endif
+    }
+
+    Animation::~Animation() {
+        #ifdef DEBUG
+                logDbg("Animation destroyed at address: ", this);
+        #endif
+    }
+
+    Animation::Animation(Animation&& other) noexcept :
+        m_soundFrames(std::move(other.m_soundFrames)),
+        m_frameIndices(std::move(other.m_frameIndices)),
+        m_texture(std::move(other.m_texture)),
+        m_sourceRect(other.m_sourceRect),
+        m_spriteRes(other.m_spriteRes),
+        m_frameCount(other.m_frameCount),
+        m_frameDuration(other.m_frameDuration),
+        m_elapsedFrameTime(other.m_elapsedFrameTime),
+        m_soundId(other.m_soundId),
+        m_curIdx(other.m_curIdx),
+        m_animType(other.m_animType),
+        m_animId(other.m_animId),
+        m_animationFinished(other.m_animationFinished)
+    {
+    }
+
+    Animation& Animation::operator=(Animation&& other) noexcept {
+        if (this != &other) {
+            this->m_soundFrames = std::move(other.m_soundFrames);
+            this->m_frameIndices = std::move(other.m_frameIndices);
+            this->m_texture = std::move(other.m_texture);
+            this->m_sourceRect = std::move(other.m_sourceRect);
+            this->m_spriteRes = other.m_spriteRes;
+            this->m_frameCount = other.m_frameCount;
+            this->m_frameDuration = other.m_frameDuration;
+            this->m_elapsedFrameTime = other.m_elapsedFrameTime;
+            this->m_soundId = other.m_soundId;
+            this->m_curIdx = other.m_curIdx;
+            this->m_animType = other.m_animType;
+            this->m_animId = other.m_animId;
+            this->m_animationFinished = other.m_animationFinished;
+        }
+
+        return *this;
     }
 
     void Animation::resetAnimation() noexcept {

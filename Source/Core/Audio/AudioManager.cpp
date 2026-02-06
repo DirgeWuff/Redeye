@@ -28,6 +28,28 @@ namespace RE::Core {
         #endif
     }
 
+    AudioManager::AudioManager(AudioManager&& other) noexcept :
+        m_sounds(std::move(other.m_sounds)),
+        m_musicTracks(std::move(other.m_musicTracks))
+    {
+        #ifdef DEBUG
+                logDbg("Move called on AudioManager, new address: ", this);
+        #endif
+    }
+
+    AudioManager& AudioManager::operator=(AudioManager&& other) noexcept {
+        if (this != &other) {
+            this->m_sounds = std::move(other.m_sounds);
+            this->m_musicTracks = std::move(other.m_musicTracks);
+
+            #ifdef DEBUG
+                        logDbg("Move called on AudioManager, new address: ", this);
+            #endif
+        }
+
+        return *this;
+    }
+
     // Sound control/management
     // =================================================================================================================
     void AudioManager::pushSound(soundId id, std::unique_ptr<Sound> newSound) {

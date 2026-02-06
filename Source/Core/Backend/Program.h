@@ -26,10 +26,10 @@ namespace RE::Core {
         Program();
         ~Program() = default;
 
-        Program(Program&) = delete;
-        Program(Program&&) = delete;
-        Program& operator=(Program&) = delete;
-        Program&& operator=(Program&&) = delete;
+        Program(const Program&) = delete;
+        Program(Program&&) noexcept = delete;
+        Program& operator=(const Program&) = delete;
+        Program&& operator=(Program&&) noexcept = delete;
     public:
         void init();
         void run() const;

@@ -32,6 +32,11 @@ namespace RE::Application {
         explicit DeathMenuLayer(const std::shared_ptr<Core::Player>& player);
         ~DeathMenuLayer() override;
 
+        DeathMenuLayer(const DeathMenuLayer&) = delete;
+        DeathMenuLayer(DeathMenuLayer&&) noexcept = delete;
+        DeathMenuLayer& operator=(const DeathMenuLayer&) = delete;
+        DeathMenuLayer& operator=(DeathMenuLayer&&) noexcept = delete;
+
         void update() override;
         void draw() override;
     };

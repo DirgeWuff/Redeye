@@ -9,7 +9,9 @@
 //
 // Module purpose/description:
 //
-// Function definitions for non-templated functions for Audio.h
+// Function definitions for non-templated functions for Audio.h. NOTE:
+// Move constructors copy here because ::Sound is a C POD type, and therefore
+// it has no move semantics.
 
 #include <cassert>
 #include "Sound.h"
@@ -44,6 +46,37 @@ namespace RE::Core {
         #ifdef DEBUG
             logDbg("SingleSound destroyed at address: ", this);
         #endif
+    }
+
+    SingleSound::SingleSound(SingleSound&& other) noexcept :
+        m_sound(other.m_sound)
+    {
+        this->m_type = other.m_type;
+        this->m_volume = other.m_volume;
+        this->m_pan = other.m_pan;
+
+        other.m_sound = {};
+
+        #ifdef DEBUG
+            logDbg("Move called on SingleSound, new address: ", this);
+        #endif
+    }
+
+    SingleSound& SingleSound::operator=(SingleSound&& other) noexcept {
+        if (this != &other) {
+            this->m_type = other.m_type;
+            this->m_volume = other.m_volume;
+            this->m_pan = other.m_pan;
+            this->m_sound = other.m_sound;
+
+            other.m_sound = {};
+
+            #ifdef DEBUG
+                logDbg("Move assignment called on SingleSound, new address: ", this);
+            #endif
+        }
+
+        return *this;
     }
 
     void SingleSound::play() const {
@@ -112,8 +145,6 @@ namespace RE::Core {
         assert(!m_sounds.empty());
 
         for (const auto& sound : m_sounds) {
-            assert(IsSoundValid(sound));
-
             UnloadSound(sound);
 
         #ifdef DEBUG
@@ -122,11 +153,46 @@ namespace RE::Core {
         }
     }
 
+    SoundArray::SoundArray(SoundArray&& other) noexcept :
+        m_sounds(other.m_sounds)
+    {
+        this->m_type = other.m_type;
+        this->m_volume = other.m_volume;
+        this->m_pan = other.m_pan;
+
+        for (auto& sound : other.m_sounds) {
+            sound = {};
+        }
+
+        #ifdef DEBUG
+                logDbg("Move called on SoundArray, new address: ", this);
+        #endif
+    }
+
+    SoundArray& SoundArray::operator=(SoundArray&& other) noexcept {
+        if (this != &other) {
+            this->m_type = other.m_type;
+            this->m_volume = other.m_volume;
+            this->m_pan = other.m_pan;
+            this->m_sounds = other.m_sounds;
+
+            for (auto& sound : other.m_sounds) {
+                sound = {};
+            }
+        }
+
+        #ifdef DEBUG
+            logDbg("Move assignment called on SoundArray, new address: ", this);
+        #endif
+
+        return *this;
+    }
+
     void SoundArray::play() const {
         assert(!m_sounds.empty());
 
         try {
-            PlaySound(m_sounds.at(getRandInt(0, m_sounds.size() - 1)));
+            PlaySound(m_sounds.at(getRandInt(0, static_cast<int>(m_sounds.size()) - 1)));
         }
         catch (const std::exception& e) {
             logFatal(std::string("SoundArray::play() failed:") + std::string(e.what()));

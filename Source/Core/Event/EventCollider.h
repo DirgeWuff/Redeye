@@ -60,10 +60,9 @@ namespace RE::Core {
         ~EventCollider();
 
         EventCollider(const EventCollider&) = default;
-        EventCollider(EventCollider&&) = default;
+        EventCollider(EventCollider&& other) noexcept = delete;
         EventCollider& operator=(const EventCollider&) = delete;
-        EventCollider& operator=(EventCollider&&) = delete;
-
+        EventCollider& operator=(EventCollider&& other) noexcept = delete;
 
         void disableCollider() const noexcept;
         [[nodiscard]] Vector2 getSizePx() const noexcept;
