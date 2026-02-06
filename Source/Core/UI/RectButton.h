@@ -9,8 +9,8 @@
 //
 // Module purpose/description:
 //
-// A collection of UI-related classes, including text and buttons.
-// These objects are used to create the menus and popups in the game.
+// Animated, configurable rectangular button that can be used in game UI,
+// and programmed to execute a std::function<void()> when clicked.
 
 #ifndef UI_H
 #define UI_H
@@ -26,7 +26,6 @@
 #include "../Utility/Enum.h"
 
 namespace RE::Core {
-    // Animated rectangular button, based on Raylib Rectangle
     class RectButton {
         Font m_buttonFont;
         std::function<void()> m_clickEvent{};
@@ -125,50 +124,6 @@ namespace RE::Core {
         void setColor(Color primaryColor, Color hoverColor) noexcept;
         void update();
         void draw() const;
-    };
-
-    // Text alert, used to display text for a duration on the screen, such as when a checkpoint is reached
-    class TextAlert final : public Layer {
-        Font m_font;
-        std::string m_message;
-        Vector2 m_position;
-        float m_duration;
-        float m_elapsedTime;
-        float m_fontSize;
-        float m_fontSpacing;
-    public:
-        ~TextAlert() override;
-
-        template<typename T>
-        TextAlert(T&& text, const float duration) :
-            m_message(std::string(std::forward<T>(text))),
-            m_position({30.0f, 30.0f}),
-            m_duration(duration),
-            m_elapsedTime(0.0f),
-            m_fontSize(30.0f),
-            m_fontSpacing(2.0f)
-    {
-        m_type = layerType::OVERLAY_LAYER;
-        m_isEnabled = true;
-
-        m_font = LoadFontEx(
-            "../assets/Fonts/penakut.ttf",
-            static_cast<int>(m_fontSize),
-            NULL, // NOLINT
-            0);
-
-        if (!IsFontValid(m_font)) {
-            logFatal("Error loading font: TextAlert(Args...)");
-            return;
-        }
-    }
-        TextAlert(const TextAlert&) = delete;
-        TextAlert(TextAlert&& other) noexcept;
-        TextAlert(const TextAlert&&) = delete;
-        TextAlert& operator=(TextAlert&& other) noexcept;
-
-        void update() override;
-        void draw()  override;
     };
 }
 

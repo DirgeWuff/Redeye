@@ -80,8 +80,8 @@ add_executable(Redeye
         Source/Core/Event/EventDispatcher.h
         Source/Core/Event/EventCollider.cpp
         Source/Core/Event/EventCollider.h
-        Source/Core/UI/UI.cpp
-        Source/Core/UI/UI.h
+        Source/Core/UI/RectButton.cpp
+        Source/Core/UI/RectButton.h
         Source/Core/Audio/Sound.cpp
         Source/Core/Audio/Sound.h
         Source/Core/Renderer/TilemapRenderer.cpp
@@ -113,6 +113,8 @@ add_executable(Redeye
         Source/Core/Audio/AudioManager.h
         Source/Core/Audio/Music.cpp
         Source/Core/Audio/Music.h
+        Source/Application/Layers/TextAlertLayer.cpp
+        Source/Application/Layers/TextAlertLayer.h
 )
 
 # Compile definitions

@@ -9,14 +9,12 @@
 //
 // Module purpose/description:
 //
-// Class/member function definitions for classes contained within UI.h
+// Class definition for RectButton and its members.
 
 #include "raylib.h"
-#include "UI.h"
+#include "RectButton.h"
 
 namespace RE::Core {
-    // Buttons
-    // =====================================================================================================================
     RectButton::~RectButton() {
         UnloadFont(m_buttonFont);
 
@@ -127,82 +125,6 @@ namespace RE::Core {
                 m_fontSize * g_buttonHeightScaleFactor,
                 m_fontSpacing,
                 m_fontColor);
-        }
-    }
-
-    // Text
-    // =====================================================================================================================
-    TextAlert::~TextAlert() {
-        UnloadFont(m_font);
-
-        #ifdef DEBUG
-            logDbg("TextAlert destroyed at address: ", this);
-        #endif
-    }
-
-    TextAlert::TextAlert(TextAlert&& other) noexcept :
-        m_font(std::move(other.m_font)),
-        m_message(std::move(other.m_message)),
-        m_position(other.m_position),
-        m_duration(other.m_duration),
-        m_elapsedTime(other.m_elapsedTime),
-        m_fontSize(other.m_fontSize),
-        m_fontSpacing(other.m_fontSpacing)
-    {
-        this->m_type = other.m_type;
-        this->m_isEnabled = other.m_isEnabled;
-
-        other.m_font = {};
-
-        #ifdef DEBUG
-            logDbg("Move called on Text alert, new address: ", this);
-        #endif
-    }
-
-    TextAlert& TextAlert::operator=(TextAlert&& other) noexcept {
-        if (this != &other) {
-            this->m_type = other.m_type;
-            this->m_isEnabled = other.m_isEnabled;
-            this->m_font = std::move(other.m_font);
-            this->m_message = std::move(other.m_message);
-            this->m_position = other.m_position;
-            this->m_duration = other.m_duration;
-            this->m_elapsedTime = other.m_elapsedTime;
-            this->m_fontSize = other.m_fontSize;
-            this->m_fontSpacing = other.m_fontSpacing;
-
-            other.m_font = {};
-        }
-
-        #ifdef DEBUG
-                logDbg("Move assignment called on TextAlert, new address: ", this);
-        #endif
-
-        return *this;
-    }
-
-
-    void TextAlert::update() {
-        const float deltaTime = GetFrameTime();
-
-        if (m_isEnabled) {
-            m_elapsedTime += deltaTime;
-
-            if (m_elapsedTime >= m_duration) {
-                m_isEnabled = false;
-            }
-        }
-    }
-
-    void TextAlert::draw() {
-        if (m_isEnabled) {
-            DrawTextEx(
-                m_font,
-                m_message.c_str(),
-                {m_position.x, m_position.y},
-                m_fontSize,
-                m_fontSpacing,
-                RED);
         }
     }
 }

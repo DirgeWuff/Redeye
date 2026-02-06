@@ -15,7 +15,7 @@
 #include "box2d/box2d.h"
 #include "Player.h"
 #include "../../Core/Utility/Logging.h"
-#include "../../Core/UI/UI.h"
+#include "../../Core/UI/RectButton.h"
 #include "../../Core/Audio/Sound.h"
 #include "../../Core/Utility/Utils.h"
 #include "../../Core/Backend/LayerManager.h"

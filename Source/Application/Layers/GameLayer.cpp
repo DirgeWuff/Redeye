@@ -26,6 +26,7 @@
 #include "../../Core/Renderer/TilemapRenderer.h"
 #include "../../Core/Utility/Globals.h"
 #include "../../Core/Backend/LayerManager.h"
+#include "TextAlertLayer.h"
 
 namespace RE::Application {
     void GameLayer::setEventCallbacks() {
@@ -79,7 +80,7 @@ namespace RE::Application {
                         try {
                             Core::LayerManager::getInstance().pushLayer(
                             Core::layerKey::CHECKPOINT_ALERT,
-                            std::make_unique<Core::TextAlert>("checkpoint reached", 5.0f));
+                            std::make_unique<Application::TextAlertLayer>("checkpoint reached", 5.0f));
                         }
                         catch (const std::exception& err) {
                             Core::logFatal(std::string("Checkpoint collider failed: ") + std::string(err.what()));
