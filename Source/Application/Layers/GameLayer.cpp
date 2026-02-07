@@ -33,70 +33,70 @@ namespace RE::Application {
     void GameLayer::setEventCallbacks() {
         try {
            // Subscribe footpaw sensor.
-        m_eventBus.get<Core::playerCollisionEvent>().subscribe(
-            Core::subId::PLAYER_FOOTPAW_GROUND_CONTACT,
-            [this](const Core::playerCollisionEvent& e) {
-                const Core::sensorInfo pawInfo = m_playerCharacter->getFootpawSensorInfo();
+            m_eventBus.get<Core::playerCollisionEvent>().subscribe(
+                Core::subId::PLAYER_FOOTPAW_GROUND_CONTACT,
+                [this](const Core::playerCollisionEvent& e) {
+                    const Core::sensorInfo pawInfo = m_playerCharacter->getFootpawSensorInfo();
 
-                return pawInfo.id == e.info.id && pawInfo.type == e.info.type;
-            },
-            [this](const Core::playerCollisionEvent& e) {
-                if (e.contactBegan) {
-                    m_playerCharacter->addContactEvent();
-                }
-                else {
-                    m_playerCharacter->removeContactEvent();
-                }
-            });
-
-        // Subscribe death colliders.
-        m_eventBus.get<Core::playerCollisionEvent>().subscribe(
-            Core::subId::PLAYER_DEATH_COLLIDER_CONTACT,
-            [this](const Core::playerCollisionEvent& e) {
-                return e.info.type == Core::sensorType::MURDER_BOX;
-            },
-            [this](const Core::playerCollisionEvent& e) {
-            if (e.contactBegan) {
-                m_playerCharacter->murder();
-            }
-        });
-
-        // Subscribe checkpoint colliders.
-        m_eventBus.get<Core::playerCollisionEvent>().subscribe(
-            Core::subId::PLAYER_CHECKPOINT_COLLIDER_CONTACT,
-            [](const Core::playerCollisionEvent& e) {
-                return e.info.type == Core::sensorType::CHECKPOINT;
-            },
-            [this](const Core::playerCollisionEvent& e) {
-                if (e.contactBegan) {
-                    m_currentSave.centerPosition = m_playerCharacter->getPositionCenterMeters();
-                    m_currentSave.currentMapPath = m_map.fullMapPath;
-
-                    saveGame(m_currentSave);
-
-                    if (Core::LayerManager::getInstance().stackContains(Core::layerKey::CHECKPOINT_ALERT)) {
-                        Core::LayerManager::getInstance().resumeLayer(Core::layerKey::CHECKPOINT_ALERT);
+                    return pawInfo.id == e.info.id && pawInfo.type == e.info.type;
+                },
+                [this](const Core::playerCollisionEvent& e) {
+                    if (e.contactBegan) {
+                        m_playerCharacter->addContactEvent();
                     }
                     else {
-                        try {
-                            Core::LayerManager::getInstance().pushLayer(
-                            Core::layerKey::CHECKPOINT_ALERT,
-                            std::make_unique<Application::TextAlertLayer>("checkpoint reached", 5.0f));
-                        }
-                        catch (const std::exception& err) {
-                            Core::logFatal(std::string("Checkpoint collider failed: ") + std::string(err.what()));
-                            return;
-                        }
-                        catch (...) {
-                            Core::logFatal("Checkpoint collider failed due to an unknown error.");
-                            return;
-                        }
+                        m_playerCharacter->removeContactEvent();
                     }
+                });
 
-                    const auto* info = static_cast<Core::sensorInfo*>(b2Shape_GetUserData(e.visitorShape));
-                    disableEventCollider(m_map, info->id);
+            // Subscribe death colliders.
+            m_eventBus.get<Core::playerCollisionEvent>().subscribe(
+                Core::subId::PLAYER_DEATH_COLLIDER_CONTACT,
+                [this](const Core::playerCollisionEvent& e) {
+                    return e.info.type == Core::sensorType::MURDER_BOX;
+                },
+                [this](const Core::playerCollisionEvent& e) {
+                if (e.contactBegan) {
+                    m_playerCharacter->murder();
                 }
             });
+
+            // Subscribe checkpoint colliders.
+            m_eventBus.get<Core::playerCollisionEvent>().subscribe(
+                Core::subId::PLAYER_CHECKPOINT_COLLIDER_CONTACT,
+                [](const Core::playerCollisionEvent& e) {
+                    return e.info.type == Core::sensorType::CHECKPOINT;
+                },
+                [this](const Core::playerCollisionEvent& e) {
+                    if (e.contactBegan) {
+                        m_currentSave.centerPosition = m_playerCharacter->getPositionCenterMeters();
+                        m_currentSave.currentMapPath = m_map.fullMapPath;
+
+                        saveGame(m_currentSave);
+
+                        if (Core::LayerManager::getInstance().stackContains(Core::layerKey::CHECKPOINT_ALERT)) {
+                            Core::LayerManager::getInstance().resumeLayer(Core::layerKey::CHECKPOINT_ALERT);
+                        }
+                        else {
+                            try {
+                                Core::LayerManager::getInstance().pushLayer(
+                                Core::layerKey::CHECKPOINT_ALERT,
+                                std::make_unique<Application::TextAlertLayer>("checkpoint reached", 5.0f));
+                            }
+                            catch (const std::exception& err) {
+                                Core::logFatal(std::string("Checkpoint collider failed: ") + std::string(err.what()));
+                                return;
+                            }
+                            catch (...) {
+                                Core::logFatal("Checkpoint collider failed due to an unknown error.");
+                                return;
+                            }
+                        }
+
+                        const auto* info = static_cast<Core::sensorInfo*>(b2Shape_GetUserData(e.visitorShape));
+                        disableEventCollider(m_map, info->id);
+                    }
+                });
         }
         catch (std::exception& e) {
             Core::logFatal(std::string("Error subscribing event callbacks: ") + std::string(e.what()));
