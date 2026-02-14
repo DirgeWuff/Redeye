@@ -265,7 +265,7 @@ namespace RE::Application {
                 Core::soundId::PLAYER_LAND,
                 std::make_unique<Core::SoundArray>("../assets/Player assets/Sounds/Jump"));
 
-            m_audioManager->setSoundVolume(Core::soundId::PLAYER_FOOTSTEP, 0.50f);
+            m_audioManager->setSoundVolume(Core::soundId::PLAYER_FOOTSTEP, 0.30f);
             m_audioManager->setSoundVolume(Core::soundId::PLAYER_LAND, 0.50f);
 
             m_audioManager->pushMusic(
