@@ -32,7 +32,7 @@ namespace RE::Application {
         m_headerFont(LoadFontEx(
             "../assets/Fonts/penakut.ttf",
             400,
-            NULL,
+            NULL, // NOLINT
             0)),
         m_backgroundOpacity(0)
     {

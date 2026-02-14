@@ -12,14 +12,29 @@
 // Function definition of the animation loader.
 
 #include <filesystem>
-#include "../external_libs/Toml/toml.hpp"
 #include "AnimationLoader.h"
+#include "../Renderer/Animation.h"
 #include "../Utility/Utils.h"
 
 namespace fs = std::filesystem;
 
 namespace RE::Core {
-    [[nodiscard]] std::vector<animationDescriptor> loadAnimations(const std::string& dirPath) {
+    [[nodiscard]] animationDescriptor parseDescriptorBase(const toml::table &tbl) {
+        const Vector2 s = getVecFromToml(tbl, "start");
+        const Vector2 e = getVecFromToml(tbl, "end");
+
+        return {
+            spriteIndex{static_cast<std::size_t>(s.x), static_cast<std::size_t>(s.y)},
+            spriteIndex{static_cast<std::size_t>(e.x), static_cast<std::size_t>(e.y)},
+            getVecFromToml(tbl, "spriteRes"),
+            getValFromToml<float>(tbl, "duration"),
+            toEnum<animPlaybackMode>(getValFromToml<std::uint8_t>(tbl, "playbackMode")).value(),
+            toEnum<animationId>(getValFromToml<std::uint8_t>(tbl, "id")).value(),
+            toEnum<animType>(getValFromToml<std::uint8_t>(tbl, "type")).value()
+        };
+    }
+
+    [[nodiscard]] std::vector<std::unique_ptr<animationDescriptor>> loadAnimations(const std::string& dirPath) {
         if (!fs::exists(dirPath)) {
             logFatal(std::string("Cannot load animation file: " + dirPath));
             return{};
@@ -28,7 +43,7 @@ namespace RE::Core {
         try {
             const toml::table root = toml::parse_file(dirPath);
             const auto* arr = root["animation_descriptor"].as_array();
-            std::vector<animationDescriptor> animations{};
+            std::vector<std::unique_ptr<animationDescriptor>> animations{};
 
             if (!arr) {
                 logFatal("arr == nullptr. loadAnimations(Args...)");
@@ -36,43 +51,57 @@ namespace RE::Core {
             }
 
             for (const auto& desc : *arr) {
-                const auto* tbl = desc.as_table();
+                const auto* tbl = desc.as_table(); // NOLINT
 
                 if (!tbl) {
                     logFatal("tbl == nullptr. loadAnimations(Args...)");
                     return{};
                 }
 
-                animationDescriptor d{};
+                const animType type = toEnum<animType>(getValFromToml<std::uint8_t>(*tbl, "type")).value();
 
-                const Vector2 s = getVecFromToml(*tbl, "start");
-                d.start = {static_cast<std::size_t>(s.x), static_cast<std::size_t>(s.y)};
+                switch (type) {
+                    case animType::SILENT: {
+                        auto d = std::make_unique<animationDescriptor>(parseDescriptorBase(*tbl));
+                        animations.push_back(std::move(d));
 
-                const Vector2 e = getVecFromToml(*tbl, "end");
-                d.end = {static_cast<std::size_t>(e.x), static_cast<std::size_t>(e.y)};
+                        break;
+                    }
+                    case animType::KEYFRAME_SOUND: {
 
-                d.frameDuration = getValFromToml<float>(*tbl, "duration");
-                d.spriteRes = getVecFromToml(*tbl, "spriteRes");
+                        auto d = std::make_unique<keyframeSoundDescriptor>(
+                            parseDescriptorBase(*tbl),
+                            getArrFromToml<std::uint8_t>(*tbl, "soundFrames"),
+                            toEnum<soundId>(getValFromToml<std::uint8_t>(*tbl, "soundFrameSoundId")).value());
 
-                d.type = toEnum<animPlaybackType>(getValFromToml<std::uint8_t>(*tbl, "playbackMode")).value();
-                d.id = toEnum<animationId>(getValFromToml<std::uint8_t>(*tbl, "id")).value();
+                        animations.push_back(std::move(d));
 
-                if (tbl->contains("soundFrames")) {
-                    d.soundFrames = getArrFromToml<uint8_t>(*tbl, "soundFrames");
-                    d.soundId = getValFromToml<std::uint8_t>(*tbl, "soundId");
+                        break;
+                    }
+                    case animType::TRANSITION_SOUND: {
+                        auto d = std::make_unique<transitionSoundDescriptor>(
+                            parseDescriptorBase(*tbl),
+                            toEnum<soundId>(getValFromToml<std::uint8_t>(*tbl, "transitionSound")).value());
+
+                        animations.push_back(std::move(d));
+
+                        break;
+                    }
+                    default: {
+                        logFatal("No such animation type!");
+                        break;
+                    }
                 }
-                else {
-                    d.soundFrames = std::nullopt;
-                    d.soundId = std::nullopt;
-                }
-
-                animations.push_back(d);
             }
 
             return animations;
         }
         catch (const toml::parse_error& e) {
             logFatal(std::string("Cannot parse animation file: ") + std::string(e.what()));
+            return{};
+        }
+        catch (...) {
+            logFatal("Failed to load animation file, an unknown error has occurred.");
             return{};
         }
     }

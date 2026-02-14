@@ -37,7 +37,7 @@ namespace fs = std::filesystem;
 namespace RE::Application {
     class GameLayer final : public Core::Layer {
         Core::MapData m_map{};
-        Core::AudioManager m_audioManager{};
+        std::shared_ptr<Core::AudioManager> m_audioManager{};
         b2WorldDef m_worldDef{};
         Core::SceneCamera m_camera{};
         Core::EventBus m_eventBus;
@@ -90,23 +90,32 @@ namespace RE::Application {
             SHADER_UNIFORM_VEC2);
 
         try {
+            m_audioManager = std::make_shared<Core::AudioManager>();
+
+            m_audioManager->pushSound(
+                Core::soundId::PLAYER_FOOTSTEP,
+                std::make_unique<Core::SoundArray>("../assets/Player assets/Sounds/Walk"));
+
+            m_audioManager->pushSound(
+                Core::soundId::PLAYER_LAND,
+                std::make_unique<Core::SoundArray>("../assets/Player assets/Sounds/Jump"));
+
+            m_audioManager->setSoundVolume(Core::soundId::PLAYER_FOOTSTEP, 0.50f);
+            m_audioManager->setSoundVolume(Core::soundId::PLAYER_LAND, 0.50f);
+
+            m_audioManager->pushMusic(
+                Core::musicId::BACKGROUND_NOISE,
+                Core::Music("../assets/Map data/Sounds/Brown noise.wav"));
+
+            m_audioManager->setMusicVolume(Core::musicId::BACKGROUND_NOISE, 0.30f);
+            m_audioManager->startMusic(Core::musicId::BACKGROUND_NOISE);
+
             // Has to be ptr. b2Body enters undefined state when moved.
             m_playerCharacter = std::make_shared<Core::Player>(
                 Core::metersToPixels(m_currentSave.centerPosition.x),
                 Core::metersToPixels(m_currentSave.centerPosition.y),
                 m_worldId,
-                std::forward<P>(playerSpritePath));
-
-            m_audioManager.pushSound(
-                Core::soundId::PLAYER_FOOTSTEP,
-                std::make_unique<Core::SoundArray>("../assets/Player assets/Sounds/Walk"));
-
-            m_audioManager.pushMusic(
-                Core::musicId::BACKGROUND_NOISE,
-                Core::Music("../assets/Map data/Sounds/Brown noise.wav"));
-
-            m_audioManager.setMusicVolume(Core::musicId::BACKGROUND_NOISE, 0.30f);
-            m_audioManager.startMusic(Core::musicId::BACKGROUND_NOISE);
+                m_audioManager);
         }
         catch (const std::exception& e) {
             Core::logFatal(std::string("GameLayer::GameLayer(Args...) failed: ") + std::string(e.what()));

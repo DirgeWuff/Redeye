@@ -12,85 +12,18 @@
 // Class definition for Player.h and definitions of its functions.
 
 #include <iostream>
+#include "raylib.h"
 #include "box2d/box2d.h"
 #include "Player.h"
 #include "../../Core/Utility/Logging.h"
 #include "../../Core/UI/RectButton.h"
-#include "../../Core/Audio/Sound.h"
 #include "../../Core/Utility/Utils.h"
 #include "../../Core/Backend/LayerManager.h"
 #include "../../Application/Layers/DeathMenuLayer.h"
 #include "../../Core/Utility/Globals.h"
+#include "../../Core/Serialization/AnimationLoader.h"
 
 namespace RE::Core {
-    Player::~Player() {
-        #ifdef DEBUG
-            logDbg("Player destroyed at address: ", this);
-        #endif
-
-        if (b2Body_IsValid(m_body))
-            b2DestroyBody(m_body);
-
-    }
-
-    void Player::pollEvents() {
-        if (IsKeyDown(KEY_D))
-            m_movementIntent = 1;
-        else if (IsKeyDown(KEY_A))
-            m_movementIntent = -1;
-        else
-            m_movementIntent = 0;
-
-        if (IsKeyDown(KEY_SPACE))
-            m_jumpIntent = true;
-    }
-
-    void Player::update(const b2WorldId& world, AudioManager& audManager) {
-        assert(b2Body_IsValid(m_body));
-
-        const float velocityY = b2Body_GetLinearVelocity(m_body).y;
-
-        if (isOnGround() && m_jumpIntent)
-            jump();
-
-        m_jumpIntent = false;
-
-        if (m_movementIntent > 0) {
-            m_currentDirection = direction::RIGHT;
-            moveRight(world);
-        }
-        else if (m_movementIntent < 0) {
-            m_currentDirection = direction::LEFT;
-            moveLeft(world);
-        }
-
-        if (!isOnGround()) {
-            m_currentState = velocityY < 0.0f ?
-                entityActionState::JUMPING :
-                entityActionState::FALLING;
-        }
-        else {
-            m_currentState = m_movementIntent != 0 ?
-                entityActionState::WALKING :
-                entityActionState::IDLE;
-        }
-
-        m_movementIntent = 0;
-
-        m_centerPosition = b2Body_GetPosition(m_body);
-        m_cornerPosition = {
-            metersToPixels(m_centerPosition.x) - m_sizePx.x / 2,
-            metersToPixels(m_centerPosition.y) - m_sizePx.y / 2
-        };
-
-        m_animationManager.updateAnimation(m_currentState, m_currentDirection, audManager);
-        m_currentAnimId = m_animationManager.getCurrentAnimId();
-    }
-
-    void Player::draw() const {
-        m_animationManager.drawAnimation(m_cornerPosition);
-    }
-
     void Player::moveRight(const b2WorldId& world) const {
         assert(b2Body_IsValid(m_body));
         assert(b2World_IsValid(world));
@@ -156,6 +89,176 @@ namespace RE::Core {
         true);
     }
 
+    // Consider returning the full result if other raycast info is needed down the line...
+    [[nodiscard]] b2Vec2 Player::getGroundNormals(const b2WorldId& world) const {
+        assert(b2Body_IsValid(m_body));
+
+        const b2Vec2 origin = b2Body_GetPosition(m_body);
+        const b2Vec2 endPoint = {origin.x, origin.y + 1.0f};
+        const b2Vec2 translation = b2Sub(endPoint, origin);
+
+        b2QueryFilter filter = b2DefaultQueryFilter();
+        filter.categoryBits = g_raycastCategoryBits;
+        filter.maskBits = g_groundCategoryBits;
+
+        assert(b2World_IsValid(world));
+        const b2RayResult result = b2World_CastRayClosest(world, origin, translation, filter);
+
+        return result.normal;
+    }
+
+    Player::Player(
+        const float centerX,
+        const float centerY,
+        const b2WorldId world,
+        std::shared_ptr<AudioManager> manager) :
+            m_playerAnimations(loadAnimations(g_playerAnimPath)),
+            m_animationManager(
+                g_playerSpritePath,
+                m_playerAnimations,
+                animationId::PLAYER_IDLE_RIGHT,
+                std::move(manager)),
+            m_playerSpritePath(g_playerSpritePath),
+            m_currentDirection(direction::RIGHT),
+            m_currentState(entityActionState::IDLE)
+    {
+        m_sizePx = m_animationManager.getSpriteSize();
+        m_sizeMeters = pixelsToMetersVec(m_sizePx);
+        m_centerPosition = {pixelsToMeters(centerX), pixelsToMeters(centerY)};
+        m_cornerPosition = {centerX - m_sizePx.x / 2.0f, centerY - m_sizePx.y / 2.0f};
+
+        m_bodyDef = b2DefaultBodyDef();
+        m_bodyDef.position = m_centerPosition;
+        m_bodyDef.type = b2_dynamicBody;
+        m_bodyDef.fixedRotation = true;
+        m_bodyDef.linearDamping = 8.0f;
+        m_body = b2CreateBody(world, &m_bodyDef);
+
+        const b2Capsule boundingCapsule = {
+            pixelsToMetersVec(Vector2(0.0f, -20.0f)),
+            pixelsToMetersVec(Vector2(0.0f, 32.0f)),
+            pixelsToMeters(28.0f)
+        };
+
+        m_shapeDef = b2DefaultShapeDef();
+        m_shapeDef.material.friction = 0.50f;
+        m_shapeDef.material.restitution = 0.0f;
+        m_shapeDef.density = 8.0f;
+        m_shapeDef.filter.categoryBits = g_playerCategoryBits;
+        m_shapeDef.filter.maskBits = g_universalMaskBits;   // Using this for now, may change later...
+        b2CreateCapsuleShape(m_body, &m_shapeDef, &boundingCapsule);
+
+        // Footpaw sensor :3
+        m_footpawSensorBox = b2MakeOffsetBox(
+            pixelsToMeters(20.0f),
+            pixelsToMeters(12.0f),
+            {0.0f, m_sizeMeters.y / 3.0f},
+            b2MakeRot(0.0f)
+        );
+
+        m_footpawSensorShape = b2DefaultShapeDef();
+        m_footpawSensorShape.isSensor = true;
+        m_footpawSensorShape.enableSensorEvents = true;
+        m_footpawSensorShape.filter.categoryBits = g_footpawCategoryBits;
+        m_footpawSensorShape.filter.maskBits = g_universalMaskBits;
+
+        // Set our userData for the EventDispatcher to use later
+        try {
+            m_footpawSensorInfo = std::make_unique<sensorInfo>(sensorType::PLAYER_FOOTPAW_SENSOR);
+            m_footpawSensorShape.userData = static_cast<void*>(m_footpawSensorInfo.get());
+        }
+        catch (const std::exception& e) {
+            logFatal(std::string("Failed to allocate for m_footpawSensorInfo: ") + std::string(e.what()) +
+                    std::string(". Player::Player(Args...)"));
+
+            return;
+        }
+        catch (...) {
+            logFatal("Failed to allocate for m_footpawSensorInfo: An unknown error has occurred."
+                     "Player::Player(Args...)");
+
+            return;
+        }
+
+        m_footpawSensorId = b2CreatePolygonShape(
+            m_body,
+            &m_footpawSensorShape,
+            &m_footpawSensorBox);
+
+        m_currentAnimId = m_animationManager.getCurrentAnimId();
+
+        #ifdef DEBUG
+            logDbg("Class player constructed at address: ", this);
+        #endif
+    }
+
+    Player::~Player() {
+        #ifdef DEBUG
+            logDbg("Player destroyed at address: ", this);
+        #endif
+
+        if (b2Body_IsValid(m_body))
+            b2DestroyBody(m_body);
+    }
+
+    void Player::pollEvents() {
+        if (IsKeyDown(KEY_D))
+            m_movementIntent = 1;
+        else if (IsKeyDown(KEY_A))
+            m_movementIntent = -1;
+        else
+            m_movementIntent = 0;
+
+        if (IsKeyDown(KEY_SPACE))
+            m_jumpIntent = true;
+    }
+
+    void Player::update(const b2WorldId& world) {
+        assert(b2Body_IsValid(m_body));
+
+        const float velocityY = b2Body_GetLinearVelocity(m_body).y;
+
+        if (isOnGround() && m_jumpIntent)
+            jump();
+
+        m_jumpIntent = false;
+
+        if (m_movementIntent > 0) {
+            m_currentDirection = direction::RIGHT;
+            moveRight(world);
+        }
+        else if (m_movementIntent < 0) {
+            m_currentDirection = direction::LEFT;
+            moveLeft(world);
+        }
+
+        if (!isOnGround()) {
+            m_currentState = velocityY < 0.0f ?
+                entityActionState::JUMPING :
+                entityActionState::FALLING;
+        }
+        else {
+            m_currentState = m_movementIntent != 0 ?
+                entityActionState::WALKING :
+                entityActionState::IDLE;
+        }
+
+        m_movementIntent = 0;
+
+        m_centerPosition = b2Body_GetPosition(m_body);
+        m_cornerPosition = {
+            metersToPixels(m_centerPosition.x) - m_sizePx.x / 2,
+            metersToPixels(m_centerPosition.y) - m_sizePx.y / 2
+        };
+
+        m_animationManager.updateAnimation(m_currentState, m_currentDirection);
+        m_currentAnimId = m_animationManager.getCurrentAnimId();
+    }
+
+    void Player::draw() const {
+        m_animationManager.drawAnimation(m_cornerPosition);
+    }
+
     void Player::murder() {
         LayerManager::getInstance().suspendLayer(layerKey::GAME_LAYER);
         LayerManager::getInstance().suspendOverlays();
@@ -202,6 +305,14 @@ namespace RE::Core {
         m_dead = false;
     }
 
+    void Player::addContactEvent() noexcept {
+        m_activeGroundContacts++;
+    }
+
+    void Player::removeContactEvent() noexcept {
+        m_activeGroundContacts--;
+    }
+
     [[nodiscard]] sensorInfo Player::getFootpawSensorInfo() const noexcept {
         assert(m_footpawSensorInfo);
 
@@ -230,31 +341,5 @@ namespace RE::Core {
 
     [[nodiscard]] entityActionState Player::getCurrentActionState() const noexcept {
         return m_currentState;
-    }
-
-    void Player::addContactEvent() noexcept {
-        m_activeGroundContacts++;
-    }
-
-    void Player::removeContactEvent() noexcept {
-        m_activeGroundContacts--;
-    }
-
-    // Consider returning the full result if other raycast info is needed down the line...
-    [[nodiscard]] b2Vec2 Player::getGroundNormals(const b2WorldId& world) const {
-        assert(b2Body_IsValid(m_body));
-
-        const b2Vec2 origin = b2Body_GetPosition(m_body);
-        const b2Vec2 endPoint = {origin.x, origin.y + 1.0f};
-        const b2Vec2 translation = b2Sub(endPoint, origin);
-
-        b2QueryFilter filter = b2DefaultQueryFilter();
-        filter.categoryBits = g_raycastCategoryBits;
-        filter.maskBits = g_groundCategoryBits;
-
-        assert(b2World_IsValid(world));
-        const b2RayResult result = b2World_CastRayClosest(world, origin, translation, filter);
-
-        return result.normal;
     }
 }

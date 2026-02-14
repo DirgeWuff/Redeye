@@ -9,7 +9,7 @@
 //
 // Module purpose/description:
 //
-// Declaration of a function to load an std::vector<animationDescriptor> from
+// Declaration of a functions to load an std::vector<std::unique_ptr<animationDescriptor>> from
 // TOML file. Designed to eliminate hard-coding of animationDescriptors.
 
 #ifndef ANIMATIONLOADER_H
@@ -17,10 +17,13 @@
 
 #include <vector>
 #include <string>
+#include <memory>
+#include "../external_libs/Toml/toml.hpp"
 #include "../Renderer/Animation.h"
 
 namespace RE::Core {
-    [[nodiscard]] std::vector<animationDescriptor> loadAnimations(const std::string& dirPath);
+    [[nodiscard]] animationDescriptor parseDescriptorBase(const toml::table& tbl);
+    [[nodiscard]] std::vector<std::unique_ptr<animationDescriptor>> loadAnimations(const std::string& dirPath);
 }
 
 #endif //ANIMATIONLOADER_H

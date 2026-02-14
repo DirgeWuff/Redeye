@@ -63,7 +63,7 @@ namespace RE::Core {
     };
 
     // Animation playback "mode"
-    enum class animPlaybackType : std::uint8_t {
+    enum class animPlaybackMode : std::uint8_t {
         SINGLE_FRAME,
         NON_LOOPING,
         LOOP,
@@ -119,6 +119,13 @@ namespace RE::Core {
         PLAYER_FALL_RIGHT = 6,
         PLAYER_FALL_LEFT = 7,
         COUNT = 8
+    };
+
+    enum class animType : std::uint8_t {
+        SILENT = 0,
+        KEYFRAME_SOUND = 1,
+        TRANSITION_SOUND = 2,
+        COUNT = 3
     };
 
     std::string layerKeyToStr(const layerKey& key);

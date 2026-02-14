@@ -11,7 +11,6 @@
 //
 // Class definition for AnimationManager.h and its member functions.
 
-
 #include <cassert>
 #include "ranges"
 #include "AnimationManager.h"
@@ -31,13 +30,15 @@ namespace RE::Core {
 
     AnimationManager::AnimationManager(
         const std::string& spritePath,
-        std::vector<animationDescriptor>& anims,
-        const animationId& startingAnim)
+        std::vector<std::unique_ptr<animationDescriptor>>& anims,
+        const animationId& startingAnim,
+        std::shared_ptr<AudioManager> manager) :
+            m_audioManager(std::move(manager))
     {
         for (auto& anim : anims) {
             try {
                 std::shared_ptr<Texture2D> tex;
-                const auto it = m_animTexs.find(spritePath);
+                const auto it = m_animTexs.find(spritePath); // NOLINT
 
                 if (it != m_animTexs.end()) {
                     tex = it->second;
@@ -52,11 +53,28 @@ namespace RE::Core {
                     m_animTexs.emplace(spritePath, tex);
                 }
 
-                m_anims.try_emplace(
-                   anim.id,
+                // Try derived FIRST because dynamic_cast to base will always be valid...
+                if (auto* keyframeDesc = dynamic_cast<keyframeSoundDescriptor*>(anim.get())) {
+                    auto newKeyframeAnim = std::make_unique<KeyframeSoundAnim>(tex, *keyframeDesc, m_audioManager);
 
-                    tex,
-                    anim);
+                    m_anims.emplace(
+                        anim->id,
+                        std::move(newKeyframeAnim));
+                }
+                else if (auto* transitionDesc = dynamic_cast<transitionSoundDescriptor*>(anim.get())) {
+                    auto newTransitionAnim = std::make_unique<TransitionSoundAnim>(tex, *transitionDesc, m_audioManager);
+
+                    m_anims.emplace(
+                        anim->id,
+                        std::move(newTransitionAnim));
+                }
+                else if (auto* animDesc = anim.get()) {
+                    auto newAnim = std::make_unique<Animation>(tex, *animDesc);
+
+                    m_anims.emplace(
+                        anim->id,
+                        std::move(newAnim));
+                }
             }
             catch (const std::exception& e) {
                 logFatal(std::string("Construction failed: ") + std::string(e.what()) +
@@ -81,9 +99,9 @@ namespace RE::Core {
 
         m_curAnimId = it->first;
 
-    #ifdef DEBUG
-        logDbg("AnimationManager constructed at address: ", this);
-    #endif
+        #ifdef DEBUG
+            logDbg("AnimationManager constructed at address: ", this);
+        #endif
     }
 
     AnimationManager::~AnimationManager() {
@@ -99,14 +117,46 @@ namespace RE::Core {
     #endif
     }
 
+    AnimationManager::AnimationManager(AnimationManager&& other) noexcept :
+        m_anims(std::move(other.m_anims)),
+        m_animTexs(std::move(other.m_animTexs)),
+        m_audioManager(std::move(other.m_audioManager)),
+        m_prevAnimId(other.m_prevAnimId),
+        m_curAnimId(other.m_curAnimId)
+    {
+        #ifdef DEBUG
+            logDbg("Move called on AnimationManager, new address: ", this);
+        #endif
+    }
+
+    AnimationManager& AnimationManager::operator=(AnimationManager&& other) noexcept {
+        if (this != &other) {
+            this->m_anims = std::move(other.m_anims);
+            this->m_animTexs = std::move(other.m_animTexs);
+            this->m_audioManager = std::move(other.m_audioManager);
+            this->m_prevAnimId = other.m_prevAnimId;
+            this->m_curAnimId = other.m_curAnimId;
+        }
+
+        #ifdef DEBUG
+            logDbg("Move assignment called on AnimationManager, new address: ", this);
+        #endif
+
+        return *this;
+    }
+
     void AnimationManager::updateAnimation(
         const entityActionState& state,
-        const direction& dir,
-        AudioManager& audManager)
+        const direction& dir)
     {
-        const animationId id = resolveAnimationId(state, dir);
+        const animationId id = resolveAnimationId(state, dir); // NOLINT
 
+        // Animation switch occurs...
         if (id != m_curAnimId) {
+            if (m_anims.at(m_curAnimId)->getType() == animType::TRANSITION_SOUND) {
+                m_anims.at(m_curAnimId)->onEnd();
+            }
+
             const auto it = m_anims.find(id);
 
             if (it == m_anims.end()) {
@@ -114,19 +164,19 @@ namespace RE::Core {
                 return;
             }
 
-            it->second.resetAnimation();
+            it->second->resetAnimation();
             m_prevAnimId = m_curAnimId;
             m_curAnimId = it->first;
 
-            m_anims.at(m_curAnimId).update(audManager);
+            m_anims.at(m_curAnimId)->update();
         }
         else {
-            m_anims.at(m_curAnimId).update(audManager);
+            m_anims.at(m_curAnimId)->update();
         }
     }
 
     void AnimationManager::drawAnimation(const Vector2 drawPos) const {
-        m_anims.at(m_curAnimId).draw(drawPos);
+        m_anims.at(m_curAnimId)->draw(drawPos);
     }
 
     [[nodiscard]] animationId AnimationManager::getCurrentAnimId() const noexcept {
@@ -135,10 +185,10 @@ namespace RE::Core {
 
     // Should be same for all sprites on sheet... Might be an unnecessarily complex way to do this.
     [[nodiscard]] Vector2 AnimationManager::getSpriteSize() const noexcept {
-        const auto it = m_anims.find(m_curAnimId);
+        const auto it = m_anims.find(m_curAnimId); // NOLINT
 
         if (it != m_anims.end()) {
-           return it->second.m_spriteRes;
+           return it->second->m_spriteRes;
         }
 
         return{};

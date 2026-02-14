@@ -31,8 +31,9 @@ namespace RE::Core {
     const direction& dir);
 
     class AnimationManager {
-        std::map<animationId, Animation> m_anims{};
+        std::map<animationId, std::unique_ptr<Animation>> m_anims{};
         std::map<std::string, std::shared_ptr<Texture2D>> m_animTexs{};
+        std::shared_ptr<AudioManager> m_audioManager{};
         animationId m_prevAnimId{};
         animationId m_curAnimId{};
     public:
@@ -42,22 +43,23 @@ namespace RE::Core {
             #endif
         }
 
+        // TODO: Rethink how all this is constructed, should probably have push/pop functions
         AnimationManager(
         const std::string& spritePath,
-        std::vector<animationDescriptor>& anims,
-        const animationId& startingAnim);
+        std::vector<std::unique_ptr<animationDescriptor>>& anims,
+        const animationId& startingAnim,
+        std::shared_ptr<AudioManager> manager);
 
         ~AnimationManager();
 
         AnimationManager(const AnimationManager&) = delete;
-        AnimationManager(AnimationManager&&) noexcept = delete;
+        AnimationManager(AnimationManager&& other) noexcept;
         AnimationManager& operator=(const AnimationManager&) = delete;
-        AnimationManager& operator=(AnimationManager&&) noexcept = delete;
+        AnimationManager& operator=(AnimationManager&& other) noexcept;
 
         void updateAnimation(
             const entityActionState& state,
-            const direction& dir,
-            AudioManager& audManager);
+            const direction& dir);
 
         void drawAnimation(Vector2 drawPos) const;
 

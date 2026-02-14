@@ -20,26 +20,23 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "raylib.h"
 #include "../../Core/Phys/BoxBody.h"
 #include "../../Core/Event/EventCollider.h"
 #include "../../Core/Utility/Utils.h"
 #include "../../Core/Serialization/Save.h"
-#include "../../Core/Utility/Globals.h"
 #include "../../Core/Renderer/Animation.h"
 #include "../../Core/Renderer/AnimationManager.h"
-#include "../Serialization/AnimationLoader.h"
 
 namespace RE::Core {
     class SceneCamera;
 
     class Player final : public BoxBody, public std::enable_shared_from_this<Player> {
         b2Polygon m_footpawSensorBox{};
-        std::vector<animationDescriptor> m_playerAnimations{};
+        std::vector<std::unique_ptr<animationDescriptor>> m_playerAnimations{};
         AnimationManager m_animationManager{};
         b2ShapeDef m_footpawSensorShape{};
         std::string m_playerSpritePath{};
-        std::unique_ptr<sensorInfo> m_footpawSensorInfo;
+        std::unique_ptr<sensorInfo> m_footpawSensorInfo{};
         b2ShapeId m_footpawSensorId{};
         std::uint16_t m_activeGroundContacts{};
         std::uint8_t m_soundDelayClock{};
@@ -53,93 +50,15 @@ namespace RE::Core {
         void moveRight(const b2WorldId& world) const;
         void moveLeft(const b2WorldId& world) const;
         void jump() const;
+        [[nodiscard]] b2Vec2 getGroundNormals(const b2WorldId& world) const;
     public:
         Player() = default;
-
-        template<typename T>
         Player(
-            const float centerX,
-            const float centerY,
-            const b2WorldId world,
-            T&& spritePath) :
-                m_playerAnimations(loadAnimations(g_playerAnimPath)),
-                m_animationManager(
-                    spritePath,
-                    m_playerAnimations,
-                    animationId::PLAYER_IDLE_RIGHT),
-                        m_playerSpritePath(std::string(std::forward<T>(spritePath))),
-                        m_currentDirection(direction::RIGHT),
-                        m_currentState(entityActionState::IDLE)
-    {
-        m_sizePx = m_animationManager.getSpriteSize();
-        m_sizeMeters = pixelsToMetersVec(m_sizePx);
-        m_centerPosition = {pixelsToMeters(centerX), pixelsToMeters(centerY)};
-        m_cornerPosition = {centerX - m_sizePx.x / 2.0f, centerY - m_sizePx.y / 2.0f};
+            float centerX,
+            float centerY,
+            b2WorldId world,
+            std::shared_ptr<AudioManager> manager);
 
-        m_bodyDef = b2DefaultBodyDef();
-        m_bodyDef.position = m_centerPosition;
-        m_bodyDef.type = b2_dynamicBody;
-        m_bodyDef.fixedRotation = true;
-        m_bodyDef.linearDamping = 8.0f;
-        m_body = b2CreateBody(world, &m_bodyDef);
-
-        const b2Capsule boundingCapsule = {
-            pixelsToMetersVec(Vector2(0.0f, -20.0f)),
-            pixelsToMetersVec(Vector2(0.0f, 32.0f)),
-            pixelsToMeters(28.0f)
-        };
-
-        m_shapeDef = b2DefaultShapeDef();
-        m_shapeDef.material.friction = 0.50f;
-        m_shapeDef.material.restitution = 0.0f;
-        m_shapeDef.density = 8.0f;
-        m_shapeDef.filter.categoryBits = g_playerCategoryBits;
-        m_shapeDef.filter.maskBits = g_universalMaskBits;   // Using this for now, may change later...
-        b2CreateCapsuleShape(m_body, &m_shapeDef, &boundingCapsule);
-
-        // Footpaw sensor :3
-        m_footpawSensorBox = b2MakeOffsetBox(
-            pixelsToMeters(20.0f),
-            pixelsToMeters(12.0f),
-            {0.0f, m_sizeMeters.y / 3.0f},
-            b2MakeRot(0.0f)
-        );
-
-        m_footpawSensorShape = b2DefaultShapeDef();
-        m_footpawSensorShape.isSensor = true;
-        m_footpawSensorShape.enableSensorEvents = true;
-        m_footpawSensorShape.filter.categoryBits = g_footpawCategoryBits;
-        m_footpawSensorShape.filter.maskBits = g_universalMaskBits;
-
-        // Set our userData for the EventDispatcher to use later
-        try {
-            m_footpawSensorInfo = std::make_unique<sensorInfo>(sensorType::PLAYER_FOOTPAW_SENSOR);
-            m_footpawSensorShape.userData = static_cast<void*>(m_footpawSensorInfo.get());
-        }
-        catch (const std::exception& e) {
-            logFatal(std::string("Failed to allocate for m_footpawSensorInfo: ") + std::string(e.what()) +
-                    std::string(". Player::Player(Args...)"));
-
-            return;
-        }
-        catch (...) {
-            logFatal("Failed to allocate for m_footpawSensorInfo: An unknown error has occurred."
-                     "Player::Player(Args...)");
-
-            return;
-        }
-
-        m_footpawSensorId = b2CreatePolygonShape(
-            m_body,
-            &m_footpawSensorShape,
-            &m_footpawSensorBox);
-
-        m_currentAnimId = m_animationManager.getCurrentAnimId();
-
-        #ifdef DEBUG
-            logDbg("Class player constructed at address: ", this);
-        #endif
-    }
         ~Player() override;
 
         Player(const Player&) = delete;
@@ -148,13 +67,12 @@ namespace RE::Core {
         Player& operator=(Player&&) noexcept = delete;
 
         void pollEvents();
-        void update(const b2WorldId& world, AudioManager& audManager);
+        void update(const b2WorldId& world);
         void draw() const override;
         void murder();
         void reform(const saveData& save);
         void addContactEvent() noexcept;
         void removeContactEvent() noexcept;
-        [[nodiscard]] b2Vec2 getGroundNormals(const b2WorldId& world) const;
 
         [[nodiscard]] sensorInfo getFootpawSensorInfo() const noexcept;
         [[nodiscard]] b2ShapeId getFootpawSenorId() const noexcept; // Do we ever use this???

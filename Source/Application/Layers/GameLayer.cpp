@@ -146,7 +146,7 @@ namespace RE::Application {
 
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             const Vector2 mousePos = GetMousePosition();
-            const Vector2 shaderMousePos = { mousePos.x, GetScreenHeight() - mousePos.y };
+            const Vector2 shaderMousePos = { mousePos.x, static_cast<float>(GetScreenHeight()) - mousePos.y };
 
             // Calculate direction vector from beam to mouse and relative angle
             const Vector2 vecToMouse = Vector2Normalize(Vector2Subtract(shaderMousePos, m_beamPosition));
@@ -220,9 +220,9 @@ namespace RE::Application {
         m_playerCharacter->pollEvents();
         b2World_Step(m_worldId, g_worldStep, g_subStep);
         this->processSensorEvents();
-        m_playerCharacter->update(m_worldId, m_audioManager);
+        m_playerCharacter->update(m_worldId);
         m_camera.update(*m_playerCharacter);
-        m_audioManager.updateMusic();
+        m_audioManager->updateMusic();
 
         if (g_drawShaderEffects)
             updateBeam();
