@@ -68,7 +68,6 @@ namespace RE::Core {
                         break;
                     }
                     case animType::KEYFRAME_SOUND: {
-
                         auto d = std::make_unique<keyframeSoundDescriptor>(
                             parseDescriptorBase(*tbl),
                             getArrFromToml<std::uint8_t>(*tbl, "soundFrames"),

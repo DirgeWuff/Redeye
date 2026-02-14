@@ -62,7 +62,7 @@ namespace RE::Core {
 
             LayerManager::getInstance().pushLayer(
                  layerKey::GAME_LAYER,
-                 std::make_unique<RE::Application::GameLayer>(g_playerSpritePath, initSave));
+                 std::make_unique<RE::Application::GameLayer>(initSave));
         }
         catch (const std::exception& e) {
             logFatal(std::string("Program::init() failed: " + std::string(e.what())));

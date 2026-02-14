@@ -16,9 +16,6 @@
 #include "Animation.h"
 #include "../Audio/AudioManager.h"
 #include "../Utility/Logging.h"
-#include <filesystem>
-
-namespace fs = std::filesystem;
 
 namespace RE::Core {
     // Virtual/Base
@@ -179,25 +176,6 @@ namespace RE::Core {
             m_frameIndices.at(m_curIdx).y,
             m_spriteRes.x,
             m_spriteRes.y};
-
-        std::ofstream f;
-
-        if (fs::exists("sourceRectLog.txt")) {
-            f.open("sourceRectLog.txt", std::ios::app);
-
-            f << "Animation::Update()\n";
-            f << "X: " << m_sourceRect.x << " Y: " << m_sourceRect.y;
-            f << " " << animIdToStr(m_animId) << "\n";
-            f.close();
-        }
-        else {
-            f.open("sourceRectLog.txt");
-
-            f << "Animation::Update()\n";
-            f << "X: " << m_sourceRect.x << " Y: " << m_sourceRect.y;
-            f << " " << animIdToStr(m_animId) << "\n";
-            f.close();
-        }
     }
 
     void Animation::draw(const Vector2 drawPos) const noexcept {
@@ -338,25 +316,6 @@ namespace RE::Core {
             m_frameIndices.at(m_curIdx).y,
             m_spriteRes.x,
             m_spriteRes.y};
-
-        std::ofstream f;
-
-        if (fs::exists("sourceRectLog.txt")) {
-            f.open("sourceRectLog.txt", std::ios::app);
-
-            f << "KeyframeSoundAnim::Update()\n";
-            f << "X: " << m_sourceRect.x << " Y: " << m_sourceRect.y;
-            f << " " << animIdToStr(m_animId) << "\n";
-            f.close();
-        }
-        else {
-            f.open("sourceRectLog.txt");
-
-            f << "KeyframeSoundAnim::Update()\n";
-            f << "X: " << m_sourceRect.x << " Y: " << m_sourceRect.y;
-            f << " " << animIdToStr(m_animId) << "\n";
-            f.close();
-        }
     }
 
     // TransitionSoundAnim

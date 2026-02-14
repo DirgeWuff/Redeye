@@ -17,6 +17,7 @@
 // debug the issue, but to no avail. So for now, it stays in here.
 
 #include <cstdint>
+#include <filesystem>
 #include "raylib.h"
 #include "raymath.h"
 #include "box2d/box2d.h"
@@ -27,7 +28,10 @@
 #include "../../Core/Renderer/TilemapRenderer.h"
 #include "../../Core/Utility/Globals.h"
 #include "../../Core/Backend/LayerManager.h"
+#include "../../Core/Event/EventDispatcher.h"
 #include "TextAlertLayer.h"
+
+namespace fs = std::filesystem;
 
 namespace RE::Application {
     void GameLayer::setEventCallbacks() {
@@ -110,10 +114,6 @@ namespace RE::Application {
         #ifdef DEBUG
             Core::logDbg("Event callbacks set.");
         #endif
-    }
-
-    GameLayer::~GameLayer() {
-        GameLayer::destroy();
     }
 
     void GameLayer::updateBeam() {
@@ -213,6 +213,93 @@ namespace RE::Application {
         }
     }
 
+    void GameLayer::destroy() {
+        #ifdef DEBUG
+            logDbg("GameLayer destroyed at address: ", this);
+        #endif
+
+        UnloadShader(m_fragShader);
+        Core::unloadMap(m_map);
+    }
+
+    GameLayer::GameLayer(const Core::saveData& save) :
+        m_worldDef(b2DefaultWorldDef())
+    {
+        m_type = Core::layerType::PRIMARY_LAYER;
+        m_isEnabled = true;
+        m_worldDef.gravity = {0.0f, 50.0f};
+        m_worldId = b2CreateWorld(&m_worldDef);
+        m_map = Core::loadMap(save.currentMapPath.string(), m_worldId);
+        m_currentSave.currentMapPath = fs::path(save.currentMapPath);
+        m_currentSave.centerPosition = save.centerPosition;
+        m_frameBuffer = LoadRenderTexture(GetScreenWidth(), GetScreenHeight());
+        m_camera = Core::SceneCamera(m_map, 1.5f);
+        m_fragShader = LoadShader(NULL, "../assets/Shaders/lighting.fsh"); // NOLINT
+        m_beamAngle = Vector2{1.0f, 0.0f};
+
+        if (!IsShaderValid(m_fragShader)) {
+            Core::logFatal("Unable to load shader. GameLayer::GameLayer()");
+            return;
+        }
+
+        m_flashlightPosLoc = GetShaderLocation(m_fragShader, "lightPos");
+        m_flashlightDirLoc = GetShaderLocation(m_fragShader, "lightDirection");
+        m_screenResLoc = GetShaderLocation(m_fragShader, "screenResolution");
+
+        const Vector2 screenRes = {static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())};
+
+        SetShaderValue(
+            m_fragShader,
+            m_screenResLoc,
+            &screenRes,
+            SHADER_UNIFORM_VEC2);
+
+        try {
+            m_audioManager = std::make_shared<Core::AudioManager>();
+
+            m_audioManager->pushSound(
+                Core::soundId::PLAYER_FOOTSTEP,
+                std::make_unique<Core::SoundArray>("../assets/Player assets/Sounds/Walk"));
+
+            m_audioManager->pushSound(
+                Core::soundId::PLAYER_LAND,
+                std::make_unique<Core::SoundArray>("../assets/Player assets/Sounds/Jump"));
+
+            m_audioManager->setSoundVolume(Core::soundId::PLAYER_FOOTSTEP, 0.50f);
+            m_audioManager->setSoundVolume(Core::soundId::PLAYER_LAND, 0.50f);
+
+            m_audioManager->pushMusic(
+                Core::musicId::BACKGROUND_NOISE,
+                Core::Music("../assets/Map data/Sounds/Brown noise.wav"));
+
+            m_audioManager->setMusicVolume(Core::musicId::BACKGROUND_NOISE, 0.30f);
+            m_audioManager->startMusic(Core::musicId::BACKGROUND_NOISE);
+
+            // Has to be ptr. b2Body enters undefined state when moved.
+            m_playerCharacter = std::make_shared<Core::Player>(
+                Core::metersToPixels(m_currentSave.centerPosition.x),
+                Core::metersToPixels(m_currentSave.centerPosition.y),
+                m_worldId,
+                m_audioManager);
+        }
+        catch (const std::exception& e) {
+            Core::logFatal(std::string("GameLayer::GameLayer(Args...) failed: ") + std::string(e.what()));
+            return;
+        }
+        catch (...) {
+            Core::logFatal("GameLayer::GameLayer(Args...) failed: An unknown error has occurred.");
+            return;
+        }
+
+        m_eventBus.addDispatcher(Core::EventDispatcher<Core::playerCollisionEvent>());
+        this->setEventCallbacks();
+        m_camera.setTarget(*m_playerCharacter);
+    }
+
+    GameLayer::~GameLayer() {
+        GameLayer::destroy();
+    }
+
     void GameLayer::update() {
         assert(m_playerCharacter);
         assert(b2World_IsValid(m_worldId));
@@ -278,14 +365,4 @@ namespace RE::Application {
             #endif
         }
     }
-
-    void GameLayer::destroy() {
-        #ifdef DEBUG
-            logDbg("GameLayer destroyed at address: ", this);
-        #endif
-
-        UnloadShader(m_fragShader);
-        Core::unloadMap(m_map);
-    }
 }
-
