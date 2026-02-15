@@ -29,6 +29,7 @@
 #include "../../Core/Utility/Globals.h"
 #include "../../Core/Backend/LayerManager.h"
 #include "../../Core/Event/EventDispatcher.h"
+#include "../../Core/Audio/AudioManager.h"
 #include "TextAlertLayer.h"
 
 namespace fs = std::filesystem;
@@ -282,7 +283,7 @@ namespace RE::Application {
                 m_worldId,
                 m_audioManager);
         }
-        catch (const std::exception& e) {
+        catch (const std::bad_alloc& e) {
             Core::logFatal(std::string("GameLayer::GameLayer(Args...) failed: ") + std::string(e.what()));
             return;
         }

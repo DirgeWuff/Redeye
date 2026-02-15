@@ -99,10 +99,10 @@ add_executable(Redeye
         Source/Core/Serialization/Save.h
         Source/Core/Utility/Globals.h
         Source/Core/Renderer/Tilemap.cpp
-        Source/Core/Renderer/Animation.cpp
-        Source/Core/Renderer/Animation.h
-        Source/Core/Renderer/AnimationManager.cpp
-        Source/Core/Renderer/AnimationManager.h
+        Source/Core/Animation/EntityAnimation.cpp
+        Source/Core/Animation/EntityAnimation.h
+        Source/Core/Animation/EntityAnimationManager.cpp
+        Source/Core/Animation/EntityAnimationManager.h
         Source/Core/Utility/Enum.cpp
         Source/Core/Utility/Enum.h
         Source/Core/Serialization/AnimationLoader.h

@@ -21,7 +21,7 @@
 #include <string>
 #include <memory>
 #include "raylib.h"
-#include "Animation.h"
+#include "EntityAnimation.h"
 #include "../Utility/Logging.h"
 #include "../Audio/AudioManager.h"
 
@@ -30,32 +30,32 @@ namespace RE::Core {
     const entityActionState& state,
     const direction& dir);
 
-    class AnimationManager {
-        std::map<animationId, std::unique_ptr<Animation>> m_anims{};
+    class EntityAnimationManager {
+        std::map<animationId, std::unique_ptr<EntityAnimation>> m_anims{};
         std::map<std::string, std::shared_ptr<Texture2D>> m_animTexs{};
         std::shared_ptr<AudioManager> m_audioManager{};
         animationId m_prevAnimId{};
         animationId m_curAnimId{};
     public:
-        AnimationManager() {
+        EntityAnimationManager() {
             #ifdef DEBUG
                 logDbg("Default AnimationManager created at address: ", this);
             #endif
         }
 
         // TODO: Rethink how all this is constructed, should probably have push/pop functions
-        AnimationManager(
+        EntityAnimationManager(
         const std::string& spritePath,
         std::vector<std::unique_ptr<animationDescriptor>>& anims,
         const animationId& startingAnim,
         std::shared_ptr<AudioManager> manager);
 
-        ~AnimationManager();
+        ~EntityAnimationManager();
 
-        AnimationManager(const AnimationManager&) = delete;
-        AnimationManager(AnimationManager&& other) noexcept;
-        AnimationManager& operator=(const AnimationManager&) = delete;
-        AnimationManager& operator=(AnimationManager&& other) noexcept;
+        EntityAnimationManager(const EntityAnimationManager&) = delete;
+        EntityAnimationManager(EntityAnimationManager&& other) noexcept;
+        EntityAnimationManager& operator=(const EntityAnimationManager&) = delete;
+        EntityAnimationManager& operator=(EntityAnimationManager&& other) noexcept;
 
         void updateAnimation(
             const entityActionState& state,

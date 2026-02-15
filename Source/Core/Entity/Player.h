@@ -24,8 +24,8 @@
 #include "../../Core/Event/EventCollider.h"
 #include "../../Core/Utility/Utils.h"
 #include "../../Core/Serialization/Save.h"
-#include "../../Core/Renderer/Animation.h"
-#include "../../Core/Renderer/AnimationManager.h"
+#include "../../Core/Animation/EntityAnimation.h"
+#include "../../Core/Animation/EntityAnimationManager.h"
 
 namespace RE::Core {
     class SceneCamera;
@@ -33,7 +33,7 @@ namespace RE::Core {
     class Player final : public BoxBody, public std::enable_shared_from_this<Player> {
         b2Polygon m_footpawSensorBox{};
         std::vector<std::unique_ptr<animationDescriptor>> m_playerAnimations{};
-        AnimationManager m_animationManager{};
+        EntityAnimationManager m_animationManager{};
         b2ShapeDef m_footpawSensorShape{};
         std::string m_playerSpritePath{};
         std::unique_ptr<sensorInfo> m_footpawSensorInfo{};

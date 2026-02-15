@@ -29,7 +29,7 @@
 
 namespace RE::Core {
     class AudioManager;
-    class AnimationManager;
+    class EntityAnimationManager;
 
     struct spriteIndex {std::size_t x; std::size_t y;};
 
@@ -115,8 +115,8 @@ namespace RE::Core {
     // TODO: Add support for animations that span multiple rows on the sprite sheet if that becomes a thing
 
     // Silent/base animation class
-    class Animation {
-        friend class AnimationManager;
+    class EntityAnimation {
+        friend class EntityAnimationManager;
     protected:
         std::vector<Vector2> m_frameIndices{};
         std::shared_ptr<Texture2D> m_texture{};
@@ -143,17 +143,17 @@ namespace RE::Core {
             animationId animId,
             animType type);
     public:
-        Animation();
-        Animation(
+        EntityAnimation();
+        EntityAnimation(
             std::shared_ptr<Texture2D> tex,
             const animationDescriptor& desc);
 
-        virtual ~Animation();
+        virtual ~EntityAnimation();
 
-        Animation(const Animation&) = delete;
-        Animation(Animation&& other) noexcept;
-        Animation& operator=(const Animation&) = delete;
-        Animation& operator=(Animation&& other) noexcept;
+        EntityAnimation(const EntityAnimation&) = delete;
+        EntityAnimation(EntityAnimation&& other) noexcept;
+        EntityAnimation& operator=(const EntityAnimation&) = delete;
+        EntityAnimation& operator=(EntityAnimation&& other) noexcept;
 
         virtual void onBegin() {}
         virtual void onEnd() {}
@@ -164,7 +164,7 @@ namespace RE::Core {
         [[nodiscard]] animType getType() const noexcept;
     };
 
-    class KeyframeSoundAnim final : public Animation {
+    class KeyframeSoundAnim final : public EntityAnimation {
         std::vector<std::uint8_t> m_soundFrames{};
         std::shared_ptr<AudioManager> m_audioManager{};
         soundId m_soundId{};
@@ -185,7 +185,7 @@ namespace RE::Core {
         void update() noexcept override;
     };
 
-    class TransitionSoundAnim final : public Animation {
+    class TransitionSoundAnim final : public EntityAnimation {
         // If the animation manager detects that we're transitioning
         // from this animation into m_transitionToId, a sound will be
         // the sound with m_soundId will be played by onEnd().

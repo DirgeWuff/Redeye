@@ -19,7 +19,7 @@
 #include <string>
 #include <memory>
 #include "../external_libs/Toml/toml.hpp"
-#include "../Renderer/Animation.h"
+#include "../Animation/EntityAnimation.h"
 
 namespace RE::Core {
     [[nodiscard]] animationDescriptor parseDescriptorBase(const toml::table& tbl);

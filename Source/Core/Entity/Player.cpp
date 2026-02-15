@@ -22,6 +22,7 @@
 #include "../../Application/Layers/DeathMenuLayer.h"
 #include "../../Core/Utility/Globals.h"
 #include "../../Core/Serialization/AnimationLoader.h"
+#include "../../Core/Audio/AudioManager.h"
 
 namespace RE::Core {
     void Player::moveRight(const b2WorldId& world) const {

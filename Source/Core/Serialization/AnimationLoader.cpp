@@ -13,7 +13,7 @@
 
 #include <filesystem>
 #include "AnimationLoader.h"
-#include "../Renderer/Animation.h"
+#include "../Animation/EntityAnimation.h"
 #include "../Utility/Utils.h"
 
 namespace fs = std::filesystem;

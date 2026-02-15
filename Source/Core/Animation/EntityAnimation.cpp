@@ -13,14 +13,14 @@
 
 #include <cassert>
 #include <iostream>
-#include "Animation.h"
+#include "EntityAnimation.h"
 #include "../Audio/AudioManager.h"
 #include "../Utility/Logging.h"
 
 namespace RE::Core {
     // Virtual/Base
     //==================================================================================================================
-    void Animation::initBase(
+    void EntityAnimation::initBase(
         std::shared_ptr<Texture2D> tex,
         const spriteIndex startingFrame,
         const spriteIndex endingFrame,
@@ -75,13 +75,13 @@ namespace RE::Core {
         assert(m_frameIndices[0].y < m_texture->height);
     }
 
-    Animation::Animation() {
+    EntityAnimation::EntityAnimation() {
         #ifdef DEBUG
             logDbg("Default Animation constructed at address: ", this);
         #endif
     }
 
-    Animation::Animation(
+    EntityAnimation::EntityAnimation(
         const std::shared_ptr<Texture2D> tex,
         const animationDescriptor& desc)
     {
@@ -100,13 +100,13 @@ namespace RE::Core {
         #endif
     }
 
-    Animation::~Animation() {
+    EntityAnimation::~EntityAnimation() {
         #ifdef DEBUG
                 logDbg("Animation destroyed at address: ", this);
         #endif
     }
 
-    Animation::Animation(Animation&& other) noexcept :
+    EntityAnimation::EntityAnimation(EntityAnimation&& other) noexcept :
         m_frameIndices(std::move(other.m_frameIndices)),
         m_texture(std::move(other.m_texture)),
         m_sourceRect(other.m_sourceRect),
@@ -124,7 +124,7 @@ namespace RE::Core {
         #endif
     }
 
-    Animation& Animation::operator=(Animation&& other) noexcept {
+    EntityAnimation& EntityAnimation::operator=(EntityAnimation&& other) noexcept {
         if (this != &other) {
             this->m_frameIndices = std::move(other.m_frameIndices);
             this->m_texture = std::move(other.m_texture);
@@ -146,12 +146,12 @@ namespace RE::Core {
         return *this;
     }
 
-    void Animation::resetAnimation() noexcept {
+    void EntityAnimation::resetAnimation() noexcept {
         m_elapsedFrameTime = 0.0f;
         m_curIdx = 0;
     }
 
-    void Animation::update() {
+    void EntityAnimation::update() {
         if (m_animationFinished) return;
 
         const float dt = GetFrameTime();
@@ -178,7 +178,7 @@ namespace RE::Core {
             m_spriteRes.y};
     }
 
-    void Animation::draw(const Vector2 drawPos) const noexcept {
+    void EntityAnimation::draw(const Vector2 drawPos) const noexcept {
         assert(m_texture);
         assert(IsTextureValid(*m_texture));
 
@@ -189,7 +189,7 @@ namespace RE::Core {
             WHITE);
     }
 
-    [[nodiscard]] animType Animation::getType() const noexcept {
+    [[nodiscard]] animType EntityAnimation::getType() const noexcept {
         return m_type;
     }
 

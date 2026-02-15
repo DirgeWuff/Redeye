@@ -13,7 +13,7 @@
 
 #include <cassert>
 #include "ranges"
-#include "AnimationManager.h"
+#include "EntityAnimationManager.h"
 
 namespace RE::Core {
     // Any new anims/sprites on the sprite sheet will have to be added here to function...
@@ -28,7 +28,7 @@ namespace RE::Core {
         return animationTable[static_cast<std::uint8_t>(state)][static_cast<std::uint8_t>(dir)];
     }
 
-    AnimationManager::AnimationManager(
+    EntityAnimationManager::EntityAnimationManager(
         const std::string& spritePath,
         std::vector<std::unique_ptr<animationDescriptor>>& anims,
         const animationId& startingAnim,
@@ -69,7 +69,7 @@ namespace RE::Core {
                         std::move(newTransitionAnim));
                 }
                 else if (auto* animDesc = anim.get()) {
-                    auto newAnim = std::make_unique<Animation>(tex, *animDesc);
+                    auto newAnim = std::make_unique<EntityAnimation>(tex, *animDesc);
 
                     m_anims.emplace(
                         anim->id,
@@ -104,7 +104,7 @@ namespace RE::Core {
         #endif
     }
 
-    AnimationManager::~AnimationManager() {
+    EntityAnimationManager::~EntityAnimationManager() {
         for (const auto& texture : std::views::values(m_animTexs)) {
             assert(texture);
             assert(IsTextureValid(*texture));
@@ -117,7 +117,7 @@ namespace RE::Core {
     #endif
     }
 
-    AnimationManager::AnimationManager(AnimationManager&& other) noexcept :
+    EntityAnimationManager::EntityAnimationManager(EntityAnimationManager&& other) noexcept :
         m_anims(std::move(other.m_anims)),
         m_animTexs(std::move(other.m_animTexs)),
         m_audioManager(std::move(other.m_audioManager)),
@@ -129,7 +129,7 @@ namespace RE::Core {
         #endif
     }
 
-    AnimationManager& AnimationManager::operator=(AnimationManager&& other) noexcept {
+    EntityAnimationManager& EntityAnimationManager::operator=(EntityAnimationManager&& other) noexcept {
         if (this != &other) {
             this->m_anims = std::move(other.m_anims);
             this->m_animTexs = std::move(other.m_animTexs);
@@ -145,7 +145,7 @@ namespace RE::Core {
         return *this;
     }
 
-    void AnimationManager::updateAnimation(
+    void EntityAnimationManager::updateAnimation(
         const entityActionState& state,
         const direction& dir)
     {
@@ -175,16 +175,16 @@ namespace RE::Core {
         }
     }
 
-    void AnimationManager::drawAnimation(const Vector2 drawPos) const {
+    void EntityAnimationManager::drawAnimation(const Vector2 drawPos) const {
         m_anims.at(m_curAnimId)->draw(drawPos);
     }
 
-    [[nodiscard]] animationId AnimationManager::getCurrentAnimId() const noexcept {
+    [[nodiscard]] animationId EntityAnimationManager::getCurrentAnimId() const noexcept {
         return m_curAnimId;
     }
 
     // Should be same for all sprites on sheet... Might be an unnecessarily complex way to do this.
-    [[nodiscard]] Vector2 AnimationManager::getSpriteSize() const noexcept {
+    [[nodiscard]] Vector2 EntityAnimationManager::getSpriteSize() const noexcept {
         const auto it = m_anims.find(m_curAnimId); // NOLINT
 
         if (it != m_anims.end()) {
