@@ -7,6 +7,8 @@ The following code is not guaranteed to be performant, nor complete, and should 
 
 Expect to see regular updates to the repo.
 
+![Gameplay screenshot](/Images/Game.png)
+
 ## BUILDING AND RUNNING
 
 ### Requirements
